@@ -12,10 +12,6 @@ import logging
 _dir = os.path.dirname(os.path.abspath(__file__))
 os.environ["K2EG_PYTHON_CONFIGURATION_PATH_FOLDER"] = os.path.join(_dir, "k2eg_utils")
 
-
-print(os.environ["K2EG_PYTHON_CONFIGURATION_PATH_FOLDER"])
-
-
 model_getter = MLflowModelGetter(
     model_name=os.environ["model_name"], model_version=os.environ["model_version"]
 )  # these will be grabbed from the environment variables
@@ -75,7 +71,7 @@ def main():
                 if vto.updated:
                     time_start = time.time()
                     for key, value in vto.latest_transformed.items():
-                        # print(f"Output: {key}, Value: {value}")
+                        print(f"Output: {key}, Value: {value}")
                         try:
                             k_out.put("pva://" + key, value, 1)
                         except Exception as e:
@@ -105,5 +101,4 @@ def main():
 
 
 if __name__ == "__main__":
-    print("Starting the main_deploy script...")
     main()

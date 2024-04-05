@@ -3,7 +3,7 @@ import os
 import uuid
 
 
-def initialise_k2eg(name = "app-test-3"):
+def initialise_k2eg(name="app-test-3"):
     """Initialise a K2EG client
     Returns:
         k2eg: K2EG client
