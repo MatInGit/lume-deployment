@@ -3,12 +3,12 @@ import os
 import uuid
 
 
-def initialise_k2eg(name="app-test-3"):
+def initialise_k2eg(name="app-test-3", group="test"):
     """Initialise a K2EG client
     Returns:
         k2eg: K2EG client
     """
-    k = k2eg.dml("env", name)
+    k = k2eg.dml("env", name, group_name=group)
     return k
 
 

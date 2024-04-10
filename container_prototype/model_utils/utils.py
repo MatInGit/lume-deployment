@@ -14,34 +14,45 @@ class MLflowModelGetter:
         self.model_version = model_version
         self.client = MlflowClient()
         self.model_type = None
-
+        self.tags = None
     def get_pv_mapping(self):
+        self.get_tags()
 
-        if type(self.model_version) == int:
-            version = self.client.get_model_version(self.model_name, self.model_version)
-        elif type(self.model_version) == str:
-            version_no = self.client.get_model_version_by_alias(
-                self.model_name, self.model_version
-            )
-            version = self.client.get_model_version(self.model_name, version_no.version)
-
-        # download pv_mappings.yaml from model root
+        # if type(self.model_version) == int:
+        #     version = self.client.get_model_version(self.model_name, self.model_version)
+        # elif type(self.model_version) == str:
+        #     version_no = self.client.get_model_version_by_alias(
+        #         self.model_name, self.model_version
+        #     )
+        #     version = self.client.get_model_version(self.model_name, version_no.version)
+        
+        version = self.client.get_model_version(self.model_name, self.model_version)
+        
+        if "artifact_location" in self.tags.keys():
+            artifact_location = self.tags["artifact_location"]
+        else:
+            artifact_location = version.name
         self.client.download_artifacts(
-            version.run_id, f"{self.model_name}/pv_mapping.yaml", "."
+            version.run_id, f"{artifact_location}/pv_mapping.yaml", "."
         )
         return yaml.load(
-            open(f"{self.model_name}/pv_mapping.yaml", "r"), Loader=yaml.FullLoader
+            open(f"{artifact_location}/pv_mapping.yaml", "r"), Loader=yaml.FullLoader
         )
+    def get_tags(self):
+        registry_model = self.client.get_registered_model(self.model_name)
+        self.tags = registry_model.tags
 
     def get_model(self):
+        self.get_tags()
 
-        if type(self.model_version) == int:
-            version = self.client.get_model_version(self.model_name, self.model_version)
-        elif type(self.model_version) == str:
-            version_no = self.client.get_model_version_by_alias(
-                self.model_name, self.model_version
-            )
-            version = self.client.get_model_version(self.model_name, version_no.version)
+        # if type(self.model_version) == int:
+        #     version = self.client.get_model_version(self.model_name, self.model_version)
+        # elif type(self.model_version) == str:
+        #     version_no = self.client.get_model_version_by_alias(
+        #         self.model_name, self.model_version
+        #     )
+        #     version = self.client.get_model_version(self.model_name, version_no.version)
+        version = self.client.get_model_version(self.model_name, self.model_version)
 
         # flavor
         flavor = get_model_info(model_uri=version.source).flavors
@@ -124,9 +135,9 @@ class DepGetter:
 
     def get_dependencies(self):
         # Get dependencies
-        if type(self.model_version) == int:
+        if int(self.model_version) >= 0:
             version = self.client.get_model_version(self.model_name, self.model_version)
-        elif type(self.model_version) == str:
+        elif self.model_version == "champion":
             version_no = self.client.get_model_version_by_alias(
                 self.model_name, self.model_version
             )

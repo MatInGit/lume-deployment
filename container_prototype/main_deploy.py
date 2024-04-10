@@ -4,6 +4,11 @@ from k2eg_utils.utils import monitor, initialise_k2eg
 import sys, time
 import torch
 import logging 
+
+# thread executor
+from concurrent.futures import ThreadPoolExecutor
+
+executor = ThreadPoolExecutor(20)
 # logging.basicConfig(
 #             format="[%(asctime)s %(levelname)-8s] %(message)s",
 #             level=logging.DEBUG,
@@ -21,6 +26,20 @@ pv_mapping = model_getter.get_pv_mapping()
 vt = VaraibleTransformer(pv_mapping["epics_to_model"], pv_mapping["epics_vars"].keys())
 vto = VaraibleTransformer(pv_mapping["model_to_epics"], pv_mapping["model_output"])
 
+
+publish = True
+
+# it may not exist
+if "deployment_publish" in model_getter.tags and model_getter.tags["deployment_publish"] is not None:
+    if model_getter.tags["deployment_publish"].lower() == "false":
+        publish = False
+    elif model_getter.tags["deployment_publish"].lower() == "true":
+        publish = True
+    else:
+        publish = False # value not recognised
+
+print(f"Publishing: {publish}")
+
 pv_list = []
 pv_list_output = []
 
@@ -34,26 +53,40 @@ for key in pv_mapping[
 ].keys():
     pv_list_output.append("pva://"+ key)
 
-
+def put(k_out, key, value):
+    try:
+        res = k_out.put("pva://" + key, value, 2)
+    except Exception as e:
+        print(f"An error occured: {e}")
+        res = f"An error occured: {e}"
+        
+    return res
+input_stats = [0.0]
+output_stats = [0.0]
 def main():
     try:
         # returns mlflow.pyfunc.PyFuncModel
         print("initialising k2eg")
-        k = initialise_k2eg()
-        k_out = initialise_k2eg(name = "app-test-4")
+        k = initialise_k2eg(name = "app-test-3",group = str(os.environ["model_name"]+str(os.environ["model_version"])+"-input"))
+        k_out = initialise_k2eg(name = "app-test-4" ,group = str(os.environ["model_name"]+str(os.environ["model_version"])+"-output"))
         print("k2eg initialised")
 
         # intialise pv values this section could be wrapped up in the vt module in the future
+        print(f"Initialising PVs {pv_list}")
+        
         for pv in pv_list:
             pv_full = k.get(pv)
-            val = pv_full["value"]
             # print(f"PV: {pv}, Value: {val}")
             vt.handler_for_k2eg(pv, pv_full)
 
         monitor(pv_list=pv_list, handler=vt.handler_for_k2eg, client=k) # this doesnt need to be a sublclass given how simple it is
-
+        time_update_stats = time.time()
         while True:
+            if time.time() - time_update_stats > 1:
+                print(f"Inference time: {sum(input_stats)/len(input_stats)} sec, Output stats per item: {sum(output_stats)/len(output_stats)/len(vto.latest_pvs.items())} sec/item")
+                time_update_stats = time.time()
             if vt.updated:
+                time_start = time.time()
                 inputs = vt.latest_transformed
                 # print(f"Inputs: {inputs}")
 
@@ -64,21 +97,29 @@ def main():
                         )  # this could be wrapped up in the vt module in the future
 
                 output = model.evaluate(inputs)
+                time_end = time.time()
+                input_stats.append(time_end - time_start)
+                if len(input_stats) > 10:
+                    input_stats.pop(0)
+                # print(f"Inputs: {inputs}")
+                # print(f"Output: {output}")
 
                 for key, value in output.items():
                     vto.handler_for_k2eg(key, {"value": value})
 
-                if vto.updated:
+                if vto.updated and publish:
                     time_start = time.time()
-                    for key, value in vto.latest_transformed.items():
-                        print(f"Output: {key}, Value: {value}")
-                        try:
-                            k_out.put("pva://" + key, value, 1)
-                        except Exception as e:
-                            print(f"An error occured: {e}")
+                    futures = []
+                    # for key, value in vto.latest_transformed.items():
+                    #     futures.append(executor.submit(put, k_out, key, value))
+                    futures = [executor.submit(put, k_out, key, value) for key, value in vto.latest_transformed.items()]
+                    results = [future.result() for future in futures] # fire and forget but wanna know if it fails
+                    # might wanna do additional error handling here
                     time_end = time.time()
-                    print(f"Time taken to put: {time_end - time_start} - {(time_end - time_start)/len(vto.latest_transformed) })")
-
+                    # print(f"Time taken to put: {time_end - time_start} - {(time_end - time_start)/(len(vto.latest_transformed)) })")
+                    output_stats.append(time_end - time_start)
+                    if len(output_stats) > 10:
+                        output_stats.pop(0)
 
                 # print(f"Output: {output}")
                 vt.updated = False
