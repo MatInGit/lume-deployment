@@ -3,7 +3,7 @@ import os, json, time
 from k2eg_utils.utils import monitor, initialise_k2eg
 import sys, time
 import torch
-import logging 
+import logging, psutil
 
 # thread executor
 from concurrent.futures import ThreadPoolExecutor
@@ -55,7 +55,7 @@ for key in pv_mapping[
 
 def put(k_out, key, value):
     try:
-        res = k_out.put("pva://" + key, value, 2)
+        res = k_out.put("pva://" + key, value, 10)
     except Exception as e:
         print(f"An error occured: {e}")
         res = f"An error occured: {e}"
@@ -83,7 +83,17 @@ def main():
         time_update_stats = time.time()
         while True:
             if time.time() - time_update_stats > 1:
-                print(f"Inference time: {sum(input_stats)/len(input_stats)} sec, Output stats per item: {sum(output_stats)/len(output_stats)/len(vto.latest_pvs.items())} sec/item")
+                metric_input = sum(input_stats)/len(input_stats) # mean of the last 3 times to get inputs 
+                metric_output_total = sum(output_stats)/len(output_stats) # mean of the last 3 times to get outputs
+                items = len(vto.latest_pvs.items())
+                cpu = psutil.cpu_percent()
+                memory = psutil.virtual_memory().percent
+                handler_time = sum(vt.handler_time)/len(vt.handler_time)
+                # format so that there are 10 spaces within which each stat can fit
+                # | input_get: 0.12345 ms | output_put: 0.12345 ms | items: 123 | cpu: 12.34% | memory: 12.34% |
+                print(f"| epics_to_handler {handler_time*1000:.5f} ms | input_process: {metric_input*1000:.5f} ms | output_put: {metric_output_total*1000:.5f} ms | items: {items} | cpu: {cpu:.2f}% | memory: {memory:.2f}% | {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())} |")            
+                
+                # print(f"Inference time: {sum(input_stats)/len(input_stats)} sec, Output stats per item: {sum(output_stats)/len(output_stats)/len(vto.latest_pvs.items())} sec/item")
                 time_update_stats = time.time()
             if vt.updated:
                 time_start = time.time()
@@ -99,10 +109,8 @@ def main():
                 output = model.evaluate(inputs)
                 time_end = time.time()
                 input_stats.append(time_end - time_start)
-                if len(input_stats) > 10:
+                if len(input_stats) > 3:
                     input_stats.pop(0)
-                # print(f"Inputs: {inputs}")
-                # print(f"Output: {output}")
 
                 for key, value in output.items():
                     vto.handler_for_k2eg(key, {"value": value})
@@ -118,8 +126,10 @@ def main():
                     time_end = time.time()
                     # print(f"Time taken to put: {time_end - time_start} - {(time_end - time_start)/(len(vto.latest_transformed)) })")
                     output_stats.append(time_end - time_start)
-                    if len(output_stats) > 10:
+                    if len(output_stats) > 3:
                         output_stats.pop(0)
+                        
+                    vto.updated = False
 
                 # print(f"Output: {output}")
                 vt.updated = False

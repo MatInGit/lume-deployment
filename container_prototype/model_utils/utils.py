@@ -4,7 +4,7 @@ from mlflow import MlflowClient
 import pandas as pd
 import yaml
 import sympy as sp
-
+import time
 from lume_model.models import TorchModule, TorchModel
 
 
@@ -89,6 +89,8 @@ class VaraibleTransformer:
         self.latest_pvs = {symbol: None for symbol in symbol_list}
         self.latest_transformed = {key: None for key in self.pv_mapping.keys()}
         self.updated = False
+        
+        self.handler_time = []
 
     def __validate_formula(self, formula: str):
         try:
@@ -97,7 +99,17 @@ class VaraibleTransformer:
             raise Exception(f"Invalid formula: {formula}")
 
     def handler_for_k2eg(self, pv_name, value):
-
+        try: 
+            os_time = time.time()
+            pv_time = value["timeStamp"]["secondsPastEpoch"] + value["timeStamp"]["nanoseconds"]*1e-9
+            k2_eg_time = os_time - pv_time
+            self.handler_time.append(k2_eg_time)
+            if len(self.handler_time) > 3:
+                self.handler_time.pop(0)
+        except:
+            # print(value)
+            pass
+            
         # strip protoco; ca:// or pva:// from pv_name if present
         if pv_name.startswith("ca://"):
             pv_name = pv_name[5:]

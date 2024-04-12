@@ -16,7 +16,7 @@ os.environ["MLFLOW_S3_ENDPOINT_URL"] = json_data["MLFLOW_S3_ENDPOINT_URL"]
 os.environ["MLFLOW_TRACKING_URI"] = json_data["MLFLOW_TRACKING_URI"]
 
 os.environ["model_name"] = "generic_model"
-os.environ["model_version"] = "7"
+os.environ["model_version"] = "8"
 
 import main_deploy
 
