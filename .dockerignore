@@ -1,4 +1,9 @@
 main_local.py
+env.yaml
+creds.json
+env
+kube/*
+main_local.py
 env
 cred.json
 __pycache__
@@ -9,5 +14,3 @@ old
 .pytest_cache
 *.egg-info
 mlruns
-generic_model
-torch_model

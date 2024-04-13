@@ -4,6 +4,7 @@ import uuid
 
 # needs to be removed in the future versions as this wrapper doesnt add any value
 
+
 def initialise_k2eg(name="app-test-3", group="test"):
     """Initialise a K2EG client
     Returns:

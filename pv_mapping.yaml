@@ -1,0 +1,35 @@
+deployment:
+  type: "continuous"
+  # other configurations
+input_data:
+  get_method: "k2eg"
+  config:
+    intialize: false
+    variables:
+      QUAD:LTUH:680:BCTRL:
+        proto: pva
+        name: QUAD:LTUH:680:BCTRL
+      LUME:MLFLOW:TEST_A:
+        proto: pva
+        name: LUME:MLFLOW:TEST_A
+
+input_data_to_model:
+  input_to_model_transform: "SimpleTransformer"
+  config:
+    x2:
+      formula: "QUAD:LTUH:680:BCTRL"
+    x1: 
+      formula: "LUME:MLFLOW:TEST_A"
+
+output_model_to_data:
+  output_model_to_output_transform: "SimpleTransformer"
+  config:
+    y: 
+      formula: "y"
+output_data_to:
+  put_method: "k2eg"
+  config:
+    variables:
+      LUME:MLFLOW:TEST_Y:
+        proto: pva
+        name: LUME:MLFLOW:TEST_Y

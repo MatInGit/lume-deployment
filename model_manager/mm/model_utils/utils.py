@@ -15,19 +15,11 @@ class MLflowModelGetter:
         self.client = MlflowClient()
         self.model_type = None
         self.tags = None
+
     def get_pv_mapping(self):
         self.get_tags()
-
-        # if type(self.model_version) == int:
-        #     version = self.client.get_model_version(self.model_name, self.model_version)
-        # elif type(self.model_version) == str:
-        #     version_no = self.client.get_model_version_by_alias(
-        #         self.model_name, self.model_version
-        #     )
-        #     version = self.client.get_model_version(self.model_name, version_no.version)
-        
         version = self.client.get_model_version(self.model_name, self.model_version)
-        
+
         if "artifact_location" in self.tags.keys():
             artifact_location = self.tags["artifact_location"]
         else:
@@ -38,6 +30,7 @@ class MLflowModelGetter:
         return yaml.load(
             open(f"{artifact_location}/pv_mapping.yaml", "r"), Loader=yaml.FullLoader
         )
+
     def get_tags(self):
         registry_model = self.client.get_registered_model(self.model_name)
         self.tags = registry_model.tags
@@ -89,7 +82,7 @@ class VaraibleTransformer:
         self.latest_pvs = {symbol: None for symbol in symbol_list}
         self.latest_transformed = {key: None for key in self.pv_mapping.keys()}
         self.updated = False
-        
+
         self.handler_time = []
 
     def __validate_formula(self, formula: str):
@@ -99,9 +92,12 @@ class VaraibleTransformer:
             raise Exception(f"Invalid formula: {formula}")
 
     def handler_for_k2eg(self, pv_name, value):
-        try: 
+        try:
             os_time = time.time()
-            pv_time = value["timeStamp"]["secondsPastEpoch"] + value["timeStamp"]["nanoseconds"]*1e-9
+            pv_time = (
+                value["timeStamp"]["secondsPastEpoch"]
+                + value["timeStamp"]["nanoseconds"] * 1e-9
+            )
             k2_eg_time = os_time - pv_time
             self.handler_time.append(k2_eg_time)
             if len(self.handler_time) > 3:
@@ -109,7 +105,7 @@ class VaraibleTransformer:
         except:
             # print(value)
             pass
-            
+
         # strip protoco; ca:// or pva:// from pv_name if present
         if pv_name.startswith("ca://"):
             pv_name = pv_name[5:]
