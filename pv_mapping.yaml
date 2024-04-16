@@ -2,34 +2,44 @@ deployment:
   type: "continuous"
   # other configurations
 input_data:
-  get_method: "k2eg"
+  get_method: "p4p_server"
   config:
+    EPICS_PVA_NAME_SERVERS: "localhost:5075"
     intialize: false
     variables:
-      QUAD:LTUH:680:BCTRL:
+      LUME:MLFLOW:TEST_B:
         proto: pva
-        name: QUAD:LTUH:680:BCTRL
-      LUME:MLFLOW:TEST_A:
+        name: LUME:MLFLOW:TEST_BB
+      LUME:MLFLOW:TEST_AA:
         proto: pva
-        name: LUME:MLFLOW:TEST_A
+        name: LUME:MLFLOW:TEST_AA
 
 input_data_to_model:
   input_to_model_transform: "SimpleTransformer"
   config:
-    x2:
-      formula: "QUAD:LTUH:680:BCTRL"
-    x1: 
-      formula: "LUME:MLFLOW:TEST_A"
+    variables:
+      x2:
+        formula: "LUME:MLFLOW:TEST_BB"
+      x1: 
+        formula: "LUME:MLFLOW:TEST_AA"
+
+outputs_model:
+  config:
+    variables:
+      y:
+        type: "scalar"
 
 output_model_to_data:
   output_model_to_output_transform: "SimpleTransformer"
   config:
-    y: 
-      formula: "y"
+    variables:
+      LUME:MLFLOW:TEST_Q:
+        formula: "y"
+
 output_data_to:
   put_method: "k2eg"
   config:
     variables:
-      LUME:MLFLOW:TEST_Y:
+      LUME:MLFLOW:TEST_Q:
         proto: pva
-        name: LUME:MLFLOW:TEST_Y
+        name: LUME:MLFLOW:TEST_Q

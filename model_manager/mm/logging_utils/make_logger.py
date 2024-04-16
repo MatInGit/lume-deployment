@@ -6,7 +6,7 @@ def make_logger(name="model_manager", level=logging.DEBUG):
     logger = colorlog.getLogger(name)
     handler = colorlog.StreamHandler()
     formatter = colorlog.ColoredFormatter(
-        "%(log_color)s%(levelname)-8s%(reset)s %(blue)s%(message)s",
+        "%(log_color)s[%(filename)s:%(lineno)s:%(funcName)s] %(levelname)s: %(message)s",
         datefmt=None,
         reset=True,
         log_colors={

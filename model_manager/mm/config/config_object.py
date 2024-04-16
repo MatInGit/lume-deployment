@@ -2,6 +2,8 @@ import pydantic
 from typing import Dict, Any
 
 
+
+# all of the below objects need more work
 class DeploymentConfig(pydantic.BaseModel):
     type: str
 
@@ -13,12 +15,12 @@ class InputDataConfig(pydantic.BaseModel):
 
 class InputDataToModelConfig(pydantic.BaseModel):
     input_to_model_transform: str
-    config: Dict[str, Dict[str, str]]
+    config: Any
 
 
 class ModelToOutputDataConfig(pydantic.BaseModel):
     output_model_to_output_transform: str
-    config: Dict[str, Dict[str, str]]
+    config: Any
 
 
 class OutputDataToConfig(pydantic.BaseModel):
@@ -26,12 +28,16 @@ class OutputDataToConfig(pydantic.BaseModel):
     config: Any
 
 
+class OutputModelConfig(pydantic.BaseModel):
+    config: Any
+
 class ConfigObject(pydantic.BaseModel):
     deployment: DeploymentConfig
     input_data: InputDataConfig
     input_data_to_model: InputDataToModelConfig
     output_model_to_data: ModelToOutputDataConfig
     output_data_to: OutputDataToConfig
+    outputs_model: OutputModelConfig
 
 
 # input_data:

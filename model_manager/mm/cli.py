@@ -1,10 +1,11 @@
 import argparse
-import os, sys, json
+import os, sys, json, time, traceback
 from mm.config import ConfigParser
-from mm.logging_utils import get_logger
+from mm.logging_utils import get_logger, make_logger
 from mm.model_utils import registered_model_getters
 from mm.interfaces import registered_interfaces
-
+from mm.transformers import registered_transformers
+import torch
 logger = get_logger()
 
 
@@ -45,8 +46,8 @@ def env_config(env_config):
         raise e
 
 
-def main():
-    """Main entry point for the CLI."""
+def setup():
+    """Setup the model manager."""
     parser = argparse.ArgumentParser(description="Model Manager CLI")
     parser.add_argument(
         "-c", "--config", help="Path to the configuration file", required=False
@@ -84,6 +85,15 @@ def main():
         "--env",
         help="Path to the environment configuration file, json format",
         required=False,
+    )
+    
+    parser.add_argument(
+        "-o",
+        "--one_shot",
+        help="One shot mode, run once and exit, helpful for debugging",
+        required=False,
+        default=False,
+        action="store_true",
     )
 
     args = parser.parse_args()
@@ -137,17 +147,87 @@ def main():
     logger.debug(f"In_interfaces: {config.input_data.get_method}")
     logger.debug(f"Out_interfaces: {config.output_data_to.put_method}")
 
-    def dummy_handler(name, data):
-        logger.info(f"Handler: {name} data: {data}")
-        print(f"Handler: {name} data: {data}")
-
     in_interface = registered_interfaces[config.input_data.get_method](
         config.input_data
     )
-    in_interface.monitor(dummy_handler)
-    # out_interface = registered_interfaces[config.output_data_to.put_method](
-    #     config.output_data_to, dummy_handler
-    # )
+    out_interface = registered_interfaces[config.output_data_to.put_method](
+        config.output_data_to
+    )
+    in_transformer = registered_transformers[
+        config.input_data_to_model.input_to_model_transform
+    ](
+        config.input_data_to_model.config["variables"],
+        list(config.input_data_to_model.config["variables"].keys()),
+    )
+    out_transformer = registered_transformers[
+        config.output_model_to_data.output_model_to_output_transform
+    ](
+        config.output_model_to_data.config["variables"],
+        list(config.outputs_model.config["variables"].keys()),
+    )
 
     logger.info(f"Model: {args.model_name} version: {args.model_version} loaded")
     logger.info(f"Model type: {model_getter.model_type}")
+
+    return in_interface, out_interface, in_transformer, out_transformer, model_info, model_getter ,args
+
+
+def model_main(in_interface, out_interface, in_transformer, out_transformer, model, model_getter,args):
+    """Main."""
+    # monitor and send to transformer handle
+    # reintialise logger to get the correct logger and clear any previous handlers
+    logger = make_logger("model_manager")
+    
+    try:
+        in_interface.monitor(in_transformer.handler)
+        logger.info("Monitoring input interface")
+        while True:
+
+            if in_transformer.updated:
+                logger.debug("Input transformer updated")
+                logger.debug(
+                    f"Input transformer latest transformed: {in_transformer.latest_transformed}"
+                )
+
+                logger.debug("Evaluating model")
+                
+                # this part can maybe be handled by lume-model
+                if model_getter.model_type == "torch":
+                    latest_transformed = in_transformer.latest_transformed
+                    for key in latest_transformed:
+                        # convert to tensor
+                        latest_transformed[key] = torch.tensor(latest_transformed[key], dtype=torch.float32)
+
+                else:
+                    latest_transformed = in_transformer.latest_transformed
+                    
+                output = model.evaluate(in_transformer.latest_transformed)
+                logger.debug(f"Output from model.evaluate: {output}")
+                # print("=" * 20)
+                # print("Output from model.evaluate: ")
+                # print(output)
+                # print("=" * 20)
+
+                for key in output:
+                    logger.debug(f"Output: {key}: {output[key]}")
+                    out_transformer.handler(key, {"value": output[key]})
+
+                if out_transformer.updated:
+                    out_interface.put_many(out_transformer.latest_transformed)
+                    out_transformer.updated = False
+
+                in_transformer.updated = False
+                
+                if args.one_shot:
+                    logger.info("One shot mode, exiting")
+                    break
+
+    except Exception as e:
+        logger.error(f"Error monitoring: {traceback.format_exc()}")
+        raise e
+    finally:
+        out_interface.close()
+        in_interface.close()
+
+        logger.info("Exiting")
+        sys.exit(0)
