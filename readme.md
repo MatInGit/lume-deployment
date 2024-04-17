@@ -1,11 +1,11 @@
 ## Purpose and Idea
-The purposue of the model manager is to allow for easy deployment of models from mlflow or other source (soon tm). 
+The purpose of the model manager is to allow for easy deployment of models from MLflow or other sources (soon tm). 
 The package is in an early stage and right now is tightly coupled with MLflow. The goal is to make it more general and allow for easy deployment of models from other sources as well. It should also account for different workflow types.
 
 The idea is to divide model deployment into 3 stages 
 
 ### System level 
-This stage we get the data from X system (in our case EPICS), this is where we are "relaxed" about the defintion of the data format. We just want to get the data and store it as a dictionary And supply it to a handler function.
+In this stage we get the data from X system (in our case EPICS), this is where we are "relaxed" about the definition of the data format. We just want to get the data and store it as a dictionary And supply it to a handler function.
 
 Example
 ```python
@@ -17,21 +17,21 @@ my_data_getter.get_many(names:List[str]) -> List[Tuple(key: str, value: Dict[str
 ```
 Note: this is only partially implemeted thats why `main()` uses `.get()` instead of `.get_many()`
 
-Since we are focused on continuous data we also usualy have a monitor that calls a callback function when new data is available:
+Since we are focused on continuous data we also usually have a monitor that calls a callback function when new data is available:
 
 ```python
 my_data_getter.monitor(callback: Callable[[Dict[str, Any]], None])
 ```
 
 ### Transformation level
-This is where we transform the data into a format that the model can understand; its where we are stricter about the data format.
+This is where we transform the data into a format that the model can understand; it is where we are stricter about the data format.
 
 Again since the initial focus was on continuous data, the transformer supplies a callback function that is called from the system level monitor function.
 
 ```python
 my_transformer.handle(data: Dict[str, Any]) -> Dict[str, Any]
 ```
-Now internaly the model tracks the lates input data, on each call to `handle` it updates the internal state and returns the transformed data.
+Now internally the model tracks the late input data, on each call to `handle` it updates the internal state and returns the transformed data.
 
 Example:
 ```python
@@ -61,7 +61,7 @@ transformer.handle("LUME:MLFLOW:TEST_C", 3) # now the internal state should be u
 transformer.updated # should be True
 
 x = transformer.latest_transformed
-# x should bea  dictionary with the transformed data, ready to be fed to the model
+# x should be a dictionary with the transformed data, ready to be fed to the model
 # {
 #     "x1": 1,
 #     "x2": 2,
@@ -80,7 +80,7 @@ output = some_lume_model.evaluate(data: Dict[str, Any]) -> Dict[str, Any]
 #     "y": 0.5
 # }
 ```
-and done, now we follow the same pattern as before, model calls the callback function when new data is available.
+and done, now we follow the same pattern as before, the model calls the callback function when new data is available.
 
 ```python
 
