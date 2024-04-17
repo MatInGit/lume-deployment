@@ -8,4 +8,4 @@ RUN python -m pip install -r /app/requirements.txt --no-cache-dir
 COPY . /opt/deployment/
 WORKDIR /opt/deployment/
 RUN python -m pip install ./model_manager --no-cache-dir
-cmd ["m
+cmd model_manager -n $model_name -v $model_version -p $PORT

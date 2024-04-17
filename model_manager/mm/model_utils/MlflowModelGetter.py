@@ -34,9 +34,10 @@ class MLflowModelGetter(ModelGetterBase):
         self.client.download_artifacts(
             version.run_id, f"{artifact_location}/pv_mapping.yaml", "."
         )
-        return yaml.load(
-            open(f"{artifact_location}/pv_mapping.yaml", "r"), Loader=yaml.FullLoader
-        )
+        # return yaml.load(
+        #     open(f"{artifact_location}/pv_mapping.yaml", "r"), Loader=yaml.FullLoader
+        # )
+        return f"{artifact_location}/pv_mapping.yaml"
 
     def get_tags(self):
         registry_model = self.client.get_registered_model(self.model_name)

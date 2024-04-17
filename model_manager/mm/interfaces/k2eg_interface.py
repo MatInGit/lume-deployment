@@ -46,7 +46,9 @@ class K2EGInterface(BaseInterface):
             raise e
 
     def get(self, name, **kwargs):
-        return self.client.get(name)
+        url = self.reverse_url_lookup[name]
+        value = self.client.get(url)
+        return name, value
 
     def put(self, name, value, **kwargs):
         # print(f"putting {name} with value {value}")

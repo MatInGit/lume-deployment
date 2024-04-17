@@ -57,7 +57,6 @@ class SimplePVAInterface(BaseInterface):
     def monitor(self, handler, **kwargs):
         for pv in self.pv_list:
             try:
-                self.ctxt.get(pv)
                 new_handler = self.__handler_wrapper(handler, pv)
                 self.ctxt.monitor(pv, new_handler)
             except Exception as e:
@@ -68,7 +67,7 @@ class SimplePVAInterface(BaseInterface):
                 raise e
 
     def get(self, name, **kwargs):
-        return self.ctxt.get(name)
+        return name, self.ctxt.get(name)
 
     def put(self, name, value, **kwargs):
         return self.ctxt.put(name, value)

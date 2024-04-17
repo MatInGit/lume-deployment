@@ -13,5 +13,9 @@ logger = make_logger("model_manager")
 # # run as module
 # else:
 logger.critical("Starting model manager")
-in_interface, out_interface, in_transformer, out_transformer, model, getter, args = setup()
-model_main(in_interface, out_interface, in_transformer, out_transformer, model,getter, args)
+in_interface, out_interface, in_transformer, out_transformer, model, getter, args = (
+    setup()
+)
+model_main(
+    in_interface, out_interface, in_transformer, out_transformer, model, getter, args
+)

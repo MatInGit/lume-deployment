@@ -1,6 +1,10 @@
 import pydantic
-from typing import Dict, Any
+from typing import Dict, Any, Literal
 
+from ..transformers import registered_transformers
+
+
+allowed_transformers = list(registered_transformers.keys())
 
 
 # all of the below objects need more work
@@ -14,13 +18,29 @@ class InputDataConfig(pydantic.BaseModel):
 
 
 class InputDataToModelConfig(pydantic.BaseModel):
-    input_to_model_transform: str
+    type: str
     config: Any
+
+    @pydantic.validator("type")
+    def check_type(cls, v):
+        if v not in allowed_transformers:
+            raise ValueError(
+                f"Invalid transformer type: {v}, choose from {allowed_transformers}"
+            )
+        return v
 
 
 class ModelToOutputDataConfig(pydantic.BaseModel):
-    output_model_to_output_transform: str
+    type: str
     config: Any
+
+    @pydantic.validator("type")
+    def check_type(cls, v):
+        if v not in allowed_transformers:
+            raise ValueError(
+                f"Invalid transformer type: {v}, choose from {allowed_transformers}"
+            )
+        return v
 
 
 class OutputDataToConfig(pydantic.BaseModel):
@@ -30,6 +50,7 @@ class OutputDataToConfig(pydantic.BaseModel):
 
 class OutputModelConfig(pydantic.BaseModel):
     config: Any
+
 
 class ConfigObject(pydantic.BaseModel):
     deployment: DeploymentConfig

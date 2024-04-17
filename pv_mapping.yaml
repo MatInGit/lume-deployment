@@ -2,26 +2,29 @@ deployment:
   type: "continuous"
   # other configurations
 input_data:
-  get_method: "p4p_server"
+  get_method: "k2eg"
   config:
-    EPICS_PVA_NAME_SERVERS: "localhost:5075"
-    intialize: false
+    # EPICS_PVA_NAME_SERVERS: "localhost:5075"
+    # intialize: false
     variables:
       LUME:MLFLOW:TEST_B:
         proto: pva
-        name: LUME:MLFLOW:TEST_BB
-      LUME:MLFLOW:TEST_AA:
+        name: LUME:MLFLOW:TEST_B
+      LUME:MLFLOW:TEST_A:
         proto: pva
-        name: LUME:MLFLOW:TEST_AA
+        name: LUME:MLFLOW:TEST_A
 
 input_data_to_model:
-  input_to_model_transform: "SimpleTransformer"
+  type: "SimpleTransformer"
   config:
+    symbols:
+      - "LUME:MLFLOW:TEST_B"
+      - "LUME:MLFLOW:TEST_A"
     variables:
       x2:
-        formula: "LUME:MLFLOW:TEST_BB"
+        formula: "LUME:MLFLOW:TEST_B"
       x1: 
-        formula: "LUME:MLFLOW:TEST_AA"
+        formula: "LUME:MLFLOW:TEST_A"
 
 outputs_model:
   config:
@@ -30,8 +33,10 @@ outputs_model:
         type: "scalar"
 
 output_model_to_data:
-  output_model_to_output_transform: "SimpleTransformer"
+  type: "SimpleTransformer"
   config:
+    symbols:
+      - "y"
     variables:
       LUME:MLFLOW:TEST_Q:
         formula: "y"

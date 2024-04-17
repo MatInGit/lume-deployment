@@ -6,6 +6,7 @@ from mm.model_utils import registered_model_getters
 from mm.interfaces import registered_interfaces
 from mm.transformers import registered_transformers
 import torch
+
 logger = get_logger()
 
 
@@ -86,7 +87,7 @@ def setup():
         help="Path to the environment configuration file, json format",
         required=False,
     )
-    
+
     parser.add_argument(
         "-o",
         "--one_shot",
@@ -128,19 +129,18 @@ def setup():
         logger.info(
             "No configuration file provided, getting config from model artifacts"
         )
-        # config = model_getter.get_config()
+        config = model_getter.get_config()
+        config = initailize_config(config)
+        logger.info(f"Configuration file obtained from model: {config}")
+        logger.debug(f"Configuration: {config}")
     else:
         logger.info(f"Configuration file provided: {args.config}")
         config = initailize_config(args.config)
 
     # configure input and output interface transformers
     logger.debug("Configuring input and output interface transformers")
-    logger.debug(
-        f"Input transformer: {config.input_data_to_model.input_to_model_transform}"
-    )
-    logger.debug(
-        f"Output transformer: {config.output_model_to_data.output_model_to_output_transform}"
-    )
+    logger.debug(f"Input transformer: {config.input_data_to_model.type}")
+    logger.debug(f"Output transformer: {config.output_model_to_data.type}")
 
     # configure interfaces
     logger.debug("Configuring interfaces")
@@ -153,54 +153,74 @@ def setup():
     out_interface = registered_interfaces[config.output_data_to.put_method](
         config.output_data_to
     )
-    in_transformer = registered_transformers[
-        config.input_data_to_model.input_to_model_transform
-    ](
-        config.input_data_to_model.config["variables"],
-        list(config.input_data_to_model.config["variables"].keys()),
+    in_transformer = registered_transformers[config.input_data_to_model.type](
+        config.input_data_to_model.config
     )
-    out_transformer = registered_transformers[
-        config.output_model_to_data.output_model_to_output_transform
-    ](
-        config.output_model_to_data.config["variables"],
-        list(config.outputs_model.config["variables"].keys()),
+    out_transformer = registered_transformers[config.output_model_to_data.type](
+        config.output_model_to_data.config
     )
 
     logger.info(f"Model: {args.model_name} version: {args.model_version} loaded")
     logger.info(f"Model type: {model_getter.model_type}")
 
-    return in_interface, out_interface, in_transformer, out_transformer, model_info, model_getter ,args
+    return (
+        in_interface,
+        out_interface,
+        in_transformer,
+        out_transformer,
+        model_info,
+        model_getter,
+        args,
+    )
 
 
-def model_main(in_interface, out_interface, in_transformer, out_transformer, model, model_getter,args):
+def model_main(
+    in_interface,
+    out_interface,
+    in_transformer,
+    out_transformer,
+    model,
+    model_getter,
+    args,
+):
     """Main."""
     # monitor and send to transformer handle
     # reintialise logger to get the correct logger and clear any previous handlers
     logger = make_logger("model_manager")
-    
+
     try:
         in_interface.monitor(in_transformer.handler)
         logger.info("Monitoring input interface")
+
+        # initialise variables using get
+        for key in in_interface.variable_list:
+            _, value = in_interface.get(key)
+            # measure size of value in bytes
+
+            in_transformer.handler(key, value)
+
         while True:
 
             if in_transformer.updated:
-                logger.debug("Input transformer updated")
-                logger.debug(
-                    f"Input transformer latest transformed: {in_transformer.latest_transformed}"
-                )
+                # logger.debug("Input transformer updated")
+                # logger.debug(
+                #     f"Input transformer latest transformed: {in_transformer.latest_transformed}"
+                # )
 
-                logger.debug("Evaluating model")
-                
+                # logger.debug("Evaluating model")
+
                 # this part can maybe be handled by lume-model
                 if model_getter.model_type == "torch":
                     latest_transformed = in_transformer.latest_transformed
                     for key in latest_transformed:
                         # convert to tensor
-                        latest_transformed[key] = torch.tensor(latest_transformed[key], dtype=torch.float32)
+                        latest_transformed[key] = torch.tensor(
+                            latest_transformed[key], dtype=torch.float32
+                        )
 
                 else:
                     latest_transformed = in_transformer.latest_transformed
-                    
+
                 output = model.evaluate(in_transformer.latest_transformed)
                 logger.debug(f"Output from model.evaluate: {output}")
                 # print("=" * 20)
@@ -217,7 +237,7 @@ def model_main(in_interface, out_interface, in_transformer, out_transformer, mod
                     out_transformer.updated = False
 
                 in_transformer.updated = False
-                
+
                 if args.one_shot:
                     logger.info("One shot mode, exiting")
                     break
