@@ -36,12 +36,6 @@ class CompoundTransformer:
             data = transformer.transform(data)
         return data
 
-    def __str__(self):
-        return f"CompoundTransformer({', '.join([str(t) for t in self.transformers])})"
-
-    def __repr__(self):
-        return str(self)
-    
     def handler(self, name, data):
         for transformer in self.transformers:
             if name in transformer.input_list:

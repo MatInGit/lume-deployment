@@ -1,3 +1,4 @@
+# mail box server for testing
 from p4p.server import Server
 from p4p.server.raw import ServOpWrap
 from p4p.server.thread import SharedPV
