@@ -144,6 +144,26 @@ def test_compound_transformer():
     ct.handler("MY_TEST_C2", {"value": img_2})
 
     assert ct.updated == True
+    
+    assert ct.latest_transformed["img_1"].shape == (3, 3)
+    assert ct.latest_transformed["img_2"].shape == (3, 4)
+
+    # check positions of al 4 corners in each image
+    assert ct.latest_transformed["img_1"][0, 0] == 1
+    assert ct.latest_transformed["img_1"][0, 2] == 3
+    assert ct.latest_transformed["img_1"][2, 0] == 7
+    assert ct.latest_transformed["img_1"][2, 2] == 9
+
+    assert ct.latest_transformed["img_2"][0, 0] == 1
+    assert ct.latest_transformed["img_2"][0, 3] == 4
+    assert ct.latest_transformed["img_2"][2, 0] == 9
+    assert ct.latest_transformed["img_2"][2, 3] == 12
+    
+    assert ct.latest_transformed["x2"] == 1**2
+    assert ct.latest_transformed["x1"] == 1
+    assert ct.latest_transformed["x3"] == math.sin(1) + math.cos(2)
+    
+    print(ct.latest_transformed)
 
 
     
