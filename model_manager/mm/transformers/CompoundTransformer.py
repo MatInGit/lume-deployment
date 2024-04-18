@@ -50,4 +50,5 @@ class CompoundTransformer:
                     self.updated = True
                     self.latest_transformed = {**self.latest_transformed, **transformer.latest_transformed}
                     self.latest_input = {**self.latest_input, **transformer.latest_input}
+                
                  
