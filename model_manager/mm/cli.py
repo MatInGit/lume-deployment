@@ -97,12 +97,29 @@ def setup():
         default=False,
         action="store_true",
     )
+    
+    # publish
+    parser.add_argument(
+        "-p",
+        "--publish",
+        help="Publish data to system, if True data is published, otherwise the step is skipped",
+        required=False,
+        default=False,
+        action="store_true",
+    )
 
     args = parser.parse_args()
 
     logger.info("Model Manager CLI")
 
     logger.debug(f"Arguments: {args}")
+    
+    if args.publish:
+        logger.warning("Publishing data to system")
+        os.environ["PUBLISH"] = "True"
+    else:
+        logger.warning("Not publishing data to system, to publish use -p or --publish")
+        os.environ["PUBLISH"] = "False"
 
     # env useful when running in windows
     if args.env:
@@ -297,8 +314,12 @@ def model_main(
                         logger.warning("No handler time available for stats")
                         stats_output_transform.append(0)
                     time_start = time.time()
-
-                    out_interface.put_many(out_transformer.latest_transformed)
+                    
+                    if os.environ["PUBLISH"] == "True":
+                        logger.info("Publishing data")
+                        out_interface.put_many(out_transformer.latest_transformed)
+                    else:
+                        logger.info("Not publishing data, to publish use -p or --publish")
                     out_transformer.updated = False
 
                     time_end = time.time()
