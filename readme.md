@@ -129,7 +129,7 @@ Purpose of the system module is to provide a way to get data from a system. The 
 | Module | Description | YAML configuration | Compatible with: |
 | ------ | ----------- | ------------------ | --------------- |
 | `p4p` | EPICS data source, must have an external EPICS server running. Note that SoftIOCPVA will not work with this module. | [config](#p4p-sample-configuration) | `SimpleTransformer`, `CompoundTransformer` |
-| `p4p_server` | EPICS data source, host EPICS p4p server for specifed PVs | same [config](#p4p-sample-configuration) as `p4p`  as p4p | `SimpleTransformer`, `CompoundTransformer` |
+| `p4p_server` | EPICS data source, host EPICS p4p server for specifed PVs | same [config](#p4p-sample-configuration) as `p4p`| `SimpleTransformer`, `CompoundTransformer` |
 | `k2eg` | Kafka to EPICS gateway, get data from Kafka and write it to EPICS | [config](#k2eg-sample-configuration) | `SimpleTransformer`, `CompoundTransformer` , `CAImageTransformer`* |
 
 
@@ -241,19 +241,242 @@ Combines multiple transformers in parallel. The output will be a combined dictio
 
 
 ### Model
+Model layer is compatible with [lume-model](https://github.com/slaclab/lume-model). Currently of `TorchModule` and `BaseModel` are supported. All models have to come from MLflow, with local models coming soon.
 
-## YAML configuration
+See an example notebook containing both `TorchModule` and `BaseModel` being uploaded and registered to MLflow [here](/examples/sample_workflow.ipynb).
 
-TODO
+## Example YAML configurations
 
-## MLFlow configuration
+### Example 1
+```yaml
+deployment:
+  type: "continuous" # doesnt do anything at the moment, but will be used to determine the type of deployment
+  # other configurations
+input_data:
+  get_method: "k2eg"
+  config:
+    variables:
+      LUME:MLFLOW:TEST_B:
+        proto: pva
+        name: LUME:MLFLOW:TEST_B
+      LUME:MLFLOW:TEST_A:
+        proto: pva
+        name: LUME:MLFLOW:TEST_A
 
-TODO
+input_data_to_model:
+  type: "SimpleTransformer"
+  config:
+    symbols:
+      - "LUME:MLFLOW:TEST_B"
+      - "LUME:MLFLOW:TEST_A"
+    variables:
+      x2:
+        formula: "LUME:MLFLOW:TEST_B"
+      x1: 
+        formula: "LUME:MLFLOW:TEST_A"
 
-## Accepted Model formats
+outputs_model:
+  config:
+    variables:
+      y:
+        type: "scalar" # doesnt do anything at the moment, but will be used to determine the type of output
 
-TODO
+output_model_to_data:
+  type: "SimpleTransformer"
+  config:
+    symbols:
+      - "y"
+    variables:
+      LUME:MLFLOW:TEST_G:
+        formula: "y"
 
+output_data_to:
+  put_method: "k2eg"
+  config:
+    variables:
+      LUME:MLFLOW:TEST_G:
+        proto: pva
+        name: LUME:MLFLOW:TEST_G
+```
+
+### Example 2
+```yaml
+deployment:
+  type: "continuous"
+input_data:
+  get_method: "k2eg"
+  config:
+    variables:
+      SOLN:IN20:121:BACT:
+        proto: ca
+        name: SOLN:IN20:121:BACT
+      QUAD:IN20:121:BACT:
+        proto: ca
+        name: QUAD:IN20:121:BACT
+      QUAD:IN20:122:BACT:
+        proto: ca
+        name: QUAD:IN20:122:BACT
+      ACCL:IN20:300:L0A_PDES:
+        proto: ca
+        name: ACCL:IN20:300:L0A_PDES
+      ACCL:IN20:400:L0B_PDES:
+        proto: ca
+        name: ACCL:IN20:400:L0B_PDES
+      ACCL:IN20:300:L0A_ADES:
+        proto: ca
+        name: ACCL:IN20:300:L0A_ADES
+      ACCL:IN20:400:L0B_ADES:
+        proto: ca
+        name: ACCL:IN20:400:L0B_ADES
+      QUAD:IN20:361:BACT:
+        proto: ca
+        name: QUAD:IN20:361:BACT
+      QUAD:IN20:371:BACT:
+        proto: ca
+        name: QUAD:IN20:371:BACT
+      QUAD:IN20:425:BACT:
+        proto: ca
+        name: QUAD:IN20:425:BACT
+      QUAD:IN20:441:BACT:
+        proto: ca
+        name: QUAD:IN20:441:BACT
+      QUAD:IN20:511:BACT:
+        proto: ca
+        name: QUAD:IN20:511:BACT
+      QUAD:IN20:525:BACT:
+        proto: ca
+        name: QUAD:IN20:525:BACT
+      FBCK:BCI0:1:CHRG_S:
+        proto: ca
+        name: FBCK:BCI0:1:CHRG_S
+      CAMR:IN20:186:XRMS:
+        proto: ca
+        name: CAMR:IN20:186:XRMS
+      CAMR:IN20:186:YRMS:
+        proto: ca
+        name: CAMR:IN20:186:YRMS
+
+input_data_to_model:
+  type: "SimpleTransformer"
+  config:
+    symbols:
+      - CAMR:IN20:186:XRMS
+      - CAMR:IN20:186:YRMS
+      - SOLN:IN20:121:BACT
+      - QUAD:IN20:121:BACT
+      - QUAD:IN20:122:BACT
+      - ACCL:IN20:300:L0A_PDES
+      - ACCL:IN20:400:L0B_PDES
+      - ACCL:IN20:300:L0A_ADES
+      - ACCL:IN20:400:L0B_ADES
+      - QUAD:IN20:361:BACT
+      - QUAD:IN20:371:BACT
+      - QUAD:IN20:425:BACT
+      - QUAD:IN20:441:BACT
+      - QUAD:IN20:511:BACT
+      - QUAD:IN20:525:BACT
+      - FBCK:BCI0:1:CHRG_S
+    variables:
+      distgen:t_dist:length:value:
+          formula: "1.8550514181818183" # constant
+      distgen:r_dist:sigma_xy:value: 
+        formula: "(CAMR:IN20:186:XRMS**2 + CAMR:IN20:186:YRMS**2)**(1/2)" 
+      SOL1:solenoid_field_scale:
+        formula: "SOLN:IN20:121:BACT" # no transformation just pass the value
+      CQ01:b1_gradient:
+        formula: "QUAD:IN20:121:BACT"
+      SQ01:b1_gradient:
+        formula: "QUAD:IN20:122:BACT"
+      L0A_phase:dtheta0_deg:
+        formula: "ACCL:IN20:300:L0A_PDES"
+      L0B_phase:dtheta0_deg:
+        formula: "ACCL:IN20:400:L0B_PDES"
+      L0A_scale:voltage:
+        formula: "ACCL:IN20:300:L0A_ADES"
+      L0B_scale:voltage:
+        formula: "ACCL:IN20:400:L0B_ADES"
+      QA01:b1_gradient:
+        formula: "QUAD:IN20:361:BACT"
+      QA02:b1_gradient:
+        formula: "QUAD:IN20:371:BACT"
+      QE01:b1_gradient:
+        formula: "QUAD:IN20:425:BACT"
+      QE02:b1_gradient:
+        formula: "QUAD:IN20:441:BACT"
+      QE03:b1_gradient:
+        formula: "QUAD:IN20:511:BACT"
+      QE04:b1_gradient:
+        formula: "QUAD:IN20:525:BACT"
+      distgen:total_charge:value:
+        formula: "FBCK:BCI0:1:CHRG_S"
+
+outputs_model:
+  config:
+    variables:
+      sigma_x:
+        type:"scalar"
+      sigma_y:
+        type:"scalar"
+      sigma_z:
+        type:"scalar"
+      norm_emit_x:
+        type:"scalar"
+      norm_emit_y:
+        type:"scalar"
+
+output_model_to_data:
+  type: "SimpleTransformer"
+  config:
+    symbols:
+      - sigma_x
+      - sigma_y
+      - sigma_z
+      - norm_emit_x
+      - norm_emit_y
+    variables:
+      LUME:MLFLOW:SIGMA_X:
+        type: ca
+        formula: "sigma_x"
+      LUME:MLFLOW:SIGMA_Y:
+        type: ca
+        formula: "sigma_y"
+      LUME:MLFLOW:SIGMA_Z:
+        type: ca
+        formula: "sigma_z"
+      LUME:MLFLOW:NORM_EMIT_X:
+        type: ca
+        formula: "norm_emit_x"
+      LUME:MLFLOW:NORM_EMIT_Y:
+        type: ca
+        formula: "norm_emit_y"
+      LUME:MLFLOW:EXAMPLE:COMBINED:
+        type: ca
+        formula: "(sigma_x**2 + sigma_y**2)**(1/2)"
+    
+output_data_to:
+  put_method: "k2eg"
+  config:
+    variables:
+      LUME:MLFLOW:SIGMA_X:
+        proto: pva
+        name: LUME:MLFLOW:SIGMA_X
+      LUME:MLFLOW:SIGMA_Y:
+        proto: pva
+        name: LUME:MLFLOW:SIGMA_Y
+      LUME:MLFLOW:SIGMA_Z:
+        proto: pva
+        name: LUME:MLFLOW:SIGMA_Z
+      LUME:MLFLOW:NORM_EMIT_X:
+        proto: pva
+        name: LUME:MLFLOW:NORM_EMIT_X
+      LUME:MLFLOW:NORM_EMIT_Y:
+        proto: pva
+        name: LUME:MLFLOW:NORM_EMIT_Y
+      LUME:MLFLOW:EXAMPLE:COMBINED:
+        proto: pva
+        name: LUME:MLFLOW:EXAMPLE:COMBINED
+```
+This example is a working deployment for [lcls-cu-in-nn](https://github.com/t-bz/lcls_cu_injector_nn_model) model. The output channels are live and can be inspected using `pvget` or `pvmonitor` commands.
 ## Installation
 
 ```bash
@@ -276,8 +499,45 @@ Conda env coming soon
 ## Usage
 
 ```bash
-model_manager -n <model_name> -v <model_version> -e <env.json> -c <pv_mappings.yaml>
+model_manager -n <model_name> -v <model_version> -e <env.json> -c <configs.yaml>
 ```
+
+- `model_name` is the name of the registered model in MLflow
+- `model_version` is the version of the model to be used
+- `env.json` is a json file containing the environment variables for the model, optional
+- `pv_mappings.yaml` is a yaml file containing the full configuration for the system, transformation and model layers, optional, provided that the registered model has a `pv_mappings.yaml` file in the MLflow model directory.
+
+'env.json' is a json file containing the environment variables for the model. The file should look like this:
+```json
+{
+    "MLFLOW_TRACKING_USERNAME": "username",
+    "MLFLOW_TRACKING_PASSWORD": "password",
+    "MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING": "true",
+    "AWS_DEFAULT_REGION": "eu-west-3",
+    "AWS_REGION": "eu-west-3",
+    "AWS_ACCESS_KEY_ID": "key-id",
+    "AWS_SECRET_ACCESS_KEY": "secret-key"
+    "MLFLOW_S3_ENDPOINT_URL": "http://my-s3-endpoint:myport",
+    "MLFLOW_TRACKING_URI": "http://my-mlflow-server"
+}
+```
+This is optional and all of the above can be set as environment variables.
+
+If you are using mlflow locally, you dont have to set anything just run mlflow ui in the terminal and the model manager will use the local server.
+
+#### Local usage (untested)
+
+```bash
+mlflow ui
+```
+Then in another terminal
+```bash
+model_manager -n "my_model" -v 1 -c configs.yaml
+```
+Provided that you have a model registered in MLflow with the name `my_model` and version `1` and the configuration file `configs.yaml` is in the current directory.
+
+
+
 
 ## Deployment
 
