@@ -14,3 +14,5 @@ old
 .pytest_cache
 *.egg-info
 mlruns
+torch_model
+*_model/

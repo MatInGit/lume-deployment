@@ -1,6 +1,9 @@
 import k2eg, os, uuid
 from .BaseInterface import BaseInterface
 from mm.logging_utils import get_logger
+from concurrent.futures import ThreadPoolExecutor
+
+executor = ThreadPoolExecutor(20)
 
 logger = get_logger()
 
@@ -52,11 +55,19 @@ class K2EGInterface(BaseInterface):
 
     def put(self, name, value, **kwargs):
         # print(f"putting {name} with value {value}")
-        self.client.put(self.reverse_url_lookup[name], value)
+        try:
+            self.client.put(self.reverse_url_lookup[name], value)
+        except Exception as e:
+            print(f"Error putting: {e}")
+            raise e
 
     def put_many(self, data, **kwargs):
+        results = []
         for name, value in data.items():
-            self.put(name, value)
+            res = executor.submit(self.put, name, value)
+            results.append(res)
+        for res in results:
+            res.result()
 
     def get_many(self, data, **kwargs):
         pass

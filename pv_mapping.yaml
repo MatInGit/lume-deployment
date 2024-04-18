@@ -2,9 +2,9 @@ deployment:
   type: "continuous"
   # other configurations
 input_data:
-  get_method: "k2eg"
+  get_method: "p4p"
   config:
-    # EPICS_PVA_NAME_SERVERS: "localhost:5075"
+    EPICS_PVA_NAME_SERVERS: "134.79.151.21:5169"
     # intialize: false
     variables:
       LUME:MLFLOW:TEST_B:
@@ -38,13 +38,13 @@ output_model_to_data:
     symbols:
       - "y"
     variables:
-      LUME:MLFLOW:TEST_Q:
+      LUME:MLFLOW:TEST_S:
         formula: "y"
 
 output_data_to:
   put_method: "k2eg"
   config:
     variables:
-      LUME:MLFLOW:TEST_Q:
+      LUME:MLFLOW:TEST_S:
         proto: pva
-        name: LUME:MLFLOW:TEST_Q
+        name: LUME:MLFLOW:TEST_S

@@ -1,11 +1,12 @@
 import argparse
 import os, sys, json, time, traceback
 from mm.config import ConfigParser
-from mm.logging_utils import get_logger, make_logger
+from mm.logging_utils import get_logger, make_logger, reset_logging
 from mm.model_utils import registered_model_getters
 from mm.interfaces import registered_interfaces
 from mm.transformers import registered_transformers
 import torch
+import time
 
 logger = get_logger()
 
@@ -186,7 +187,16 @@ def model_main(
     """Main."""
     # monitor and send to transformer handle
     # reintialise logger to get the correct logger and clear any previous handlers
-    logger = make_logger("model_manager")
+    print("model_main")
+
+    logger = get_logger()
+    logger.info("Starting model manager")
+
+    stats_inference = []
+    stats_input_transform = []
+    stats_output_transform = []
+    stats_put = []
+    last_stat_report = time.time()
 
     try:
         in_interface.monitor(in_transformer.handler)
@@ -201,7 +211,53 @@ def model_main(
 
         while True:
 
+            if time.time() - last_stat_report > 1:
+
+                stat_string = ""
+                if len(stats_inference) > 0:
+                    stat = sum(stats_inference) / len(stats_inference)
+                    stat = stat * 1000
+                    # display 2 decimal places
+                    stat_temp = f" | Inference time: {stat:.2f} ms |"
+                    spaces = 20 - len(stat_temp)
+                    stat_string += stat_temp + " " * spaces
+
+                if len(stats_input_transform) > 0:
+                    stat = sum(stats_input_transform) / len(stats_input_transform)
+                    stat = stat * 1000
+                    stat_temp = f"Input transform time: {stat:.2f} ms |"
+                    spaces = 20 - len(stat_temp)
+                    stat_string += stat_temp + " " * spaces
+                if len(stats_output_transform) > 0:
+                    stat = sum(stats_output_transform) / len(stats_output_transform)
+                    stat = stat * 1000
+                    stat_temp = f"Output transform time: {stat:.2f} ms |"
+                    spaces = 20 - len(stat_temp)
+                    stat_string += stat_temp + " " * spaces
+
+                if len(stats_put) > 0:
+                    stat = sum(stats_put) / len(stats_put)
+                    stat = stat * 1000
+                    stat_temp = f"Put time: {stat:.2f} ms |"
+                    spaces = 20 - len(stat_temp)
+                    stat_string += stat_temp + " " * spaces
+
+                if stat_string == "":
+                    pass
+                else:
+                    logger.info(stat_string)
+                    last_stat_report = time.time()
+                    stats_inference = []
+                    stats_input_transform = []
+                    stats_output_transform = []
+                    stats_put = []
+
             if in_transformer.updated:
+                try:
+                    stats_input_transform.append(in_transformer.handler_time)
+                except:
+                    logger.warning("No handler time available for stats")
+                    stats_input_transform.append(0)
                 # logger.debug("Input transformer updated")
                 # logger.debug(
                 #     f"Input transformer latest transformed: {in_transformer.latest_transformed}"
@@ -221,20 +277,32 @@ def model_main(
                 else:
                     latest_transformed = in_transformer.latest_transformed
 
+                inference_start = time.time()
                 output = model.evaluate(in_transformer.latest_transformed)
+                inference_time = time.time() - inference_start
+                stats_inference.append(inference_time)
                 logger.debug(f"Output from model.evaluate: {output}")
                 # print("=" * 20)
                 # print("Output from model.evaluate: ")
                 # print(output)
                 # print("=" * 20)
-
                 for key in output:
                     logger.debug(f"Output: {key}: {output[key]}")
                     out_transformer.handler(key, {"value": output[key]})
 
                 if out_transformer.updated:
+                    try:
+                        stats_output_transform.append(out_transformer.handler_time)
+                    except:
+                        logger.warning("No handler time available for stats")
+                        stats_output_transform.append(0)
+                    time_start = time.time()
+
                     out_interface.put_many(out_transformer.latest_transformed)
                     out_transformer.updated = False
+
+                    time_end = time.time()
+                    stats_put.append(time_end - time_start)
 
                 in_transformer.updated = False
 

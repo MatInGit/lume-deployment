@@ -121,7 +121,11 @@ System level -> Transformation level -> Model level -> Transformation level -> S
 ```
 ## Available modules
 
-TODO
+### System
+
+### Transformation
+
+### Model
 
 ## YAML configuration
 
@@ -145,11 +149,19 @@ pip install .
 ```
 for development
 
+```bash
+pip install -r requirements.txt
+
+cd model_manager
+pip install -e .
+```
 
 ## Usage
 
 ```bash
-
-
 model_manager -n <model_name> -v <model_version> -e <env.json> -c <pv_mappings.yaml>
 ```
+
+## Deployment
+
+TODO

@@ -1,21 +1,33 @@
-from mm.cli import model_main, setup
-from mm.logging_utils import make_logger
+def main():
+    from mm.cli import model_main, setup
+    from mm.logging_utils import make_logger, reset_logging
 
-logger = make_logger("model_manager")
+    logger = make_logger("model_manager")
+    logger.info("Starting model manager")
 
-# run as python python .\model_manager\main.py
+    (
+        in_interface,
+        out_interface,
+        in_transformer,
+        out_transformer,
+        model,
+        getter,
+        args,
+    ) = setup()
+    print("resetting logging...")
+    reset_logging()
+    logger = make_logger("model_manager")
 
-# if __name__ == "__main__":
-#     logger.critical("Starting model manager")
-#     in_interface, out_interface, in_transformer, out_transformer, model = setup()
-#     model_main(in_interface, out_interface, in_transformer, out_transformer, model)
+    model_main(
+        in_interface,
+        out_interface,
+        in_transformer,
+        out_transformer,
+        model,
+        getter,
+        args,
+    )
 
-# # run as module
-# else:
-logger.critical("Starting model manager")
-in_interface, out_interface, in_transformer, out_transformer, model, getter, args = (
-    setup()
-)
-model_main(
-    in_interface, out_interface, in_transformer, out_transformer, model, getter, args
-)
+
+if __name__ == "__main__":
+    main()

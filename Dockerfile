@@ -6,6 +6,8 @@ COPY requirements.txt /app/requirements.txt
 RUN python -m pip install -r /app/requirements.txt --no-cache-dir
 
 COPY . /opt/deployment/
-WORKDIR /opt/deployment/
-RUN python -m pip install ./model_manager --no-cache-dir
-cmd model_manager -n $model_name -v $model_version -p $PORT
+WORKDIR /opt/deployment/model_manager   
+RUN python -m pip install -e . --no-cache-dir
+WORKDIR /opt/deployment
+CMD model_manager -n $model_name -v $model_version
+# CMD tail -f /dev/null
