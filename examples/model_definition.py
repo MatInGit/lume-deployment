@@ -2,7 +2,6 @@ from lume_model.base import LUMEBaseModel
 
 import numpy as np
 
-
 class ExampleModel(LUMEBaseModel):
     def evaluate(self, input_dict):
         output_dict = {}
