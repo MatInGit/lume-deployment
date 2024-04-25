@@ -14,16 +14,18 @@ input_data:
       CAMR:IN20:186:N_OF_COL:
         proto: ca
         name: CAMR:IN20:186:N_OF_COL
-
+      LUME:MLFLOW:TEST_A: # this one I just added to trigger a refresh
+        proto: pva
+        name: LUME:MLFLOW:TEST_A
+      
 input_data_to_model:
-  type: "CAImageTransfomer"
-  config:
-    variables:
-      image:
-        img_ch: CAMR:IN20:186:IMAGE
-        img_x_ch: CAMR:IN20:186:N_OF_COL
-        img_y_ch: CAMR:IN20:186:N_OF_ROW
-    
+      type: "CAImageTransfomer"
+      config:
+        variables:
+          image:
+            img_ch: CAMR:IN20:186:IMAGE
+            img_x_ch: CAMR:IN20:186:N_OF_COL
+            img_y_ch: CAMR:IN20:186:N_OF_ROW
 outputs_model:
   config:
     variables:

@@ -6,7 +6,7 @@ from mm.model_utils import registered_model_getters
 from mm.interfaces import registered_interfaces
 from mm.transformers import registered_transformers
 import torch
-import time
+import time, logging
 
 logger = get_logger()
 
@@ -51,6 +51,9 @@ def env_config(env_config):
 def setup():
     """Setup the model manager."""
     parser = argparse.ArgumentParser(description="Model Manager CLI")
+    
+    parser.add_argument( "-d", "--debug", help="Debug mode", required=False, default=False, action="store_true",)
+    
     parser.add_argument(
         "-c", "--config", help="Path to the configuration file", required=False
     )
@@ -109,6 +112,14 @@ def setup():
     )
 
     args = parser.parse_args()
+    
+    # change logger level
+    if args.debug:
+        print("Debug mode")
+        logger = make_logger(level= logging.DEBUG)
+    else:
+        print("Info mode")
+        logger = make_logger(level= logging.INFO)
 
     logger.info("Model Manager CLI")
 
@@ -242,20 +253,20 @@ def model_main(
                 if len(stats_input_transform) > 0:
                     stat = sum(stats_input_transform) / len(stats_input_transform)
                     stat = stat * 1000
-                    stat_temp = f"Input transform time: {stat:.2f} ms |"
+                    stat_temp = f" Input transform time: {stat:.2f} ms |"
                     spaces = 20 - len(stat_temp)
                     stat_string += stat_temp + " " * spaces
                 if len(stats_output_transform) > 0:
                     stat = sum(stats_output_transform) / len(stats_output_transform)
                     stat = stat * 1000
-                    stat_temp = f"Output transform time: {stat:.2f} ms |"
+                    stat_temp = f" Output transform time: {stat:.2f} ms |"
                     spaces = 20 - len(stat_temp)
                     stat_string += stat_temp + " " * spaces
 
                 if len(stats_put) > 0:
                     stat = sum(stats_put) / len(stats_put)
                     stat = stat * 1000
-                    stat_temp = f"Put time: {stat:.2f} ms |"
+                    stat_temp = f" Put time: {stat:.2f} ms |"
                     spaces = 20 - len(stat_temp)
                     stat_string += stat_temp + " " * spaces
 
@@ -316,7 +327,7 @@ def model_main(
                     time_start = time.time()
                     
                     if os.environ["PUBLISH"] == "True":
-                        logger.info("Publishing data")
+                        logger.debug("Publishing data")
                         out_interface.put_many(out_transformer.latest_transformed)
                     else:
                         logger.info("Not publishing data, to publish use -p or --publish")

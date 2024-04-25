@@ -11,3 +11,6 @@ old
 mlruns
 generic_model
 torch_model
+model1.txt
+metric2.png
+local_test

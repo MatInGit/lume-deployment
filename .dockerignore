@@ -15,4 +15,5 @@ old
 *.egg-info
 mlruns
 torch_model
-*_model/
+*_model
+local_test/

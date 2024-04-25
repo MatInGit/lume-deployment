@@ -89,6 +89,7 @@ class SimpleTransformer:
 
 
 class CAImageTransfomer:
+    """Input only image transformation"""
     def __init__(self, config) -> None:
         self.img = config["variables"]
         self.img_list = list(self.img.keys())
@@ -128,12 +129,12 @@ class CAImageTransfomer:
         transformed = {}
         for key in self.img_list:
             value = self.latest_input[self.variables[key]]
-            print(f"key: {key}, value: {value}")
+            # print(f"key: {key}, value: {value}")
             transformed[key] = np.array(value).reshape(
                 self.latest_input[self.variables[key + "_x"]],
                 self.latest_input[self.variables[key + "_y"]],
             )
         for key, value in transformed.items():
             self.latest_transformed[key] = value
-            print(f"key: {key}, value: {value}")
+            # print(f"key: {key}, value: {value}")
         self.updated = True

@@ -1,7 +1,7 @@
 import colorlog, logging
 
 
-def make_logger(name="model_manager", level=logging.DEBUG):
+def make_logger(name="model_manager", level=logging.INFO):
 
     logger = colorlog.getLogger(name)
     handler = colorlog.StreamHandler()
@@ -26,7 +26,7 @@ def make_logger(name="model_manager", level=logging.DEBUG):
         logger.handlers.clear()
     logger.addHandler(handler)
 
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(level)
     logger.propagate = (
         False  # Prevent the log messages from being duplicated in the python consoles
     )
