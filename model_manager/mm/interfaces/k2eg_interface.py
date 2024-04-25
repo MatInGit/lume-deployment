@@ -42,6 +42,8 @@ class K2EGInterface(BaseInterface):
         )
 
     def monitor(self, handler, **kwargs):
+        logger.debug(f"Monitoring {self.pv_url_list}")
+        
         try:
             self.client.monitor_many(self.pv_url_list, handler, timeout=1000)
         except Exception as e:

@@ -10,6 +10,9 @@ psycopg2-binary
 k2eg==0.2.7
 psutil==5.9.8
 colorlog==6.8.2
+p4p
+pyepics
+
 
 
 

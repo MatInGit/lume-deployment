@@ -2,9 +2,9 @@ deployment:
   type: "continuous"
   # other configurations
 input_data:
-  get_method: "p4p"
+  get_method: "p4p_server"
   config:
-    EPICS_PVA_NAME_SERVERS: "134.79.151.21:5169"
+    EPICS_PVA_NAME_SERVERS: "localhost:5075"
     # intialize: false
     variables:
       LUME:MLFLOW:TEST_B:
@@ -42,7 +42,7 @@ output_model_to_data:
         formula: "y"
 
 output_data_to:
-  put_method: "k2eg"
+  put_method: "p4p_server"
   config:
     variables:
       LUME:MLFLOW:TEST_S:
