@@ -68,7 +68,22 @@ class MLflowModelGetter(ModelGetterBase):
         if loader_module == "mlflow.pyfunc.model":
             logger.debug("Loading pyfunc model")
             model_pyfunc = mlflow.pyfunc.load_model(model_uri=version.source)
-            model = model_pyfunc.unwrap_python_model().get_lume_model()
+            
+            # check if model has.get_lume_model() method
+            if not hasattr(model_pyfunc.unwrap_python_model(), "get_lume_model"):
+                # check if it has get__model() method
+                if not hasattr(model_pyfunc.unwrap_python_model(), "get_model"):
+                    raise Exception(
+                        "Model does not have get_lume_model() or get_model() method"
+                    )
+                else:
+                    logger.debug("Model has get_model() method")
+                    logger.warning("get_model() suggests a non-LUME model, please check if model has an evaluate method")
+                    model = model_pyfunc.unwrap_python_model().get_model()
+            else:
+                logger.debug("Model has get_lume_model() method")
+                model = model_pyfunc.unwrap_python_model().get_lume_model()
+                
             logger.debug(f"Model: {model}, Model type: {type(model)}")
             self.model_type = "pyfunc"
             return model
