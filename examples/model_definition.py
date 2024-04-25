@@ -7,3 +7,14 @@ class ExampleModel(LUMEBaseModel):
         output_dict = {}
         output_dict["y"] = np.max([input_dict["x1"], input_dict["x2"]])
         return output_dict
+
+class ExampleImageModel():
+    def evaluate(self, input_dict):
+        output_dict = {}
+        output_dict["y"] = np.max([input_dict["x1"], input_dict["x2"]])
+        return output_dict
+
+    def evaluate_image(self, input_dict):
+        output_dict = {}
+        output_dict["y"] = np.max([input_dict["x1"], input_dict["x2"]])
+        return output_dict
