@@ -2,11 +2,12 @@ from p4p.client.thread import Context
 from p4p.server import Server
 from p4p.server.raw import ServOpWrap
 from p4p.server.thread import SharedPV
-from p4p.nt import NTScalar
+from p4p.nt import NTScalar, NTNDArray
 
 from .BaseInterface import BaseInterface
 from mm.logging_utils import get_logger
-import os
+import os, time
+import numpy as np
 
 logger = get_logger()
 
@@ -70,10 +71,11 @@ class SimplePVAInterface(BaseInterface):
         return name, self.ctxt.get(name)
 
     def put(self, name, value, **kwargs):
-        return self.ctxt.put(name, value)
+        return self.ctxt.put(name, value) # not tested
 
     def put_many(self, data, **kwargs):
-        pass
+        for key, value in data.items():
+            self.put(key, value)
 
     def get_many(self, data, **kwargs):
         pass
@@ -90,24 +92,53 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
 
     def __init__(self, config):
         super().__init__(config)
-        self.shared_pvs = []
+        self.shared_pvs = {}
+        
         for pv in self.pv_list:
             # self.shared_pvs.append(pv)
+            # need to check if key exists config.config["variables"]["pv"]["type"]
+            print(f"config.config['variables'][pv]: {config.config['variables'][pv]}")
+            if "type" in config.config["variables"][pv]:
+                print(f"config.config['variables'][pv]['type']: {config.config['variables'][pv]['type']}")
+                pv_type = config.config["variables"][pv]["type"]
+                if pv_type == "image":
+                    x_size = config.config["variables"][pv]["image_size"]["x"]
+                    y_size = config.config["variables"][pv]["image_size"]["y"]
+                    # intialize with zeros
+                    intial_value = np.zeros((x_size, y_size))
+                    
+                    pv_type_nt = NTNDArray()
+                    pv_type_init = intial_value
+                    
+            else:
+                pv_type_nt = NTScalar("d")
+                pv_type_init = 0
+            
             pv_item = {}
-            pv_item[pv] = SharedPV(nt=NTScalar("d"), initial=0)
+            pv_item[pv] = SharedPV(nt=pv_type_nt, initial=pv_type_init)
 
             @pv_item[pv].put
             def put(pv: SharedPV, op: ServOpWrap):
+                print(f"called put with {op.value()}")
                 logger.debug(f"Put {pv} {op}")
                 pv.post(op.value())
                 op.done()
 
-            self.shared_pvs.append(pv_item)
+            self.shared_pvs[pv] = pv_item[pv]
             # this feels ugly
 
-        self.server = Server(providers=self.shared_pvs)
+        self.server = Server(providers=[{name: pv} for name, pv in self.shared_pvs.items()])
 
     def close(self):
         logger.debug("Closing SimplePVAInterfaceServer")
         self.server.stop()
         super().close()
+    
+    def put(self, name, value, **kwargs):
+        self.shared_pvs[name].post(value, timestamp=time.time())
+        
+    
+    def put_many(self, data, **kwargs):
+        for key, value in data.items():
+            self.put(key, value)
+            

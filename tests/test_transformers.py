@@ -1,4 +1,4 @@
-from mm.transformers.BaseTransformers import SimpleTransformer, CAImageTransfomer
+from mm.transformers.BaseTransformers import SimpleTransformer, CAImageTransfomer, PassThroughTransformer
 from mm.transformers.CompoundTransformer import CompoundTransformer
 from mm.logging_utils.make_logger import get_logger
 import numpy as np
@@ -165,5 +165,22 @@ def test_compound_transformer():
     
     print(ct.latest_transformed)
 
+config5 = {
+    "variables": {
+        "IMG1" : "input_image",
+        "var1" : "input_var1",
+    }}
+
+# we just relabel the input variables
+
+def test_pass_through_transformer():
+    pt = PassThroughTransformer(config5)
+    assert pt.updated == False
+    pt.handler("input_image", {"value": np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])})
+    pt.handler("input_var1", {"value": 1})
+    assert pt.updated == True
+    assert pt.latest_transformed["IMG1"].shape == (3, 3)
+    assert pt.latest_transformed["var1"] == 1
+    print(pt.latest_transformed)
 
     

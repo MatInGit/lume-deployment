@@ -2,6 +2,7 @@
 from mm.logging_utils.make_logger import get_logger
 from mm.transformers import registered_transformers
 import sympy as sp
+import time
 
 logger = get_logger()
 
@@ -30,13 +31,20 @@ class CompoundTransformer:
             self.latest_transformed = {**self.latest_transformed, **self.transformers[-1].latest_transformed}
             self.latest_input = {**self.latest_input, **self.transformers[-1].latest_input}     
         self.updated = False
+        self.handler_time = 0
         
     def transform(self, data):
+        
         for transformer in self.transformers:
             data = transformer.transform(data)
+        
+        
+        
         return data
 
     def handler(self, name, data):
+        time_start = time.time()
+        logger.debug(f"CompoundTransformer handler for {name}")
         for transformer in self.transformers:
             if name in transformer.input_list:
                 transformer.handler(name, data)
@@ -44,5 +52,5 @@ class CompoundTransformer:
                     self.updated = True
                     self.latest_transformed = {**self.latest_transformed, **transformer.latest_transformed}
                     self.latest_input = {**self.latest_input, **transformer.latest_input}
-                
-                 
+        time_end = time.time()
+        self.handler_time = time_end - time_start                 

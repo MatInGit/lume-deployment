@@ -6,7 +6,7 @@ from mm.model_utils import registered_model_getters
 from mm.interfaces import registered_interfaces
 from mm.transformers import registered_transformers
 import torch
-import time, logging
+import time, logging, asyncio
 
 logger = get_logger()
 
@@ -117,9 +117,11 @@ def setup():
     if args.debug:
         print("Debug mode")
         logger = make_logger(level= logging.DEBUG)
+        os.environ["DEBUG"] = "True"
     else:
         print("Info mode")
         logger = make_logger(level= logging.INFO)
+        os.environ["DEBUG"] = "False"
 
     logger.info("Model Manager CLI")
 
@@ -203,7 +205,7 @@ def setup():
     )
 
 
-def model_main(
+async def model_main(
     in_interface,
     out_interface,
     in_transformer,
@@ -238,6 +240,8 @@ def model_main(
             in_transformer.handler(key, value)
 
         while True:
+            
+            
 
             if time.time() - last_stat_report > 1:
 
@@ -330,7 +334,7 @@ def model_main(
                         logger.debug("Publishing data")
                         out_interface.put_many(out_transformer.latest_transformed)
                     else:
-                        logger.info("Not publishing data, to publish use -p or --publish")
+                        logger.debug("Not publishing data, to publish use -p or --publish")
                     out_transformer.updated = False
 
                     time_end = time.time()
@@ -341,7 +345,9 @@ def model_main(
                 if args.one_shot:
                     logger.info("One shot mode, exiting")
                     break
-
+                
+            await asyncio.sleep(0.0001) # makes the loop less cpu intensive 100% - > 15% cpu usage , more refactoring needed to make it more efficient
+            
     except Exception as e:
         logger.error(f"Error monitoring: {traceback.format_exc()}")
         raise e
@@ -351,3 +357,4 @@ def model_main(
 
         logger.info("Exiting")
         sys.exit(0)
+    

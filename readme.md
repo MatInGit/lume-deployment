@@ -149,7 +149,19 @@ input_data:
       LUME:MLFLOW:TEST_A:
         proto: pva
         name: LUME:MLFLOW:TEST_A
+      ### in p4p_server you can specify type as well, if not specified it will be assumed to be scalar
+      LUME:MLFLOW:TEST_C:
+        proto: pva
+        name: LUME:MLFLOW:TEST_C
+        type: "image"
+       
 ```
+Available types are `scalar` and `image`. The `image` type expects an np array as the value. See `examples/image_model/pv_mapping.yaml` or run 
+```bash
+model_manager -n "image_model" -v "16" -e cred.json -c ./local_test/pv_mapping.yaml -p -d"
+```
+to see an example of how to use the `image` type.
+
 #### `k2eg` Sample configuration
 ```yaml
 input_data:
@@ -173,6 +185,7 @@ Purpose of the transformation module is to provide a way to transform the data i
 | `SimpleTransformer` | Simple transformer that can be used to transform scalar values (ca or pv values that have a `value` field) | [config](#simpletransformer-sample-configuration) | `p4p`,`p4p_server`, `k2eg`|
 | `CAImageTransformer` | Transformer that can be used to transform a triplet of an array, x and y ca values into a np array | [config](#caimagetransformer-sample-configuration) | `k2eg` ca only|
 | `CompoundTransformer` | Compound transformer that can be used to have multuple transformers in parallel | [config](#compoundtransformer-sample-configuration) | `p4p`,`p4p_server`, `k2eg`|
+`PassThroughTransformer` | Transformer that can be used to pass data through without any transformation | [config](#passthroughtransformer-sample-configuration) | `p4p`,`p4p_server`, `k2eg`|
 
 #### `SimpleTransformer` Sample configuration
 ```yaml
@@ -239,6 +252,14 @@ input_data_to_model:
 ```
 Combines multiple transformers in parallel. The output will be a combined dictionary og model outputs . Example: `{'x1':1.2,'x2':3.2, img_1: np.array, img_2: np.array}`
 
+#### `PassThroughTransformer` Sample configuration
+```yaml
+output_model_to_data:
+  type: "PassThroughTransformer"
+  config:
+    variables:
+      LUME:MLFLOW:TEST_IMAGE: "y_img"
+```
 
 ### Model
 Model layer is compatible with [lume-model](https://github.com/slaclab/lume-model). Currently of `TorchModule` and `BaseModel` are supported. All models have to come from MLflow, with local models coming soon.

@@ -37,24 +37,34 @@ outputs_model:
         type: "scalar"
       y_std:
         type: "scalar"
-
+      y_img:
+        type: "image"
 output_model_to_data:
-  type: "SimpleTransformer"
+  type: "CompoundTransformer"
   config:
-    symbols:
-      - "y_max"
-      - "y_min"
-      - "y_mean"
-      - "y_std"
-    variables:
-      LUME:MLFLOW:TEST_Y_MAX:
-        formula: "y_max"
-      LUME:MLFLOW:TEST_Y_MIN:
-        formula: "y_min"
-      LUME:MLFLOW:TEST_Y_MEAN:
-        formula: "y_mean"
-      LUME:MLFLOW:TEST_Y_STD:
-        formula: "y_std"
+    transformers:
+      t_1:
+        type: "SimpleTransformer"
+        config:
+          symbols:
+            - "y_max"
+            - "y_min"
+            - "y_mean"
+            - "y_std"
+          variables:
+            LUME:MLFLOW:TEST_Y_MAX:
+              formula: "y_max"
+            LUME:MLFLOW:TEST_Y_MIN:
+              formula: "y_min"
+            LUME:MLFLOW:TEST_Y_MEAN:
+              formula: "y_mean"
+            LUME:MLFLOW:TEST_Y_STD:
+              formula: "y_std"
+      t_2:
+        type: "PassThroughTransformer"
+        config:
+          variables:
+            LUME:MLFLOW:TEST_IMAGE: "y_img"
 
 output_data_to:
   put_method: "p4p_server"
@@ -69,6 +79,13 @@ output_data_to:
       LUME:MLFLOW:TEST_Y_MEAN:
         proto: pva
         name: LUME:MLFLOW:TEST_Y_MEAN
-      LUME:MLFLOW:TEST_Y_STD:
+      LUME:MLFLOW:TEST_Y_STD: # implicitly type: "scalar"
         proto: pva
         name: LUME:MLFLOW:TEST_Y_STD
+      LUME:MLFLOW:TEST_IMAGE:
+        type: "image"
+        image_size:
+          x: 640
+          y: 480
+        proto: pva
+        name: LUME:MLFLOW:TEST_IMAGE

@@ -79,6 +79,8 @@ class SimpleTransformer:
                 transformed[key] = sp.sympify(value["formula"].replace(":", "_")).subs(
                     pvs_renamed
                 )
+                # converted to float
+                transformed[key] = float(transformed[key])
             except Exception as e:
                 logger.error(f"Error transforming: {e}")
                 raise e
@@ -112,7 +114,7 @@ class CAImageTransfomer:
 
     def handler(self, variable_name: str, value: dict):
         logger.debug(
-            f"CAImageTransfomer handler for {variable_name} with value {value}"
+            f"CAImageTransfomer handler for {variable_name}"
         )
         try:
             self.latest_input[variable_name] = value["value"]
@@ -138,3 +140,45 @@ class CAImageTransfomer:
             self.latest_transformed[key] = value
             # print(f"key: {key}, value: {value}")
         self.updated = True
+
+
+class PassThroughTransformer():
+    def __init__(self, config):
+        # config is a dictionary of output:intput pairs
+        pv_mapping = config["variables"]
+        self.latest_input = {}
+        self.latest_transformed = {}
+        self.updated = False
+        self.input_list = list(pv_mapping.values())
+        
+        
+        for key, value in pv_mapping.items():
+            self.latest_input[value] = 0
+            self.latest_transformed[key] = 0
+        self.pv_mapping = pv_mapping
+        
+        self.handler_time = 0
+        
+    def handler(self, pv_name, value):
+        
+        time_start = time.time()
+        logger.debug(f"PassThroughTransformer handler for {pv_name}")
+        self.latest_input[pv_name] = value["value"]
+        if all([value is not None for value in self.latest_input.values()]):
+            self.transform()
+        self.updated = True
+        time_end = time.time()
+        self.handler_time = time_end - time_start
+        
+    def transform(self):
+        logger.debug("Transforming")
+        for key, value in self.pv_mapping.items():
+            self.latest_transformed[key] = self.latest_input[value]
+        self.updated = True
+        
+        
+# config is 
+
+# input_name: output_name
+# input_name: output_name
+# input_name: output_name

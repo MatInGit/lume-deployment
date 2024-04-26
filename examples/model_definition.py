@@ -8,7 +8,7 @@ class ExampleModel(LUMEBaseModel):
         output_dict["y"] = np.max([input_dict["x1"], input_dict["x2"]])
         return output_dict
 
-class ExampleImagetoScalarModel():
+class ExampleImageModel():
 
     def evaluate(self,input_dict):
         output_dict = {}
@@ -18,5 +18,11 @@ class ExampleImagetoScalarModel():
         output_dict["y_min"] = np.min(input_dict["image"])
         output_dict["y_mean"] = np.mean(input_dict["image"])
         output_dict["y_std"] = np.std(input_dict["image"])
+
+            
+        output_dict["y_img"] = np.rot90(input_dict["image"], k=1, axes=(0, 1))
+        
+        
+        
         
         return output_dict
