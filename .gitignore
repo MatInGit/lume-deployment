@@ -21,3 +21,4 @@ output.log
 slack.py
 test.ipynb
 image_model
+test.h5
