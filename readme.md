@@ -560,9 +560,10 @@ This section outlines how to deploy the model on various systems.
 
 ### General Notes and Pre-flight checks
 
+- [ ] Model is `LUMEBaseModel`, `TorchModule` or a custom model type that is compatible with the model manager. i.e. The model registered using pyfunc wrapper has a `.get_model()` method and the model itself has a `.evaluate()` method. See `examples/image_examples.ipynb` for an example of a custom model.
 - [ ] Model is in MLflow
 - [ ] Model is registered in MLflow
-- [ ] `pv_mappings.yaml` file is in the MLflow model_name directory
+- [ ] `pv_mappings.yaml` file is in the MLflow model_name directory.
 - [ ] Test configuration locally using `model_manager -n <model_name> -v <model_version> -e <env.json> -c <configs.yaml> -d`
      - If not working check if you have valid PV names and that your interfaces are in contact with the PV servers
      - Check on multiple machines if possible, you may also test inside `matindocker/lumeservicesdeployment:latest` container.
@@ -593,4 +594,18 @@ model_manager -n <model_name> -v <model_version> -e <env.json>
 ```
 
 You can append `&` to the end of the command to run it in the background.
+
+### Known issues
+
+- [ ] `p4p_server` cannot be an input to the transformation layer. 
+- [ ] `k2eg` will not work correctly if the PVs or CAs are not available.
+
+### Future work
+- [ ] Batch processing for models that require it.
+- [ ] Slack bot for deployment status and workflow building help. As well as help with spinning up and terminating deployments.
+- [ ] Better abstract classes for the system, transformation and model layers.
+- [ ] Compound interfaces for the system layer.
+- [ ] Local model getter. 
+
+
 
