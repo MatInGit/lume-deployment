@@ -22,7 +22,7 @@ class CompoundTransformer:
         self.latest_transformed = {}
         self.input_list = []
         for transformer in config["transformers"]:
-            print(transformer, config["transformers"][transformer])
+            # print(transformer, config["transformers"][transformer])
             transformer_type = config["transformers"][transformer]["type"]
             transformer_config = config["transformers"][transformer]["config"]
             self.transformers.append(registered_transformers[transformer_type](transformer_config))

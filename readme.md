@@ -528,7 +528,15 @@ model_manager -n <model_name> -v <model_version> -e <env.json> -c <configs.yaml>
 - `env.json` is a json file containing the environment variables for the model, optional
 - `pv_mappings.yaml` is a yaml file containing the full configuration for the system, transformation and model layers, optional, provided that the registered model has a `pv_mappings.yaml` file in the MLflow model directory.
 
-'env.json' is a json file containing the environment variables for the model. The file should look like this:
+#### List of flags:
+- `-n` or `--model_name` : Name of the model in MLflow
+- `-v` or `--model_version` : Version of the model in MLflow
+- `-e` or `--env` : Path to the env.json file
+- `-c` or `--configs` : Path to the configs.yaml file
+- `-p` or `--publish` : Publish data to output module, off by default.
+- `-d` or `--debug` : Debug mode, off by default.
+
+`env.json` is a json file containing the environment variables for the model. The file should look like this:
 ```json
 {
     "MLFLOW_TRACKING_USERNAME": "username",
@@ -546,20 +554,43 @@ This is optional and all of the above can be set as environment variables.
 
 If you are using mlflow locally, you dont have to set anything just run mlflow ui in the terminal and the model manager will use the local server.
 
-#### Local usage (untested)
-
-```bash
-mlflow ui
-```
-Then in another terminal
-```bash
-model_manager -n "my_model" -v 1 -c configs.yaml
-```
-Provided that you have a model registered in MLflow with the name `my_model` and version `1` and the configuration file `configs.yaml` is in the current directory.
-
-
-
-
 ## Deployment
 
+This section outlines how to deploy the model on various systems.
+
+### General Notes and Pre-flight checks
+
+- [ ] Model is in MLflow
+- [ ] Model is registered in MLflow
+- [ ] `pv_mappings.yaml` file is in the MLflow model_name directory
+- [ ] Test configuration locally using `model_manager -n <model_name> -v <model_version> -e <env.json> -c <configs.yaml> -d`
+     - If not working check if you have valid PV names and that your interfaces are in contact with the PV servers
+     - Check on multiple machines if possible, you may also test inside `matindocker/lumeservicesdeployment:latest` container.
+
+Note: when the model is registered you have to ensure that you have a valid `pv_mappings.yaml` file in a directory with the __same name as your registered model name__! .i.e if your model is named `my_model` then the directory should be `my_model` and the `pv_mappings.yaml` file should be in that directory. As shown in figure below: 
+![mlflow](/images/capture_1.PNG)
+
+### SLAC/S3DF
+
+At SLAC the models can be deployed directly from the MLflow web UI. Once a model has been registered and saved to the MLflow server it can be deployed by setting the registered models tag `deployment_type` to `prod` or `continuous` (latter is becoming legacy). Within a minute the model will be deployed to the S3DF kubernates container and will be available for use. Additional fields relating to the deployment will be populated as shown below: 
+![deployment info](/images/capture_2.PNG)
+Note the timestamp is in UTC.
+
+In order to terminate a deployment the `deployment_terminate` tag should be set to `true`. This will terminate the deployment and the model will no longer be available for use.
+The model page should update to reflect that the model is no longer deployed: 
+![deployment info](/images/capture_3.PNG)
+
+### ISIS
+
 TODO
+
+### Local/Daemon (recommended for evaluation and testing)
+
+Deploying on local machines as is as simple as running 
+
+```bash
+model_manager -n <model_name> -v <model_version> -e <env.json>
+```
+
+You can append `&` to the end of the command to run it in the background.
+

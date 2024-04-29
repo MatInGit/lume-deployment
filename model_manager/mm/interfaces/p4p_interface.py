@@ -50,8 +50,9 @@ class SimplePVAInterface(BaseInterface):
     def __handler_wrapper(self, handler, name):
         # unwrap p4p.Value into name, value
         def wrapped_handler(value):
-            logger.debug(f"SimplePVAInterface handler for {name, value['value']}")
-            handler(name, {"value": float(value["value"])})
+            # logger.debug(f"SimplePVAInterface handler for {name, value['value']}")
+            
+            handler(name, {"value": value["value"]})
 
         return wrapped_handler
 
@@ -68,7 +69,9 @@ class SimplePVAInterface(BaseInterface):
                 raise e
 
     def get(self, name, **kwargs):
-        return name, self.ctxt.get(name)
+        # print(f"Getting {name}")
+        value = self.ctxt.get(name)
+        return name, value
 
     def put(self, name, value, **kwargs):
         return self.ctxt.put(name, value) # not tested
@@ -94,19 +97,29 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         super().__init__(config)
         self.shared_pvs = {}
         
+        if "init" in config.config:
+            # print(f"config.config['init']: {config.config['init']}")
+            if config.config["init"] == False:
+                self.init_pvs = False
+            else:
+                self.init_pvs = True
+        else :
+            self.init_pvs = True
+            
+        # print(f"self.init_pvs: {self.init_pvs}")
+        
         for pv in self.pv_list:
             # self.shared_pvs.append(pv)
             # need to check if key exists config.config["variables"]["pv"]["type"]
-            print(f"config.config['variables'][pv]: {config.config['variables'][pv]}")
+            # print(f"config.config['variables'][pv]: {config.config['variables'][pv]}")
             if "type" in config.config["variables"][pv]:
-                print(f"config.config['variables'][pv]['type']: {config.config['variables'][pv]['type']}")
+                # print(f"config.config['variables'][pv]['type']: {config.config['variables'][pv]['type']}")
                 pv_type = config.config["variables"][pv]["type"]
                 if pv_type == "image":
                     x_size = config.config["variables"][pv]["image_size"]["x"]
                     y_size = config.config["variables"][pv]["image_size"]["y"]
                     # intialize with zeros
-                    intial_value = np.zeros((x_size, y_size))
-                    
+                    intial_value = np.ones((x_size, y_size))
                     pv_type_nt = NTNDArray()
                     pv_type_init = intial_value
                     
@@ -115,12 +128,16 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
                 pv_type_init = 0
             
             pv_item = {}
-            pv_item[pv] = SharedPV(nt=pv_type_nt, initial=pv_type_init)
+            if self.init_pvs:
+                pv_item[pv] = SharedPV(nt=pv_type_nt, initial=pv_type_init)
+                # logger.debug(f"pv_item[pv]: {pv_item[pv]}")
+            else:
+                pv_item[pv] = SharedPV(nt=pv_type_nt, initial=None)
+                # logger.debug(f"pv_item[pv]: {pv_item[pv]}")
 
             @pv_item[pv].put
             def put(pv: SharedPV, op: ServOpWrap):
-                print(f"called put with {op.value()}")
-                logger.debug(f"Put {pv} {op}")
+                # logger.debug(f"Put {pv} {op}")
                 pv.post(op.value())
                 op.done()
 
@@ -135,9 +152,25 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         super().close()
     
     def put(self, name, value, **kwargs):
+        # logger.debug(f"Putting {name} with value {value}")
         self.shared_pvs[name].post(value, timestamp=time.time())
-        
     
+    def get(self, name, **kwargs):
+        # print(f"Getting {name}")
+        value_raw = self.shared_pvs[name].current().raw
+        
+        # print(f"value_raw_type: {type(value_raw.value)}")
+        if type(value_raw.value) == np.ndarray:
+            value = value_raw.value
+            y_size = value_raw.dimension[0].size
+            x_size = value_raw.dimension[1].size
+            value = value.reshape((x_size, y_size))
+        else:
+            value = value_raw.value
+            
+        # print(f"value: {value}")
+        return name, {"value": value }        
+
     def put_many(self, data, **kwargs):
         for key, value in data.items():
             self.put(key, value)

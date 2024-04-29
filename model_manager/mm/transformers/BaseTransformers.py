@@ -43,9 +43,6 @@ class SimpleTransformer:
             raise Exception(f"Invalid formula: {formula}")
 
     def handler(self, pv_name, value):
-
-        time
-
         # logger.debug(f"SimpleTransformer handler for {pv_name} with value {value}")
 
         # assert valus is float
@@ -116,12 +113,15 @@ class CAImageTransfomer:
         logger.debug(
             f"CAImageTransfomer handler for {variable_name}"
         )
+        # logger.debug(f"Value: {value}")
         try:
             self.latest_input[variable_name] = value["value"]
             if all([value is not None for value in self.latest_input.values()]):
                 time_start = time.time()
                 self.transform()
                 self.handler_time = time.time() - time_start
+            else:
+                logger.debug("Not all values are present")
         except Exception as e:
             logger.error(f"Error transforming: {e}")
             raise e
@@ -132,13 +132,15 @@ class CAImageTransfomer:
         for key in self.img_list:
             value = self.latest_input[self.variables[key]]
             # print(f"key: {key}, value: {value}")
-            transformed[key] = np.array(value).reshape(
-                self.latest_input[self.variables[key + "_x"]],
-                self.latest_input[self.variables[key + "_y"]],
-            )
+            try:
+                transformed[key] = np.array(value).reshape(
+                    int(self.latest_input[self.variables[key + "_x"]]),
+                    int(self.latest_input[self.variables[key + "_y"]]),
+                )
+            except Exception as e:
+                logger.error(f"Error transforming: {e}")
         for key, value in transformed.items():
             self.latest_transformed[key] = value
-            # print(f"key: {key}, value: {value}")
         self.updated = True
 
 
@@ -153,14 +155,13 @@ class PassThroughTransformer():
         
         
         for key, value in pv_mapping.items():
-            self.latest_input[value] = 0
-            self.latest_transformed[key] = 0
+            self.latest_input[value] = None
+            self.latest_transformed[key] = None
         self.pv_mapping = pv_mapping
         
         self.handler_time = 0
         
-    def handler(self, pv_name, value):
-        
+    def handler(self, pv_name, value):    
         time_start = time.time()
         logger.debug(f"PassThroughTransformer handler for {pv_name}")
         self.latest_input[pv_name] = value["value"]
@@ -174,11 +175,18 @@ class PassThroughTransformer():
         logger.debug("Transforming")
         for key, value in self.pv_mapping.items():
             self.latest_transformed[key] = self.latest_input[value]
+            
+            # compare types and shapes
+            if type(self.latest_input[value]) != type(self.latest_transformed[key]):
+                logger.error(f"Type mismatch between input and output for {key}")
+            if type(self.latest_input[value]) == np.ndarray:
+                if self.latest_input[value].shape != self.latest_transformed[key].shape:
+                    logger.error(f"Shape mismatch between input and output for {key}")
         self.updated = True
         
-        
-# config is 
-
-# input_name: output_name
-# input_name: output_name
-# input_name: output_name
+        # for key, value in self.latest_input.items():
+        #     logger.debug(f"{key}: {value.shape}")
+        # for key, value in self.latest_transformed.items():
+        #     logger.debug(f"{key}: {value.shape}")
+            
+    

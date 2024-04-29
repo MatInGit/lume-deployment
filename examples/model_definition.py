@@ -20,8 +20,10 @@ class ExampleImageModel():
         output_dict["y_std"] = np.std(input_dict["image"])
 
             
-        output_dict["y_img"] = np.rot90(input_dict["image"], k=1, axes=(0, 1))
+        # output_dict["y_img"] = np.rot90(input_dict["image"], k=1, axes=(0, 1))
         
+        # gaussian filter
+        output_dict["y_img"] = input_dict["image"]**2
         
         
         
