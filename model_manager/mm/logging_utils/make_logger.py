@@ -2,7 +2,6 @@ import colorlog, logging
 
 
 def make_logger(name="model_manager", level=logging.INFO):
-
     logger = colorlog.getLogger(name)
     handler = colorlog.StreamHandler()
     formatter = colorlog.ColoredFormatter(

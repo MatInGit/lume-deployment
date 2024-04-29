@@ -51,9 +51,16 @@ def env_config(env_config):
 def setup():
     """Setup the model manager."""
     parser = argparse.ArgumentParser(description="Model Manager CLI")
-    
-    parser.add_argument( "-d", "--debug", help="Debug mode", required=False, default=False, action="store_true",)
-    
+
+    parser.add_argument(
+        "-d",
+        "--debug",
+        help="Debug mode",
+        required=False,
+        default=False,
+        action="store_true",
+    )
+
     parser.add_argument(
         "-c", "--config", help="Path to the configuration file", required=False
     )
@@ -100,7 +107,7 @@ def setup():
         default=False,
         action="store_true",
     )
-    
+
     # publish
     parser.add_argument(
         "-p",
@@ -112,21 +119,21 @@ def setup():
     )
 
     args = parser.parse_args()
-    
+
     # change logger level
     if args.debug:
         print("Debug mode")
-        logger = make_logger(level= logging.DEBUG)
+        logger = make_logger(level=logging.DEBUG)
         os.environ["DEBUG"] = "True"
     else:
         print("Info mode")
-        logger = make_logger(level= logging.INFO)
+        logger = make_logger(level=logging.INFO)
         os.environ["DEBUG"] = "False"
 
     logger.info("Model Manager CLI")
 
     logger.debug(f"Arguments: {args}")
-    
+
     if args.publish:
         logger.warning("Publishing data to system")
         os.environ["PUBLISH"] = "True"
@@ -240,11 +247,7 @@ async def model_main(
             in_transformer.handler(key, value)
 
         while True:
-            
-            
-
             if time.time() - last_stat_report > 1:
-
                 stat_string = ""
                 if len(stats_inference) > 0:
                     stat = sum(stats_inference) / len(stats_inference)
@@ -329,12 +332,14 @@ async def model_main(
                         logger.warning("No handler time available for stats")
                         stats_output_transform.append(0)
                     time_start = time.time()
-                    
+
                     if os.environ["PUBLISH"] == "True":
                         logger.debug("Publishing data")
                         out_interface.put_many(out_transformer.latest_transformed)
                     else:
-                        logger.debug("Not publishing data, to publish use -p or --publish")
+                        logger.debug(
+                            "Not publishing data, to publish use -p or --publish"
+                        )
                     out_transformer.updated = False
 
                     time_end = time.time()
@@ -345,9 +350,11 @@ async def model_main(
                 if args.one_shot:
                     logger.info("One shot mode, exiting")
                     break
-                
-            await asyncio.sleep(0.0001) # makes the loop less cpu intensive 100% - > 15% cpu usage , more refactoring needed to make it more efficient
-            
+
+            await asyncio.sleep(
+                0.0001
+            )  # makes the loop less cpu intensive 100% - > 15% cpu usage , more refactoring needed to make it more efficient
+
     except Exception as e:
         logger.error(f"Error monitoring: {traceback.format_exc()}")
         raise e
@@ -357,4 +364,3 @@ async def model_main(
 
         logger.info("Exiting")
         sys.exit(0)
-    

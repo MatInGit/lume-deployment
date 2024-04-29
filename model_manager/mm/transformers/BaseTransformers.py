@@ -89,6 +89,7 @@ class SimpleTransformer:
 
 class CAImageTransfomer:
     """Input only image transformation"""
+
     def __init__(self, config) -> None:
         self.img = config["variables"]
         self.img_list = list(self.img.keys())
@@ -110,9 +111,7 @@ class CAImageTransfomer:
         self.updated = False
 
     def handler(self, variable_name: str, value: dict):
-        logger.debug(
-            f"CAImageTransfomer handler for {variable_name}"
-        )
+        logger.debug(f"CAImageTransfomer handler for {variable_name}")
         # logger.debug(f"Value: {value}")
         try:
             self.latest_input[variable_name] = value["value"]
@@ -144,7 +143,7 @@ class CAImageTransfomer:
         self.updated = True
 
 
-class PassThroughTransformer():
+class PassThroughTransformer:
     def __init__(self, config):
         # config is a dictionary of output:intput pairs
         pv_mapping = config["variables"]
@@ -152,16 +151,15 @@ class PassThroughTransformer():
         self.latest_transformed = {}
         self.updated = False
         self.input_list = list(pv_mapping.values())
-        
-        
+
         for key, value in pv_mapping.items():
             self.latest_input[value] = None
             self.latest_transformed[key] = None
         self.pv_mapping = pv_mapping
-        
+
         self.handler_time = 0
-        
-    def handler(self, pv_name, value):    
+
+    def handler(self, pv_name, value):
         time_start = time.time()
         logger.debug(f"PassThroughTransformer handler for {pv_name}")
         self.latest_input[pv_name] = value["value"]
@@ -170,12 +168,12 @@ class PassThroughTransformer():
         self.updated = True
         time_end = time.time()
         self.handler_time = time_end - time_start
-        
+
     def transform(self):
         logger.debug("Transforming")
         for key, value in self.pv_mapping.items():
             self.latest_transformed[key] = self.latest_input[value]
-            
+
             # compare types and shapes
             if type(self.latest_input[value]) != type(self.latest_transformed[key]):
                 logger.error(f"Type mismatch between input and output for {key}")
@@ -183,10 +181,8 @@ class PassThroughTransformer():
                 if self.latest_input[value].shape != self.latest_transformed[key].shape:
                     logger.error(f"Shape mismatch between input and output for {key}")
         self.updated = True
-        
+
         # for key, value in self.latest_input.items():
         #     logger.debug(f"{key}: {value.shape}")
         # for key, value in self.latest_transformed.items():
         #     logger.debug(f"{key}: {value.shape}")
-            
-    

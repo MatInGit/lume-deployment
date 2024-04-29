@@ -17,21 +17,23 @@ def main():
     ) = setup()
     print("resetting logging...")
     reset_logging()
-    
-    if os.environ.get("DEBUG") ==  "True":
-        logger = make_logger("model_manager", level= logging.DEBUG)
+
+    if os.environ.get("DEBUG") == "True":
+        logger = make_logger("model_manager", level=logging.DEBUG)
     else:
         logger = make_logger("model_manager")
 
-    asyncio.run(model_main(
-        in_interface,
-        out_interface,
-        in_transformer,
-        out_transformer,
-        model,
-        getter,
-        args,
-    ))
+    asyncio.run(
+        model_main(
+            in_interface,
+            out_interface,
+            in_transformer,
+            out_transformer,
+            model,
+            getter,
+            args,
+        )
+    )
 
 
 if __name__ == "__main__":

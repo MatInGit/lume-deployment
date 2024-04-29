@@ -9,9 +9,6 @@ logger = get_logger()
 
 _dir = os.path.dirname(os.path.abspath(__file__))
 os.environ["K2EG_PYTHON_CONFIGURATION_PATH_FOLDER"] = _dir
-# executor = ThreadPoolExecutor(20)
-
-# print(f"K2EG_PYTHON_CONFIGURATION_PATH_FOLDER: {os.environ['K2EG_PYTHON_CONFIGURATION_PATH_FOLDER']})")
 
 
 class K2EGInterface(BaseInterface):
@@ -43,7 +40,7 @@ class K2EGInterface(BaseInterface):
 
     def monitor(self, handler, **kwargs):
         logger.debug(f"Monitoring {self.pv_url_list}")
-        
+
         try:
             self.client.monitor_many(self.pv_url_list, handler, timeout=1000)
         except Exception as e:

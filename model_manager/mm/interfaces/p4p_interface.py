@@ -51,7 +51,7 @@ class SimplePVAInterface(BaseInterface):
         # unwrap p4p.Value into name, value
         def wrapped_handler(value):
             # logger.debug(f"SimplePVAInterface handler for {name, value['value']}")
-            
+
             handler(name, {"value": value["value"]})
 
         return wrapped_handler
@@ -74,7 +74,7 @@ class SimplePVAInterface(BaseInterface):
         return name, value
 
     def put(self, name, value, **kwargs):
-        return self.ctxt.put(name, value) # not tested
+        return self.ctxt.put(name, value)  # not tested
 
     def put_many(self, data, **kwargs):
         for key, value in data.items():
@@ -96,18 +96,18 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
     def __init__(self, config):
         super().__init__(config)
         self.shared_pvs = {}
-        
+
         if "init" in config.config:
             # print(f"config.config['init']: {config.config['init']}")
             if config.config["init"] == False:
                 self.init_pvs = False
             else:
                 self.init_pvs = True
-        else :
+        else:
             self.init_pvs = True
-            
+
         # print(f"self.init_pvs: {self.init_pvs}")
-        
+
         for pv in self.pv_list:
             # self.shared_pvs.append(pv)
             # need to check if key exists config.config["variables"]["pv"]["type"]
@@ -122,11 +122,11 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
                     intial_value = np.ones((x_size, y_size))
                     pv_type_nt = NTNDArray()
                     pv_type_init = intial_value
-                    
+
             else:
                 pv_type_nt = NTScalar("d")
                 pv_type_init = 0
-            
+
             pv_item = {}
             if self.init_pvs:
                 pv_item[pv] = SharedPV(nt=pv_type_nt, initial=pv_type_init)
@@ -144,21 +144,23 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
             self.shared_pvs[pv] = pv_item[pv]
             # this feels ugly
 
-        self.server = Server(providers=[{name: pv} for name, pv in self.shared_pvs.items()])
+        self.server = Server(
+            providers=[{name: pv} for name, pv in self.shared_pvs.items()]
+        )
 
     def close(self):
         logger.debug("Closing SimplePVAInterfaceServer")
         self.server.stop()
         super().close()
-    
+
     def put(self, name, value, **kwargs):
         # logger.debug(f"Putting {name} with value {value}")
         self.shared_pvs[name].post(value, timestamp=time.time())
-    
+
     def get(self, name, **kwargs):
         # print(f"Getting {name}")
         value_raw = self.shared_pvs[name].current().raw
-        
+
         # print(f"value_raw_type: {type(value_raw.value)}")
         if type(value_raw.value) == np.ndarray:
             value = value_raw.value
@@ -167,11 +169,10 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
             value = value.reshape((x_size, y_size))
         else:
             value = value_raw.value
-            
+
         # print(f"value: {value}")
-        return name, {"value": value }        
+        return name, {"value": value}
 
     def put_many(self, data, **kwargs):
         for key, value in data.items():
             self.put(key, value)
-            
