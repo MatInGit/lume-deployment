@@ -186,10 +186,10 @@ def setup():
     logger.debug(f"Out_interfaces: {config.output_data_to.put_method}")
 
     in_interface = registered_interfaces[config.input_data.get_method](
-        config.input_data
+        config.input_data.config
     )
     out_interface = registered_interfaces[config.output_data_to.put_method](
-        config.output_data_to
+        config.output_data_to.config
     )
     in_transformer = registered_transformers[config.input_data_to_model.type](
         config.input_data_to_model.config
@@ -209,6 +209,7 @@ def setup():
         model_info,
         model_getter,
         args,
+        config.deployment.type
     )
 
 

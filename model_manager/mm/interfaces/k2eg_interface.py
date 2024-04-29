@@ -14,10 +14,10 @@ os.environ["K2EG_PYTHON_CONFIGURATION_PATH_FOLDER"] = _dir
 class K2EGInterface(BaseInterface):
     def __init__(self, config):
         self.client = k2eg.dml(
-            "env", "app-test-3", group_name=f"mlflow-test-{uuid.uuid4()}"
+            "env", "app-test-4", group_name=f"model-deployment-{str(uuid.uuid4())[0:15]}"
         )
 
-        pv_dict = config.config["variables"]
+        pv_dict = config["variables"]
         pv_url_list = []
         for pv in pv_dict:
             pv_url_list.append(pv_dict[pv]["proto"] + "://" + pv_dict[pv]["name"])

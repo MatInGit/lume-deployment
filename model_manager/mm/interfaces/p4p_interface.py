@@ -21,8 +21,8 @@ class SimplePVAInterface(BaseInterface):
             logger.debug(
                 f"EPICS_PVA_NAME_SERVERS: {os.environ['EPICS_PVA_NAME_SERVERS']}"
             )
-        elif "EPICS_PVA_NAME_SERVERS" in config.config:
-            os.environ["EPICS_PVA_NAME_SERVERS"] = config.config[
+        elif "EPICS_PVA_NAME_SERVERS" in config:
+            os.environ["EPICS_PVA_NAME_SERVERS"] = config[
                 "EPICS_PVA_NAME_SERVERS"
             ]
             logger.debug(
@@ -34,7 +34,7 @@ class SimplePVAInterface(BaseInterface):
             )
             os.environ["EPICS_PVA_NAME_SERVERS"] = "localhost:5075"
 
-        pv_dict = config.config["variables"]
+        pv_dict = config["variables"]
         pv_list = []
         for pv in pv_dict:
             try:
@@ -97,9 +97,9 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         super().__init__(config)
         self.shared_pvs = {}
 
-        if "init" in config.config:
-            # print(f"config.config['init']: {config.config['init']}")
-            if config.config["init"] == False:
+        if "init" in config:
+            # print(f"config['init']: {config['init']}")
+            if config["init"] == False:
                 self.init_pvs = False
             else:
                 self.init_pvs = True
@@ -110,14 +110,14 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
 
         for pv in self.pv_list:
             # self.shared_pvs.append(pv)
-            # need to check if key exists config.config["variables"]["pv"]["type"]
-            # print(f"config.config['variables'][pv]: {config.config['variables'][pv]}")
-            if "type" in config.config["variables"][pv]:
-                # print(f"config.config['variables'][pv]['type']: {config.config['variables'][pv]['type']}")
-                pv_type = config.config["variables"][pv]["type"]
+            # need to check if key exists config["variables"]["pv"]["type"]
+            # print(f"config['variables'][pv]: {config['variables'][pv]}")
+            if "type" in config["variables"][pv]:
+                # print(f"config['variables'][pv]['type']: {config['variables'][pv]['type']}")
+                pv_type = config["variables"][pv]["type"]
                 if pv_type == "image":
-                    x_size = config.config["variables"][pv]["image_size"]["x"]
-                    y_size = config.config["variables"][pv]["image_size"]["y"]
+                    x_size = config["variables"][pv]["image_size"]["x"]
+                    y_size = config["variables"][pv]["image_size"]["y"]
                     # intialize with zeros
                     intial_value = np.ones((x_size, y_size))
                     pv_type_nt = NTNDArray()

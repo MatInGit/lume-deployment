@@ -16,10 +16,6 @@ class BaseDataInterface(ABC):
     def save(self, data, **kwargs):
         pass
 
-    @abstractmethod
-    def get_one(self, name, **kwargs):
-        pass
-
 
 class BaseInterface(ABC):
     @abstractmethod

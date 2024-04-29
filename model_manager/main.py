@@ -14,7 +14,9 @@ def main():
         model,
         getter,
         args,
+        dep_type,
     ) = setup()
+    logger.info(f"Model deployed with type: {dep_type}")
     print("resetting logging...")
     reset_logging()
 
@@ -22,19 +24,21 @@ def main():
         logger = make_logger("model_manager", level=logging.DEBUG)
     else:
         logger = make_logger("model_manager")
-
-    asyncio.run(
-        model_main(
-            in_interface,
-            out_interface,
-            in_transformer,
-            out_transformer,
-            model,
-            getter,
-            args,
+        
+    if dep_type == "continuous":    
+        asyncio.run(
+            model_main(
+                in_interface,
+                out_interface,
+                in_transformer,
+                out_transformer,
+                model,
+                getter,
+                args,
+            )
         )
-    )
-
+    elif dep_type == "batch":
+        raise NotImplementedError("Batch mode not implemented")
 
 if __name__ == "__main__":
     main()
