@@ -603,16 +603,17 @@ You can append `&` to the end of the command to run it in the background.
 
 ### Known issues
 
-- [ ] `p4p_server` cannot be an input to the transformation layer. 
+- [ ] ~~`p4p_server` cannot be an input to the transformation layer.~~ Fix implemented needs more testing to tick off.
 - [ ] `k2eg` will not work correctly if the PVs or CAs are not available.
 
 ### Future work
 - [ ] Batch processing for models that require it.
+- [ ] Local model getter. 
 - [ ] Visualisation of the data flow and data webpages.
 - [ ] Slack bot for deployment status and workflow building help. As well as help with spinning up and terminating deployments.
 - [ ] Better abstract classes for the system, transformation and model layers.
 - [ ] Compound interfaces for the system layer.
-- [ ] Local model getter. 
+
 
 
 
