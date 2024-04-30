@@ -1,6 +1,6 @@
 import k2eg, os, uuid
 from .BaseInterface import BaseInterface
-from mm.logging_utils import get_logger
+from src.logging_utils import get_logger
 from concurrent.futures import ThreadPoolExecutor
 
 executor = ThreadPoolExecutor(20)

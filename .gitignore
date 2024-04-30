@@ -14,7 +14,6 @@ torch_model
 model1.txt
 metric2.png
 local_test
-.gitignore
 .coverage
 image.png
 output.log

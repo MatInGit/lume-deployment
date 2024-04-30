@@ -1,6 +1,6 @@
 # defines a compound transformer that can be used add multiple transformers together
-from mm.logging_utils.make_logger import get_logger
-from mm.transformers import registered_transformers
+from src.logging_utils.make_logger import get_logger
+from src.transformers import registered_transformers
 import sympy as sp
 import time
 

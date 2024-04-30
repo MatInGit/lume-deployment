@@ -6,7 +6,7 @@ from p4p.nt import NTScalar, NTNDArray
 from p4p.wrapper import Value,Type
 
 from .BaseInterface import BaseInterface
-from mm.logging_utils import get_logger
+from src.logging_utils import get_logger
 import os, time
 import numpy as np
 

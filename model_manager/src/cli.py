@@ -1,10 +1,10 @@
 import argparse
 import os, sys, json, time, traceback
-from mm.config import ConfigParser
-from mm.logging_utils import get_logger, make_logger, reset_logging
-from mm.model_utils import registered_model_getters
-from mm.interfaces import registered_interfaces
-from mm.transformers import registered_transformers
+from src.config import ConfigParser
+from src.logging_utils import get_logger, make_logger, reset_logging
+from src.model_utils import registered_model_getters
+from src.interfaces import registered_interfaces
+from src.transformers import registered_transformers
 import torch
 import time, logging, asyncio
 

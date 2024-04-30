@@ -1,5 +1,5 @@
 import pytest
-from mm.config.parser import ConfigParser
+from src.config.parser import ConfigParser
 
 
 def test_parse():

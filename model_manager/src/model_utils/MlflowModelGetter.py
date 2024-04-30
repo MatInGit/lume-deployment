@@ -5,9 +5,9 @@ import pandas as pd
 import yaml
 import sympy as sp
 from lume_model.models import TorchModule, TorchModel
-from mm.model_utils import ModelGetterBase
+from src.model_utils import ModelGetterBase
 
-from mm.logging_utils import get_logger
+from src.logging_utils import get_logger
 
 logger = get_logger()
 

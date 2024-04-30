@@ -1,4 +1,4 @@
-from mm.logging_utils.make_logger import get_logger
+from src.logging_utils.make_logger import get_logger
 import sympy as sp
 import numpy as np
 import time

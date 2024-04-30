@@ -1,8 +1,8 @@
 # not implemented yet warning
 from warnings import warn
 import colorlog
-from mm.model_utils import ModelGetterBase
-from mm.logging_utils import get_logger
+from src.model_utils import ModelGetterBase
+from src.logging_utils import get_logger
 
 logger = get_logger()
 

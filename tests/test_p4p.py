@@ -1,5 +1,5 @@
-from mm.interfaces import SimplePVAInterface
-from mm.logging_utils.make_logger import get_logger, make_logger
+from src.interfaces import SimplePVAInterface
+from src.logging_utils.make_logger import get_logger, make_logger
 import numpy as np
 import subprocess
 import pytest

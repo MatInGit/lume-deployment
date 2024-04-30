@@ -1,10 +1,10 @@
-from mm.transformers.BaseTransformers import (
+from src.transformers.BaseTransformers import (
     SimpleTransformer,
     CAImageTransfomer,
     PassThroughTransformer,
 )
-from mm.transformers.CompoundTransformer import CompoundTransformer
-from mm.logging_utils.make_logger import get_logger
+from src.transformers.CompoundTransformer import CompoundTransformer
+from src.logging_utils.make_logger import get_logger
 import numpy as np
 import math
 

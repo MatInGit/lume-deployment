@@ -1,6 +1,6 @@
-from mm.interfaces import SimlePVAInterfaceServer
-from mm.transformers import PassThroughTransformer, CompoundTransformer
-from mm.logging_utils.make_logger import get_logger, make_logger
+from src.interfaces import SimlePVAInterfaceServer
+from src.transformers import PassThroughTransformer, CompoundTransformer
+from src.logging_utils.make_logger import get_logger, make_logger
 import numpy as np
 
 logger = make_logger("model_manager")
