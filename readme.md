@@ -498,6 +498,110 @@ output_data_to:
         name: LUME:MLFLOW:EXAMPLE:COMBINED
 ```
 This example is a working deployment for [lcls-cu-in-nn](https://github.com/t-bz/lcls_cu_injector_nn_model) model. The output channels are live and can be inspected using `pvget` or `pvmonitor` commands.
+
+### Example 3
+This is based on the image example 
+```yaml
+deployment:
+  type: "continuous"
+  # other configurations
+input_data:
+  get_method: "k2eg"
+  config:
+    variables:
+      CAMR:IN20:186:IMAGE:
+        proto: ca
+        name: CAMR:IN20:186:IMAGE
+      CAMR:IN20:186:N_OF_ROW:
+        proto: ca
+        name: CAMR:IN20:186:N_OF_ROW
+      CAMR:IN20:186:N_OF_COL:
+        proto: ca
+        name: CAMR:IN20:186:N_OF_COL
+      
+input_data_to_model:
+      type: "CAImageTransfomer"
+      config:
+        variables:
+          image:
+            img_ch: CAMR:IN20:186:IMAGE
+            img_x_ch: CAMR:IN20:186:N_OF_COL
+            img_y_ch: CAMR:IN20:186:N_OF_ROW
+outputs_model:
+  config:
+    variables:
+      y_max:
+        type: "scalar"
+      y_min:
+        type: "scalar"
+      y_mean:
+        type: "scalar"
+      y_std:
+        type: "scalar"
+      y_img:
+        type: "image"
+output_model_to_data:
+  type: "CompoundTransformer"
+  config:
+    transformers:
+      t_1:
+        type: "SimpleTransformer"
+        config:
+          symbols:
+            - "y_max"
+            - "y_min"
+            - "y_mean"
+            - "y_std"
+          variables:
+            LUME:MLFLOW:TEST_Y_MAX:
+              formula: "y_max"
+            LUME:MLFLOW:TEST_Y_MIN:
+              formula: "y_min"
+            LUME:MLFLOW:TEST_Y_MEAN:
+              formula: "y_mean"
+            LUME:MLFLOW:TEST_Y_STD:
+              formula: "y_std"
+      t_2:
+        type: "PassThroughTransformer"
+        config:
+          variables:
+            LUME:MLFLOW:TEST_IMAGE: "y_img"
+
+output_data_to:
+  put_method: "p4p_server"
+  config:
+    variables:
+      LUME:MLFLOW:TEST_Y_MAX:
+        proto: pva
+        name: LUME:MLFLOW:TEST_Y_MAX
+      LUME:MLFLOW:TEST_Y_MIN:
+        proto: pva
+        name: LUME:MLFLOW:TEST_Y_MIN
+      LUME:MLFLOW:TEST_Y_MEAN:
+        proto: pva
+        name: LUME:MLFLOW:TEST_Y_MEAN
+      LUME:MLFLOW:TEST_Y_STD: # implicitly type: "scalar"
+        proto: pva
+        name: LUME:MLFLOW:TEST_Y_STD
+      LUME:MLFLOW:TEST_IMAGE:
+        type: "image"
+        image_size:
+          x: 640
+          y: 480
+        proto: pva
+        name: LUME:MLFLOW:TEST_IMAGE
+```
+
+Then running from command line rather than deplyment:
+```bash
+model_manager -n "image_model" -v "16" -e cred.json -c ./examples/image/pv_mapping.yaml -p"
+```
+![gif example of the terminal result](/images/terminal_example.gif)
+
+and viewing the result in pydm using (image.ui):
+
+![model output](/images/result.gif)
+
 ## Installation
 
 Python `3.11.x` recommended.
@@ -605,6 +709,7 @@ You can append `&` to the end of the command to run it in the background.
 
 - [ ] ~~`p4p_server` cannot be an input to the transformation layer.~~ Fix implemented needs more testing to tick off.
 - [ ] `k2eg` will not work correctly if the PVs or CAs are not available.
+- [ ] `p4p_server` does not publish out of s3df, so deployments using it have to be local or daemon ones. Such as the image example untill this is addressed.
 
 ### Future work
 - [ ] Batch processing for models that require it.
