@@ -12,7 +12,3 @@ psutil==5.9.8
 colorlog==6.8.2
 p4p
 pyepics
-
-
-
-
