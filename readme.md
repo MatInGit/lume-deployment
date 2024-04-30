@@ -608,7 +608,7 @@ You can append `&` to the end of the command to run it in the background.
 
 ### Future work
 - [ ] Batch processing for models that require it.
-- [ ] Local model getter. 
+- [ ] Local model getter for easier testing, specific deployment.
 - [ ] Visualisation of the data flow and data webpages.
 - [ ] Slack bot for deployment status and workflow building help. As well as help with spinning up and terminating deployments.
 - [ ] Better abstract classes for the system, transformation and model layers.

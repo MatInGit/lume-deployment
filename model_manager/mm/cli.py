@@ -161,7 +161,7 @@ def setup():
 
     # get model and config
 
-    model_info = model_getter.get_model()
+    model = model_getter.get_model()
 
     if not args.config:
         logger.info(
@@ -206,7 +206,7 @@ def setup():
         out_interface,
         in_transformer,
         out_transformer,
-        model_info,
+        model,
         model_getter,
         args,
         config.deployment.type
