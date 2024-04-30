@@ -15,7 +15,8 @@ process = None
 @pytest.fixture(scope="session", autouse=True)
 def setup():
     global process
-    process = subprocess.Popen(["python", "mailbox.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # process = subprocess.Popen(["python", "mailbox.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(["python", "./tests/mailbox.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     yield
     process.kill()
     
@@ -66,7 +67,7 @@ def test_SimplePVAInterface_put_and_get_image():
     name, image_get = p4p.get("test:image:AA")
     shape = image_get["value"].shape
     print(shape)
-    assert image_get["value"][0][0] == 1 # should be intialized to 1
+    assert image_get["value"][0][0] == 1 # should be intialized to 1 by mailbox.py
     
     arry = np.random.rand(shape[0], shape[1])
     p4p.put("test:image:AA", arry)

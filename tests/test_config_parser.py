@@ -1,8 +1,8 @@
-# import pytest
-# from mm.config.parser import ConfigParser
+import pytest
+from mm.config.parser import ConfigParser
 
 
-# def test_parse():
-#     parser = ConfigParser("pv_mapping.yaml")
-#     config = parser.parse()
-#     assert config is not None
+def test_parse():
+    parser = ConfigParser("pv_mapping.yaml")
+    config = parser.parse()
+    assert config is not None
