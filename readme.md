@@ -500,6 +500,8 @@ output_data_to:
 This example is a working deployment for [lcls-cu-in-nn](https://github.com/t-bz/lcls_cu_injector_nn_model) model. The output channels are live and can be inspected using `pvget` or `pvmonitor` commands.
 ## Installation
 
+Python `3.11.x` recommended.
+
 ```bash
 cd model_manager
 pip install .
@@ -511,7 +513,15 @@ cd model_manager
 pip install -e .
 ```
 
-Conda env coming soon
+Or conda environment:
+
+```bash
+conda env create -f mlflow_env.yml
+conda activate mlflow
+ 
+cd model_manager
+pip install . # or pip install -e .
+```
 
 ## Usage
 
