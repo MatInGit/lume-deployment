@@ -3,6 +3,7 @@ from p4p.server import Server
 from p4p.server.raw import ServOpWrap
 from p4p.server.thread import SharedPV
 from p4p.nt import NTScalar, NTNDArray
+from p4p.wrapper import Value,Type
 
 from .BaseInterface import BaseInterface
 from mm.logging_utils import get_logger
@@ -69,12 +70,23 @@ class SimplePVAInterface(BaseInterface):
                 raise e
 
     def get(self, name, **kwargs):
-        # print(f"Getting {name}")
-        value = self.ctxt.get(name)
+        value = self.ctxt.get(name)        
+        if type(value["value"]) == np.ndarray:
+            y_size = value["dimension"][0]["size"]
+            x_size = value["dimension"][1]["size"]
+            value = value["value"].reshape((x_size, y_size))
+        else:
+            value = value["value"]
+            
+        value  = {"value": value}
         return name, value
 
     def put(self, name, value, **kwargs):
-        return self.ctxt.put(name, value)  # not tested
+        if type(value) == np.ndarray:
+            value = NTNDArray().wrap(value)
+        else:
+            value = value
+        return self.ctxt.put(name, value)
 
     def put_many(self, data, **kwargs):
         for key, value in data.items():

@@ -4,8 +4,6 @@ import numpy as np
 
 logger = make_logger("model_manager")
 
-
-
 def test_SimplePVAInterfaceServer_init():
     config = {
         "variables": {
