@@ -1,6 +1,6 @@
 def main():
-    from mm.cli import model_main, setup
-    from mm.logging_utils import make_logger, reset_logging
+    from src.cli import model_main, setup
+    from src.logging_utils import make_logger, reset_logging
     import os, logging, asyncio
 
     logger = make_logger("model_manager")
