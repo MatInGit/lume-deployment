@@ -1,4 +1,5 @@
 from mm.interfaces import SimlePVAInterfaceServer
+from mm.transformers import PassThroughTransformer, CompoundTransformer
 from mm.logging_utils.make_logger import get_logger, make_logger
 import numpy as np
 
@@ -59,4 +60,37 @@ def test_SimplePVAInterfaceServer_put_and_get_image():
     assert name == "test"
     p4p.close()
     
+
+
+# more of an integration test than a unit test
+def test_p4p_as_image_input():
+    config = {
+        "variables": {
+            "test": {
+                "name": "test",
+                "proto": "pva",
+                "type": "image",
+                "image_size": {"x": 10, "y": 10}
+            }
+        }
+    }
+    config_pt = {
+    "variables": {
+        "IMG1": "test",
+        }
+    }
+    config_compound = {
+        "transformers": {
+            "transformer_1": {"type": "PassThroughTransformer", "config": config_pt},
+        }
+    }
+        
     
+    p4p = SimlePVAInterfaceServer(config)
+    pt = CompoundTransformer(config_compound)
+    
+    p4p.put("test", np.ones((10, 10)))
+    name, value_dict = p4p.get("test")
+    pt.handler("test", value_dict)
+    assert pt.updated == True
+    assert pt.latest_transformed["IMG1"].shape == (10, 10)

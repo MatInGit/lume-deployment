@@ -501,16 +501,12 @@ This example is a working deployment for [lcls-cu-in-nn](https://github.com/t-bz
 ## Installation
 
 ```bash
-pip install -r requirements.txt
-
 cd model_manager
 pip install .
 ```
-for development
+for development:
 
 ```bash
-pip install -r requirements.txt
-
 cd model_manager
 pip install -e .
 ```
