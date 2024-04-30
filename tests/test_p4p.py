@@ -58,7 +58,6 @@ def test_SimplePVAInterface_put_and_get_image():
                 "name": "test:image:AA",
                 "proto": "pva",
                 "type": "image",
-                "image_size": {"x": 10, "y": 10} # this doesnt really do anything yet
             }
         }
     }
