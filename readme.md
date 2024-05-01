@@ -607,12 +607,14 @@ and viewing the result in pydm using (image.ui):
 Python `3.11.x` recommended.
 
 ```bash
+pip install -r reqirements.txt
 cd model_manager
 pip install .
 ```
 for development:
 
 ```bash
+pip install -r reqirements.txt
 cd model_manager
 pip install -e .
 ```
