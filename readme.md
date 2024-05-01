@@ -119,7 +119,7 @@ To summarise the data flow is as follows:
 ```
 System level -> Transformation level -> Model level -> Transformation level -> System level
 ```
-All of this happens in the `main()` function in `model_manager/mm/cli.py` under `setup()` and `model_main()` methods.
+All of this happens in the `main()` function in `model_manager/src/cli.py` under `setup()` and `model_main()` methods.
 
 ## Available modules
 
