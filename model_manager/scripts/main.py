@@ -24,8 +24,8 @@ def main():
         logger = make_logger("model_manager", level=logging.DEBUG)
     else:
         logger = make_logger("model_manager")
-        
-    if dep_type == "continuous":    
+
+    if dep_type == "continuous":
         asyncio.run(
             model_main(
                 in_interface,
@@ -39,6 +39,7 @@ def main():
         )
     elif dep_type == "batch":
         raise NotImplementedError("Batch mode not implemented")
+
 
 if __name__ == "__main__":
     main()

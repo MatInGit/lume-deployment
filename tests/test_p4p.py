@@ -11,35 +11,31 @@ logger = make_logger("model_manager")
 
 process = None
 
-# run before tests 
+
+# run before tests
 @pytest.fixture(scope="session", autouse=True)
 def setup():
     global process
     # process = subprocess.Popen(["python", "mailbox.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process = subprocess.Popen(["python", "./tests/mailbox.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(
+        ["python", "./tests/mailbox.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
     yield
     process.kill()
-    
+
 
 def test_SimplePVAInterface_init():
-    
-
     config = {
         "variables": {
-            "test:float:AA": {
-                "name": "test:float:AA",
-                "proto": "pva"},
-            "test:float:BB": {
-                "name": "test:float:BB",
-                "proto": "pva"
-            }
+            "test:float:AA": {"name": "test:float:AA", "proto": "pva"},
+            "test:float:BB": {"name": "test:float:BB", "proto": "pva"},
         }
     }
     logger.info("Testing SimplePVAInterface init")
     p4p = SimplePVAInterface(config)
     nameA, valA = p4p.get("test:float:AA")
     assert valA["value"] == 0
-    
+
     p4p.put("test:float:AA", 1)
     p4p.put("test:float:BB", 2)
     nameA, valA = p4p.get("test:float:AA")
@@ -51,8 +47,8 @@ def test_SimplePVAInterface_init():
     assert nameB == "test:float:BB"
     p4p.close()
 
-def test_SimplePVAInterface_put_and_get_image():
 
+def test_SimplePVAInterface_put_and_get_image():
     config = {
         "variables": {
             "test:image:AA": {
@@ -63,18 +59,16 @@ def test_SimplePVAInterface_put_and_get_image():
         }
     }
     p4p = SimplePVAInterface(config)
-    
+
     name, image_get = p4p.get("test:image:AA")
     shape = image_get["value"].shape
     print(shape)
-    assert image_get["value"][0][0] == 1 # should be intialized to 1 by mailbox.py
-    
+    assert image_get["value"][0][0] == 1  # should be intialized to 1 by mailbox.py
+
     arry = np.random.rand(shape[0], shape[1])
     p4p.put("test:image:AA", arry)
     name, image_get = p4p.get("test:image:AA")
     print(type(image_get["value"]))
     assert image_get["value"][0][0] == arry[0][0]
-    
+
     p4p.close()
-
-

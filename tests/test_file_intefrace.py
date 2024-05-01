@@ -6,7 +6,7 @@
 #         "mode": "batch"
 #     }
 #     h5 = h5dfInterface(config)
-    
+
 # def test_h5dfInterface_load():
 #     config = {
 #         "path": "tests/test_data/test.h5",
@@ -18,4 +18,3 @@
 #     for key, value in data:
 #         assert key is not None
 #         assert value is not None
-    

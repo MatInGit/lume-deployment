@@ -7,14 +7,14 @@ class ModelGetterBase(ABC):
     def get_model(self):
         pass
 
-    @abstractmethod
-    def get_config(self):
-        pass
+    # @abstractmethod
+    # def get_config(self):
+    #     pass
 
     @abstractmethod
     def get_requirements(self):
         pass
 
-    @abstractmethod
-    def get_tags(self):
-        pass
+    # @abstractmethod
+    # def get_tags(self):
+    #     pass

@@ -21,13 +21,11 @@ def initailize_config(config_path):
         raise e
 
 
-def get_model_getter(model_name, model_version, model_getter):
+def get_model_getter(model_getter, config=None):
     """Get the model."""
-    logger.debug(
-        f"Getting model: {model_name} version: {model_version} using {model_getter}"
-    )
+    logger.debug(f"Getting model: {model_getter} with config: {config}")
     try:
-        model_getter = registered_model_getters[model_getter](model_name, model_version)
+        model_getter = registered_model_getters[model_getter](config)
         return model_getter
     except Exception as e:
         logger.error(f"Error getting model getter: {e}")
@@ -53,6 +51,14 @@ def setup():
     parser = argparse.ArgumentParser(description="Model Manager CLI")
 
     parser.add_argument(
+        "-l", # expects 3 arguments
+        "--local",
+        help="Local mode, run without mlflow",
+        required=False,
+        nargs=2,
+    )
+
+    parser.add_argument(
         "-d",
         "--debug",
         help="Debug mode",
@@ -74,14 +80,13 @@ def setup():
     parser.add_argument(
         "-n",
         "--model_name",
+        required=False,
         help="Name of the model to be loaded from mlflow",
-        required=True,
     )
     parser.add_argument(
         "-v",
         "--model_version",
         help="Version of the model to be loaded from mlflow",
-        required=True,
     )
     parser.add_argument(
         "-r",
@@ -145,10 +150,24 @@ def setup():
     if args.env:
         env_config(args.env)
 
-    # model getter
-    model_getter = get_model_getter(
-        args.model_name, args.model_version, args.model_getter
-    )
+    if args.local is not None:
+        # model getter
+        model_getter = get_model_getter(
+            "local",
+            {
+                "model_path": args.local[0],
+                "model_factory_class": args.local[1],
+            },
+        )
+    else:
+        # model getter
+        model_getter = get_model_getter(
+            "mlflow",
+            {
+                "model_name": args.model_name,
+                "model_version": args.model_version,
+            },
+        )
 
     # requirements install and quit
     if args.reqirements:
@@ -209,7 +228,7 @@ def setup():
         model,
         model_getter,
         args,
-        config.deployment.type
+        config.deployment.type,
     )
 
 

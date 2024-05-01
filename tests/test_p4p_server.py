@@ -5,28 +5,16 @@ import numpy as np
 
 logger = make_logger("model_manager")
 
+
 def test_SimplePVAInterfaceServer_init():
-    config = {
-        "variables": {
-            "test": {
-                "name": "test",
-                "proto": "pva"
-            }
-        }
-    }
+    config = {"variables": {"test": {"name": "test", "proto": "pva"}}}
     logger.info("Testing SimplePVAInterfaceServer init")
     p4p = SimlePVAInterfaceServer(config)
     p4p.close()
-    
+
+
 def test_SimplePVAInterfaceServer_put_and_get():
-    config = {
-        "variables": {
-            "test": {
-                "name": "test",
-                "proto": "pva"
-            }
-        }
-    }
+    config = {"variables": {"test": {"name": "test", "proto": "pva"}}}
     logger.info("Testing SimplePVAInterfaceServer put")
     p4p = SimlePVAInterfaceServer(config)
     p4p.put("test", 1)
@@ -35,7 +23,8 @@ def test_SimplePVAInterfaceServer_put_and_get():
     assert value_dict["value"] == 1
     assert name == "test"
     p4p.close()
-    
+
+
 def test_SimplePVAInterfaceServer_put_and_get_image():
     config = {
         "variables": {
@@ -43,14 +32,14 @@ def test_SimplePVAInterfaceServer_put_and_get_image():
                 "name": "test",
                 "proto": "pva",
                 "type": "image",
-                "image_size": {"x": 10, "y": 10}
+                "image_size": {"x": 10, "y": 10},
             }
         }
     }
     p4p = SimlePVAInterfaceServer(config)
-    
+
     arry = np.ones((10, 10))
-    
+
     p4p.put("test", arry)
     name, value_dict = p4p.get("test")
     print(name, value_dict)
@@ -59,7 +48,6 @@ def test_SimplePVAInterfaceServer_put_and_get_image():
     assert value_dict["value"].shape == arry.shape
     assert name == "test"
     p4p.close()
-    
 
 
 # more of an integration test than a unit test
@@ -70,13 +58,13 @@ def test_p4p_as_image_input():
                 "name": "test",
                 "proto": "pva",
                 "type": "image",
-                "image_size": {"x": 10, "y": 10}
+                "image_size": {"x": 10, "y": 10},
             }
         }
     }
     config_pt = {
-    "variables": {
-        "IMG1": "test",
+        "variables": {
+            "IMG1": "test",
         }
     }
     config_compound = {
@@ -84,11 +72,10 @@ def test_p4p_as_image_input():
             "transformer_1": {"type": "PassThroughTransformer", "config": config_pt},
         }
     }
-        
-    
+
     p4p = SimlePVAInterfaceServer(config)
     pt = CompoundTransformer(config_compound)
-    
+
     p4p.put("test", np.ones((10, 10)))
     name, value_dict = p4p.get("test")
     pt.handler("test", value_dict)
