@@ -1,13 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-visualize = True
+# visualize = True
 
-if visualize:
-    plt.ion()
-    figure = plt.figure()
-    axes = figure.add_subplot(111)
-    axes.set_title("Example Image Model")
+# if visualize:
+#     plt.ion()
+#     figure = plt.figure()
+#     axes = figure.add_subplot(111)
+#     axes.set_title("Example Image Model")
 
 class ExampleImageModel:
     def evaluate(self, input_dict):
@@ -31,14 +31,14 @@ class ExampleImageModel:
         # anythin below threshhold is set to min_val
         output_dict["y_img"][output_dict["y_img"] < threshhold] = min_val
         
-        if visualize:
-            figure.clear()
-            axes = figure.add_subplot(111)
-            axes.set_title("Example Image Model")
-            axes.imshow(input_dict["image"], origin="lower")
-            # print(input_dict["image"].shape)
-            plt.draw()
-            plt.pause(0.0001)
+        # if visualize:
+        #     figure.clear()
+        #     axes = figure.add_subplot(111)
+        #     axes.set_title("Example Image Model")
+        #     axes.imshow(output_dict["y_img"], origin="lower")
+        #     # print(input_dict["image"].shape)
+        #     plt.draw()
+        #     plt.pause(0.0001)
         
 
         return output_dict

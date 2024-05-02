@@ -74,7 +74,7 @@ class SimplePVAInterface(BaseInterface):
         if type(value["value"]) == np.ndarray:
             y_size = value["dimension"][0]["size"]
             x_size = value["dimension"][1]["size"]
-            value = value["value"].reshape((x_size, y_size))
+            value = value["value"].reshape((y_size, x_size))
         else:
             value = value["value"]
             
@@ -128,10 +128,11 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
                 # print(f"config['variables'][pv]['type']: {config['variables'][pv]['type']}")
                 pv_type = config["variables"][pv]["type"]
                 if pv_type == "image":
-                    x_size = config["variables"][pv]["image_size"]["y"]
-                    y_size = config["variables"][pv]["image_size"]["x"]
+                    # note the y and x are flipped when reshaping (rows, columns) -> (y, x)
+                    y_size = config["variables"][pv]["image_size"]["y"]
+                    x_size = config["variables"][pv]["image_size"]["x"]
                     # intialize with ones
-                    intial_value = np.ones((x_size, y_size))
+                    intial_value = np.ones((y_size,x_size))
                     pv_type_nt = NTNDArray()
                     pv_type_init = intial_value
 
@@ -150,6 +151,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
             @pv_item[pv].put
             def put(pv: SharedPV, op: ServOpWrap):
                 # logger.debug(f"Put {pv} {op}")
+                # logger.debug(f"type(pv): {type(op.value())}")
                 pv.post(op.value())
                 op.done()
 
@@ -167,6 +169,9 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
 
     def put(self, name, value, **kwargs):
         # logger.debug(f"Putting {name} with value {value}")
+        # if type(value) == np.ndarray:
+        #     value = value.T # quick fix for the fact that the image is flipped
+        
         self.shared_pvs[name].post(value, timestamp=time.time())
 
     def get(self, name, **kwargs):
