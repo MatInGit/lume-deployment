@@ -7,8 +7,9 @@ executor = ThreadPoolExecutor(20)
 
 logger = get_logger()
 
-_dir = os.path.dirname(os.path.abspath(__file__))
-os.environ["K2EG_PYTHON_CONFIGURATION_PATH_FOLDER"] = _dir
+# _dir = os.path.dirname(os.path.abspath(__file__))
+# os.environ["K2EG_PYTHON_CONFIGURATION_PATH_FOLDER"] = _dir
+# print(f"K2EG_PYTHON_CONFIGURATION_PATH_FOLDER: {_dir}")
 
 
 class K2EGInterface(BaseInterface):
