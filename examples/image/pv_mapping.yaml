@@ -83,7 +83,7 @@ output_data_to:
       LUME:MLFLOW:TEST_IMAGE:
         type: "image"
         image_size:
-          x: 640
+          x: 620
           y: 480
         proto: pva
         name: LUME:MLFLOW:TEST_IMAGE

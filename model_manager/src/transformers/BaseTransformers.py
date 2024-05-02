@@ -143,9 +143,7 @@ class CAImageTransfomer:
                 order="F" if self.variables[key + "_unfolding"] == "column_major" else "C")
                 
                 if self.variables[key + "_unfolding"] == "column_major":
-                    transformed[key] = transformed[key]
-                #
-                print(transformed[key].shape)
+                    transformed[key] = transformed[key].T
             except Exception as e:
                 logger.error(f"Error transforming: {e}")
         for key, value in transformed.items():
