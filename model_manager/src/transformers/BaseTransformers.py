@@ -100,6 +100,10 @@ class CAImageTransfomer:
             self.variables[key] = value["img_ch"]
             self.variables[key + "_x"] = value["img_x_ch"]
             self.variables[key + "_y"] = value["img_y_ch"]
+            if "unfold" in value.keys():
+                self.variables[key + "_unfolding"] = value["unfold"]
+            else:
+                self.variables[key + "_unfolding"] = "column_major" #
             self.input_list.append(value["img_ch"])
             self.input_list.append(value["img_x_ch"])
             self.input_list.append(value["img_y_ch"])
@@ -130,18 +134,25 @@ class CAImageTransfomer:
         transformed = {}
         for key in self.img_list:
             value = self.latest_input[self.variables[key]]
-            # print(f"key: {key}, value: {value}")
+            # print x and y
             try:
-                transformed[key] = np.array(value).reshape(
+                print(f"X: {self.latest_input[self.variables[key + '_x']]}")
+                print(f"Y: {self.latest_input[self.variables[key + '_y']]}")
+                transformed[key] = np.array(value).reshape((
                     int(self.latest_input[self.variables[key + "_x"]]),
                     int(self.latest_input[self.variables[key + "_y"]]),
-                )
+                ), 
+                order="F" if self.variables[key + "_unfolding"] == "row_major" else "C")
+                
+                if self.variables[key + "_unfolding"] == "row_major":
+                    transformed[key] = transformed[key].T
+                #
+                print(transformed[key].shape)
             except Exception as e:
                 logger.error(f"Error transforming: {e}")
         for key, value in transformed.items():
             self.latest_transformed[key] = value
         self.updated = True
-
 
 class PassThroughTransformer:
     def __init__(self, config):

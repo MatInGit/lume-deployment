@@ -13,11 +13,16 @@ os.environ["K2EG_PYTHON_CONFIGURATION_PATH_FOLDER"] = _dir
 
 class K2EGInterface(BaseInterface):
     def __init__(self, config):
-        self.client = k2eg.dml(
-            "env",
-            "app-test-4",
-            group_name=f"model-deployment-{str(uuid.uuid4())[0:15]}",
-        )
+        try:
+            self.client = k2eg.dml(
+                "env",
+                "app-test-3",
+                group_name=f"model-deployment-{str(uuid.uuid4())[0:15]}",
+            )
+        except Exception as e:
+            print(f"Error initializing K2EGInterface: {e}")
+            self.close()
+            raise e
 
         pv_dict = config["variables"]
         pv_url_list = []

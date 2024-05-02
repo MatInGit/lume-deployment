@@ -128,9 +128,9 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
                 # print(f"config['variables'][pv]['type']: {config['variables'][pv]['type']}")
                 pv_type = config["variables"][pv]["type"]
                 if pv_type == "image":
-                    x_size = config["variables"][pv]["image_size"]["x"]
-                    y_size = config["variables"][pv]["image_size"]["y"]
-                    # intialize with zeros
+                    x_size = config["variables"][pv]["image_size"]["y"]
+                    y_size = config["variables"][pv]["image_size"]["x"]
+                    # intialize with ones
                     intial_value = np.ones((x_size, y_size))
                     pv_type_nt = NTNDArray()
                     pv_type_init = intial_value
@@ -176,8 +176,8 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         # print(f"value_raw_type: {type(value_raw.value)}")
         if type(value_raw.value) == np.ndarray:
             value = value_raw.value
-            y_size = value_raw.dimension[0].size
-            x_size = value_raw.dimension[1].size
+            x_size = value_raw.dimension[0].size
+            y_size = value_raw.dimension[1].size
             value = value.reshape((x_size, y_size))
         else:
             value = value_raw.value

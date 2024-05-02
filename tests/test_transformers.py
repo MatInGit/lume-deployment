@@ -88,9 +88,9 @@ def test_ca_image_transformer():
     img_2 = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
     img_2_x = 3
     img_2_y = 4
-    # numpy array 3x3 image
+    # numpy array 3x4 image
 
-    # both should return the np.array with shape (3, 3)
+    # both should return the np.array with shape (3, 3) and (3, 4) respectively
     img_transformer.handler("MY_TEST_CA_X", {"value": img_1_x})
     img_transformer.handler("MY_TEST_CA_Y", {"value": img_1_y})
     img_transformer.handler("MY_TEST_CA", {"value": img_1})

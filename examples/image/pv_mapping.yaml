@@ -20,6 +20,7 @@ input_data_to_model:
       config:
         variables:
           image:
+            # unfold: "row_major"
             img_ch: CAMR:IN20:186:IMAGE
             img_x_ch: CAMR:IN20:186:N_OF_COL
             img_y_ch: CAMR:IN20:186:N_OF_ROW
