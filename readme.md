@@ -669,9 +669,10 @@ See image example for how to set up model factory and model for local use.
     "AWS_SECRET_ACCESS_KEY": "secret-key"
     "MLFLOW_S3_ENDPOINT_URL": "http://my-s3-endpoint:myport",
     "MLFLOW_TRACKING_URI": "http://my-mlflow-server"
+    "K2EG_PYTHON_CONFIGURATION_PATH_FOLDER" : "/path/to/k2eg/config_folder"
 }
 ```
-This is optional and all of the above can be set as environment variables.
+This is optional and all of the above can be set as environment variables. But working on windows can be a pain so this is a workaround.
 
 If you are using mlflow locally, you dont have to set anything just run mlflow ui in the terminal and the model manager will use the local server.
 
