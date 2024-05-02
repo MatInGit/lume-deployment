@@ -1,5 +1,5 @@
 ## Purpose and Idea
-The purpose of the model manager is to allow for easy deployment of models from MLflow or other sources (soon tm). 
+The purpose of the model manager is to allow for easy deployment of models from MLflow, local model defintion or other sources. 
 The package is in an early stage and right now is tightly coupled with MLflow. The goal is to make it more general and allow for easy deployment of models from other sources as well.
 
 The idea is to divide model deployment into 3 layers:
@@ -647,6 +647,7 @@ model_manager -n <model_name> -v <model_version> -e <env.json> -c <configs.yaml>
 - `-c` or `--configs` : Path to the configs.yaml file
 - `-p` or `--publish` : Publish data to output module, off by default.
 - `-d` or `--debug` : Debug mode, off by default.
+- `-l` or `--local` : Local mode, you need to supply a model path and a model factory class. Alternative to using MLflow. you need to provide a `-c` config as well. 
 
 `env.json` is a json file containing the environment variables for the model. The file should look like this:
 ```json
