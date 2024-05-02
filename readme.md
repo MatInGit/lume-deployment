@@ -634,11 +634,19 @@ pip install . # or pip install -e .
 ```bash
 model_manager -n <model_name> -v <model_version> -e <env.json> -c <configs.yaml>
 ```
+Where:
 
 - `model_name` is the name of the registered model in MLflow
 - `model_version` is the version of the model to be used
 - `env.json` is a json file containing the environment variables for the model, optional
 - `pv_mappings.yaml` is a yaml file containing the full configuration for the system, transformation and model layers, optional, provided that the registered model has a `pv_mappings.yaml` file in the MLflow model directory.
+
+For non-mlflow models:
+
+```bash
+model_manager -l /path/to/model_and_factory -e <env.json> -c <configs.yaml>
+```
+See image example for how to set up model factory and model for local use.
 
 #### List of flags:
 - `-n` or `--model_name` : Name of the model in MLflow
