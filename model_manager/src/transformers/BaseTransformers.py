@@ -103,7 +103,7 @@ class CAImageTransfomer:
             if "unfold" in value.keys():
                 self.variables[key + "_unfolding"] = value["unfold"]
             else:
-                self.variables[key + "_unfolding"] = "column_major" #
+                self.variables[key + "_unfolding"] = "row_major" #
             self.input_list.append(value["img_ch"])
             self.input_list.append(value["img_x_ch"])
             self.input_list.append(value["img_y_ch"])
@@ -136,16 +136,14 @@ class CAImageTransfomer:
             value = self.latest_input[self.variables[key]]
             # print x and y
             try:
-                print(f"X: {self.latest_input[self.variables[key + '_x']]}")
-                print(f"Y: {self.latest_input[self.variables[key + '_y']]}")
                 transformed[key] = np.array(value).reshape((
+                    int(self.latest_input[self.variables[key + "_y"]]), # note the order, we are going from x,y to y,x (rows, columns) in numpy
                     int(self.latest_input[self.variables[key + "_x"]]),
-                    int(self.latest_input[self.variables[key + "_y"]]),
                 ), 
-                order="F" if self.variables[key + "_unfolding"] == "row_major" else "C")
+                order="F" if self.variables[key + "_unfolding"] == "column_major" else "C")
                 
-                if self.variables[key + "_unfolding"] == "row_major":
-                    transformed[key] = transformed[key].T
+                if self.variables[key + "_unfolding"] == "column_major":
+                    transformed[key] = transformed[key]
                 #
                 print(transformed[key].shape)
             except Exception as e:
