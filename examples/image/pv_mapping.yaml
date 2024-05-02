@@ -67,6 +67,7 @@ output_model_to_data:
 output_data_to:
   put_method: "p4p_server"
   config:
+    # EPICS_PVA_NAMESERVER: "134.79.151.21:5168"
     variables:
       LUME:MLFLOW:TEST_Y_MAX:
         proto: pva

@@ -31,8 +31,8 @@
    <property name="imageChannel" stdset="0">
     <string>pva://LUME:MLFLOW:TEST_IMAGE</string>
    </property>
-   <property name="imageWidth" stdset="0">
-    <number>640</number>
+   <property name="readingOrder" stdset="0">                                                                                                                                                                                                                  
+    <enum>PyDMImageView::Clike</enum>                                                                                                                                                                                                                         
    </property>
   </widget>
  </widget>
