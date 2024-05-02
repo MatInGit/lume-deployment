@@ -704,6 +704,13 @@ Deploying on local machines as is as simple as running
 
 ```bash
 model_manager -n <model_name> -v <model_version> -e <env.json>
+# optionaly you might wanna specify -c <configs.yaml> locally
+# -p flag is optional, it will publish the output to the output module
+```
+Using local model getter is also possible, but not recommended for production deployments. 
+
+```bash
+model_manager -l /path/to/model_and_factory -e <env.json> -c <configs.yaml>
 ```
 
 You can append `&` to the end of the command to run it in the background.
@@ -716,7 +723,8 @@ You can append `&` to the end of the command to run it in the background.
 
 ### Future work
 - [ ] Batch processing for models that require it.
-- [ ] Local model getter for easier testing, specific deployment.
+- [x] Local model getter for easier testing, specific deployment.
+- [ ] Rate limiting for live deployments.
 - [ ] Visualisation of the data flow and data webpages.
 - [ ] Slack bot for deployment status and workflow building help. As well as help with spinning up and terminating deployments.
 - [ ] Better abstract classes for the system, transformation and model layers.
