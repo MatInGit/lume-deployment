@@ -256,7 +256,7 @@ async def model_main(
     last_stat_report = time.time()
 
     try:
-        in_interface.monitor(in_transformer.handler)
+        # in_interface.monitor(in_transformer.handler)
         logger.info("Monitoring input interface")
 
         # initialise variables using get
@@ -265,10 +265,11 @@ async def model_main(
             # measure size of value in bytes
 
             in_transformer.handler(key, value)
-
+        last_input_update = time.time()
         while True:
             if time.time() - last_stat_report > 1:
                 stat_string = ""
+                last_stat_report = time.time()
                 if len(stats_inference) > 0:
                     stat = sum(stats_inference) / len(stats_inference)
                     stat = stat * 1000
@@ -298,14 +299,24 @@ async def model_main(
                     stat_string += stat_temp + " " * spaces
 
                 if stat_string == "":
+                    print("No stats available")
                     pass
                 else:
                     logger.info(stat_string)
-                    last_stat_report = time.time()
+                    # last_stat_report = time.time()
                     stats_inference = []
                     stats_input_transform = []
                     stats_output_transform = []
                     stats_put = []
+                    
+            # # do update at 10 Hz 
+            if True:
+                for key in in_interface.variable_list:
+                    _, value = in_interface.get(key)
+                    if value["value"] == in_transformer.latest_input[key]:
+                        pass
+                    else:
+                        in_transformer.handler(key, value)
 
             if in_transformer.updated:
                 try:
@@ -366,6 +377,7 @@ async def model_main(
                     stats_put.append(time_end - time_start)
 
                 in_transformer.updated = False
+                # print("in_transformer.updated = False")
 
                 if args.one_shot:
                     logger.info("One shot mode, exiting")

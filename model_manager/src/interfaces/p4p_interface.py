@@ -68,6 +68,7 @@ class SimplePVAInterface(BaseInterface):
                 )
                 logger.error(f"pv: {pv}")
                 raise e
+        # pass # bugged out
 
     def get(self, name, **kwargs):
         value = self.ctxt.get(name)        
@@ -152,7 +153,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
             def put(pv: SharedPV, op: ServOpWrap):
                 # logger.debug(f"Put {pv} {op}")
                 # logger.debug(f"type(pv): {type(op.value())}")
-                pv.post(op.value())
+                pv.post(op.value(), timestamp=time.time())
                 op.done()
 
             self.shared_pvs[pv] = pv_item[pv]
