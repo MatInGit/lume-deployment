@@ -17,3 +17,6 @@ mlruns
 torch_model
 *_model
 local_test/
+env.json
+lebt_torch_model/
+

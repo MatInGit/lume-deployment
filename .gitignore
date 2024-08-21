@@ -23,3 +23,6 @@ image_model
 test.h5
 .vscode
 build
+env.json
+creds.json
+test.py
