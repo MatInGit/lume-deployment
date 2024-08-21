@@ -81,3 +81,29 @@ def test_p4p_as_image_input():
     pt.handler("test", value_dict)
     assert pt.updated == True
     assert pt.latest_transformed["IMG1"].shape == (10, 10)
+    p4p.close()
+
+def test_SimplePVAInterface_put_and_get_array():
+    config = {
+        "variables": {
+            "test:array_l:AA": {
+                "name": "test:array_l:AA",
+                "proto": "pva",
+                "type": "waveform",
+            }
+        }
+    }
+    p4p = SimlePVAInterfaceServer(config)
+    
+    # arry = np.random.rand(10)
+    # p4p.put("test:array_l:AA", arry.tolist())
+
+    name, array_get = p4p.get("test:array_l:AA")
+    # print(array_get["value"])    
+    # assert type(array_get["value"]) == np.ndarray
+    
+    # name, array_get = p4p.get("test:array_l:AA")
+    # print(array_get)
+    # np.testing.assert_array_equal(array_get["value"], arry)
+
+    p4p.close()
