@@ -119,7 +119,12 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         self.shared_pvs = {}
         pv_type_init = None
         pv_type_nt = None
-
+        
+        if "port" in config:
+            port = config["port"]
+        else:
+            port = 5075
+        
         if "init" in config:
             # print(f"config['init']: {config['init']}")
             if config["init"] == False:
@@ -185,7 +190,8 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         for name, pv in self.shared_pvs.items():
             self.provider.add(name, pv)
         
-        self.server = Server(providers=[self.provider])
+        self.server = Server(providers=[self.provider], conf={"EPICS_PVA_SERVER_PORT":str(port)})
+        logger.info(f"SimplePVAInterfaceServer initialized with config: {self.server.conf()}")
 
     def close(self):
         logger.debug("Closing SimplePVAInterfaceServer")
@@ -193,7 +199,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         super().close()
 
     def put(self, name, value, **kwargs):
-        logger.info(f"Putting {name} with value {value}")
+        # logger.debug(f"Putting {name} with value {value}")
         # if type(value) == np.ndarray:
         #     value = value.T # quick fix for the fact that the image is flipped
         # print(f"Putting {name} with value {value}")
