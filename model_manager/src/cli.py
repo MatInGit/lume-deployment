@@ -300,7 +300,7 @@ async def model_main(
                     stat_string += stat_temp + " " * spaces
 
                 if stat_string == "":
-                    print("No stats available")
+                    # print("No stats available")
                     pass
                 else:
                     logger.info(stat_string)
@@ -355,13 +355,13 @@ async def model_main(
                 output = model.evaluate(in_transformer.latest_transformed)
                 inference_time = time.time() - inference_start
                 stats_inference.append(inference_time)
-                logger.debug(f"Output from model.evaluate: {output}")
+                # logger.debug(f"Output from model.evaluate: {output}")
                 # print("=" * 20)
                 # print("Output from model.evaluate: ")
                 # print(output)
                 # print("=" * 20)
                 for key in output:
-                    logger.debug(f"Output: {key}: {output[key]}")
+                    # logger.debug(f"Output: {key}: {output[key]}")
                     out_transformer.handler(key, {"value": output[key]})
 
                 if out_transformer.updated:

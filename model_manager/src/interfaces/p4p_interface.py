@@ -203,6 +203,12 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         # if type(value) == np.ndarray:
         #     value = value.T # quick fix for the fact that the image is flipped
         # print(f"Putting {name} with value {value}")
+        
+        # scan the input dict for none values
+        # if value is None:
+        #     logger.warning(f"None value for {name}")
+        #     return
+        
         self.shared_pvs[name].post(value, timestamp=time.time())
 
     def get(self, name, **kwargs):
