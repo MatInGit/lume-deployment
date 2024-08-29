@@ -1,8 +1,8 @@
 # defines a compound transformer that can be used add multiple transformers together
+import time
+
 from src.logging_utils.make_logger import get_logger
 from src.transformers import registered_transformers
-import sympy as sp
-import time
 
 logger = get_logger()
 

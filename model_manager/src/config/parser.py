@@ -1,4 +1,5 @@
 import yaml
+
 from .config_object import ConfigObject
 
 
@@ -7,7 +8,7 @@ class ConfigParser:
         self.config_path = config_path
 
     def parse(self):
-        with open(self.config_path, "r") as stream:
+        with open(self.config_path) as stream:
             try:
                 data = yaml.safe_load(stream)
                 return ConfigObject(**data)

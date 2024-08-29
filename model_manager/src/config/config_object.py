@@ -1,8 +1,8 @@
+from typing import Any
+
 import pydantic
-from typing import Dict, Any, Literal
 
 from ..transformers import registered_transformers
-
 
 allowed_transformers = list(registered_transformers.keys())
 

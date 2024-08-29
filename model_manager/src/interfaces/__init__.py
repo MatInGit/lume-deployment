@@ -9,8 +9,7 @@ except ImportError as e:
     raise e
 
 try:
-    from .p4p_interface import SimplePVAInterface
-    from .p4p_interface import SimlePVAInterfaceServer
+    from .p4p_interface import SimlePVAInterfaceServer, SimplePVAInterface
 
     registered_interfaces["p4p"] = SimplePVAInterface
     registered_interfaces["p4p_server"] = SimlePVAInterfaceServer
