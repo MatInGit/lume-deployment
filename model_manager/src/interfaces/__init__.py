@@ -1,26 +1,22 @@
-registered_interfaces = {}
+from src.utils.lazyInterfaceLoader import AbstractInterfaceLoader
 
-try:
-    from .k2eg_interface import K2EGInterface
-
-    registered_interfaces["k2eg"] = K2EGInterface
-except ImportError as e:
-    print(f"Error importing k2eg interface: {e}")
-    raise e
-
-try:
-    from .p4p_interface import SimlePVAInterfaceServer, SimplePVAInterface
-
-    registered_interfaces["p4p"] = SimplePVAInterface
-    registered_interfaces["p4p_server"] = SimlePVAInterfaceServer
-except ImportError as e:
-    print(f"Error importing pva interface: {e}")
-    raise e
-
-try:
-    from .file_interface import h5dfInterface
-
-    registered_interfaces["h5df"] = h5dfInterface
-except ImportError as e:
-    print(f"Error importing h5df interface: {e}")
-    raise e
+class InterfaceLoader(AbstractInterfaceLoader):
+    def __init__(self):
+        super().__init__()
+        
+    def keys(self):
+        return ["k2eg", "p4p", "p4p_server", "h5df"]
+    
+    def _load_interface(self, key):
+        if key == "k2eg":
+            return self.import_module(".interfaces.k2eg_interface", "K2EGInterface")
+        elif key == "p4p":
+            return self.import_module(".interfaces.p4p_interface", "SimplePVAInterface")
+        elif key == "p4p_server":
+            return self.import_module(".interfaces.p4p_interface", "SimlePVAInterfaceServer")
+        elif key == "h5df":
+            return self.import_module(".interfaces.file_interface", "h5dfInterface")
+        else:
+            raise KeyError(f"Interface '{key}' not registered.")
+        
+registered_interfaces = InterfaceLoader()
