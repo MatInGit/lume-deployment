@@ -3,7 +3,7 @@ from p4p.server import Server
 from p4p.server.raw import ServOpWrap
 from p4p.server.thread import SharedPV
 from p4p.nt import NTScalar, NTNDArray
-from p4p.wrapper import Value,Type
+from p4p.wrapper import Value, Type
 
 from .BaseInterface import BaseInterface
 from src.logging_utils import get_logger
@@ -19,20 +19,12 @@ class SimplePVAInterface(BaseInterface):
     def __init__(self, config):
         self.ctxt = Context("pva", nt=False)
         if "EPICS_PVA_NAME_SERVERS" in os.environ:
-            logger.debug(
-                f"EPICS_PVA_NAME_SERVERS: {os.environ['EPICS_PVA_NAME_SERVERS']}"
-            )
+            logger.debug(f"EPICS_PVA_NAME_SERVERS: {os.environ['EPICS_PVA_NAME_SERVERS']}")
         elif "EPICS_PVA_NAME_SERVERS" in config:
-            os.environ["EPICS_PVA_NAME_SERVERS"] = config[
-                "EPICS_PVA_NAME_SERVERS"
-            ]
-            logger.debug(
-                f"EPICS_PVA_NAME_SERVERS: {os.environ['EPICS_PVA_NAME_SERVERS']}"
-            )
+            os.environ["EPICS_PVA_NAME_SERVERS"] = config["EPICS_PVA_NAME_SERVERS"]
+            logger.debug(f"EPICS_PVA_NAME_SERVERS: {os.environ['EPICS_PVA_NAME_SERVERS']}")
         else:
-            logger.warning(
-                "EPICS_PVA_NAME_SERVERS not set in config or environment, using localhost:5075"
-            )
+            logger.warning("EPICS_PVA_NAME_SERVERS not set in config or environment, using localhost:5075")
             os.environ["EPICS_PVA_NAME_SERVERS"] = "localhost:5075"
 
         pv_dict = config["variables"]
@@ -63,23 +55,21 @@ class SimplePVAInterface(BaseInterface):
                 new_handler = self.__handler_wrapper(handler, pv)
                 self.ctxt.monitor(pv, new_handler)
             except Exception as e:
-                logger.error(
-                    f"Error monitoring in function monitor for SimplePVAInterface: {e}"
-                )
+                logger.error(f"Error monitoring in function monitor for SimplePVAInterface: {e}")
                 logger.error(f"pv: {pv}")
                 raise e
         # pass # bugged out
 
     def get(self, name, **kwargs):
-        value = self.ctxt.get(name)        
+        value = self.ctxt.get(name)
         if type(value["value"]) == np.ndarray:
             y_size = value["dimension"][0]["size"]
             x_size = value["dimension"][1]["size"]
             value = value["value"].reshape((y_size, x_size))
         else:
             value = value["value"]
-            
-        value  = {"value": value}
+
+        value = {"value": value}
         return name, value
 
     def put(self, name, value, **kwargs):
@@ -133,9 +123,14 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
                     y_size = config["variables"][pv]["image_size"]["y"]
                     x_size = config["variables"][pv]["image_size"]["x"]
                     # intialize with ones
-                    intial_value = np.ones((y_size,x_size))
+                    intial_value = np.ones((y_size, x_size))
                     pv_type_nt = NTNDArray()
                     pv_type_init = intial_value
+                elif pv_type == "scalar":
+                    pv_type_nt = NTScalar("d")
+                    pv_type_init = 0
+                else:
+                    raise TypeError(f"Unknown PV type for {pv}: {pv_type}")
 
             else:
                 pv_type_nt = NTScalar("d")
@@ -159,9 +154,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
             self.shared_pvs[pv] = pv_item[pv]
             # this feels ugly
 
-        self.server = Server(
-            providers=[{name: pv} for name, pv in self.shared_pvs.items()]
-        )
+        self.server = Server(providers=[{name: pv} for name, pv in self.shared_pvs.items()])
 
     def close(self):
         logger.debug("Closing SimplePVAInterfaceServer")
@@ -172,7 +165,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         # logger.debug(f"Putting {name} with value {value}")
         # if type(value) == np.ndarray:
         #     value = value.T # quick fix for the fact that the image is flipped
-        
+
         self.shared_pvs[name].post(value, timestamp=time.time())
 
     def get(self, name, **kwargs):
