@@ -2,7 +2,7 @@ deployment:
   type: "continuous"
   # other configurations
 input_data:
-  get_method: "k2eg"
+  get_method: ""
   config:
     variables:
       CAMR:IN20:186:IMAGE:

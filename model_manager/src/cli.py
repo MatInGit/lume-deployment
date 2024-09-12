@@ -267,7 +267,7 @@ async def model_main(
     """Main."""
     # monitor and send to transformer handle
     # reintialise logger to get the correct logger and clear any previous handlers
-    print("model_main")
+    # print("model_main")
 
     logger = get_logger()
     logger.info("Starting model manager")

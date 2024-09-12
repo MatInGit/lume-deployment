@@ -49,10 +49,10 @@ class SimpleTransformer:
 
         # assert valus is float
         try:
-            # logger.debug(f"Converting value to float: {value}")
-            # logger.debug(f"Value type: {type(value)}")
-            # logger.debug(f"Value: {value['value']}")
-            value = float(value["value"])
+            if isinstance(value["value"], (float, int)):
+                value = float(value["value"])
+            elif isinstance(value["value"], (np.ndarray, list)):
+                value = np.array(value["value"]).astype(float)
         except Exception as e:
             logger.error(f"Error converting value to float: {e}")
             raise e
@@ -73,13 +73,41 @@ class SimpleTransformer:
         pvs_renamed = {
             key.replace(":", "_"): value for key, value in self.latest_input.items()
         }
+        pv_shapes = {}
+        
+        # convert to sympy symbols
+        
+        
+        for key, value in pvs_renamed.items():
+            if isinstance(value, (np.ndarray,list)):
+                pv_shapes[key] = value.shape
+                pvs_renamed[key] = sp.Matrix(value)
+            elif isinstance(value, (float, int)):
+                pvs_renamed[key] = value
+            else:
+                raise Exception(f"Invalid type for value: {value}")
+        
         for key, value in self.pv_mapping.items():
             try:
-                transformed[key] = sp.sympify(value["formula"].replace(":", "_")).subs(
-                    pvs_renamed
-                )
+
+                formula = value["formula"].replace(":", "_")
+                
+                formula = sp.sympify(formula)
+                transformed[key] = formula.subs(pvs_renamed)
+                # print(transformed[key])
                 # converted to float
-                transformed[key] = float(transformed[key])
+                if isinstance(transformed[key], sp.Matrix | sp.ImmutableDenseMatrix):
+                    # bit hacky but casuse sympy is meant to be symbolic only and not numerical
+                    s = sp.symbols("s")
+                    numpy_value  = sp.lambdify(s, transformed[key], modules='numpy')
+                    numpy_value = numpy_value(0)
+                    transformed[key] = numpy_value
+                    # drop last dim if it is 1
+                    if transformed[key].shape[-1] == 1:
+                        transformed[key] = transformed[key].squeeze()
+                else:
+                    transformed[key] = float(transformed[key])
+                
             except Exception as e:
                 logger.error(f"Error transforming: {e}")
                 raise e
