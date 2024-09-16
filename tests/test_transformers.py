@@ -58,6 +58,34 @@ def test_simple_transformer_complex():
     assert st.latest_transformed["x1"] == 1
     assert st.latest_transformed["x3"] == math.sin(1) + math.cos(2)
 
+config2a = {
+    "variables": {
+        "x2": {"formula": "A1*B1"},
+        "x1": {"formula": "A1"},
+        "x3": {"formula": "B1 + A1"},
+        "x4": {"formula": "C1*B1"},
+    },
+    "symbols": ["A1", "B1"],
+}
+def test_simple_transformer_complex_array_in():
+    st = SimpleTransformer(config2a)
+    
+    print(st)
+    print(st.pv_mapping)
+    
+    st.handler("A1", {"value": np.array([1, 2, 3])})
+    st.handler("B1", {"value": np.array([4, 5, 6])})
+    st.handler("C1", {"value": 7})
+    
+    assert st.updated
+    print(st.latest_transformed)
+    expected_result = np.outer(np.array([1, 2, 3]), np.array([4, 5, 6]))
+    np.testing.assert_array_equal(st.latest_transformed["x2"], expected_result)
+    np.testing.assert_array_equal(st.latest_transformed["x1"], np.array([1, 2, 3]))
+    np.testing.assert_array_equal(st.latest_transformed["x3"], np.array([4, 5, 6]) + np.array([1, 2, 3]))
+    np.testing.assert_array_equal(st.latest_transformed["x4"], 7* np.array([4, 5, 6]))
+    
+
 
 config3 = {
     "variables": {
@@ -74,7 +102,6 @@ config3 = {
     },
 }
 # maybe we need a folding direction in the config
-
 
 def test_ca_image_transformer():
     img_transformer = CAImageTransfomer(config3)
@@ -114,7 +141,7 @@ def test_ca_image_transformer():
     assert img_transformer.latest_transformed["img_2"][0, 3] == 4
     assert img_transformer.latest_transformed["img_2"][2, 0] == 9
     assert img_transformer.latest_transformed["img_2"][2, 3] == 12
-
+    
 
 config4 = {
     "transformers": {
