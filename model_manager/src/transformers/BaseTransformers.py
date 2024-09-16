@@ -74,24 +74,22 @@ class SimpleTransformer:
             key.replace(":", "_"): value for key, value in self.latest_input.items()
         }
         pv_shapes = {}
-        
+
         # convert to sympy symbols
-        
-        
+
         for key, value in pvs_renamed.items():
-            if isinstance(value, (np.ndarray,list)):
+            if isinstance(value, (np.ndarray, list)):
                 pv_shapes[key] = value.shape
                 pvs_renamed[key] = sp.Matrix(value)
             elif isinstance(value, (float, int)):
                 pvs_renamed[key] = value
             else:
                 raise Exception(f"Invalid type for value: {value}")
-        
+
         for key, value in self.pv_mapping.items():
             try:
-
                 formula = value["formula"].replace(":", "_")
-                
+
                 formula = sp.sympify(formula)
                 transformed[key] = formula.subs(pvs_renamed)
                 # print(transformed[key])
@@ -99,7 +97,7 @@ class SimpleTransformer:
                 if isinstance(transformed[key], sp.Matrix | sp.ImmutableDenseMatrix):
                     # bit hacky but casuse sympy is meant to be symbolic only and not numerical
                     s = sp.symbols("s")
-                    numpy_value  = sp.lambdify(s, transformed[key], modules='numpy')
+                    numpy_value = sp.lambdify(s, transformed[key], modules="numpy")
                     numpy_value = numpy_value(0)
                     transformed[key] = numpy_value
                     # drop last dim if it is 1
@@ -107,7 +105,7 @@ class SimpleTransformer:
                         transformed[key] = transformed[key].squeeze()
                 else:
                     transformed[key] = float(transformed[key])
-                
+
             except Exception as e:
                 logger.error(f"Error transforming: {e}")
                 raise e

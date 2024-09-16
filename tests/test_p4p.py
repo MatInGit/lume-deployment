@@ -1,4 +1,4 @@
-#from src.interfaces import SimplePVAInterface
+# from src.interfaces import SimplePVAInterface
 from src.interfaces import registered_interfaces
 from src.logging_utils.make_logger import get_logger, make_logger
 import numpy as np
@@ -73,7 +73,8 @@ def test_SimplePVAInterface_put_and_get_image():
     assert image_get["value"][0][0] == arry[0][0]
 
     p4p.close()
-    
+
+
 def test_SimplePVAInterface_put_and_get_array():
     config = {
         "variables": {
@@ -87,7 +88,7 @@ def test_SimplePVAInterface_put_and_get_array():
     p4p = SimplePVAInterface(config)
 
     name, array_get = p4p.get("test:array:AA")
-    print(array_get["value"])    
+    print(array_get["value"])
     assert type(array_get["value"]) == np.ndarray
     arry = np.random.rand(10)
     p4p.put("test:array:AA", arry.tolist())

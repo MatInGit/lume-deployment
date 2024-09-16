@@ -1,8 +1,10 @@
 import importlib
 from abc import ABC, abstractmethod
 
+
 class AbstractInterfaceLoader(ABC):
     """Abstract base class to manage lazy loading of interfaces."""
+
     def __init__(self):
         self._interfaces = {}
 
@@ -10,7 +12,7 @@ class AbstractInterfaceLoader(ABC):
         if key not in self._interfaces:
             self._interfaces[key] = self._load_interface(key)
         return self._interfaces[key]
-    
+
     @abstractmethod
     def keys(self):
         """Abstract method to return a list of keys for all available interfaces."""
@@ -27,7 +29,7 @@ class AbstractInterfaceLoader(ABC):
         """Utility function to dynamically import a module and class."""
         try:
             # Assuming 'src.interfaces' is the parent package for all your modules
-            module = importlib.import_module(module_name, package='src')
+            module = importlib.import_module(module_name, package="src")
             return getattr(module, class_name)
         except ImportError as e:
             print(f"Error importing {module_name}: {e}")
