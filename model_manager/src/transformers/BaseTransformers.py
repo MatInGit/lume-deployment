@@ -215,9 +215,6 @@ class PassThroughTransformer:
         for key, value in self.pv_mapping.items():
             self.latest_transformed[key] = self.latest_input[value]
 
-            # not sure I should do it like this
-            if isinstance(self.latest_transformed[key], type(self.latest_input[value])):
-                logger.error(f"Type mismatch between input and output for {key}")
             if isinstance(self.latest_input[value], np.ndarray):
                 if self.latest_input[value].shape != self.latest_transformed[key].shape:
                     logger.error(f"Shape mismatch between input and output for {key}")
