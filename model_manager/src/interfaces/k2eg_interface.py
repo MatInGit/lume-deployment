@@ -2,7 +2,6 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 
 import k2eg
-
 from src.logging_utils import get_logger
 
 from .BaseInterface import BaseInterface

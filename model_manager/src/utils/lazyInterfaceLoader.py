@@ -16,14 +16,12 @@ class AbstractInterfaceLoader(ABC):
     @abstractmethod
     def keys(self):
         """Abstract method to return a list of keys for all available interfaces."""
-        pass
 
     @abstractmethod
     def _load_interface(self, key):
         """Abstract method to load an interface dynamically.
         Subclasses must override this method to provide custom loading logic.
         """
-        pass
 
     def import_module(self, module_name, class_name):
         """Utility function to dynamically import a module and class."""

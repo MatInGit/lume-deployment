@@ -2,15 +2,13 @@ import os
 import time
 
 # anyScalar
-
 import numpy as np
+from p4p import Value
 from p4p.client.thread import Context
 from p4p.nt import NTNDArray, NTScalar
 from p4p.server import Server, StaticProvider
 from p4p.server.raw import ServOpWrap
 from p4p.server.thread import SharedPV
-from p4p import Value
-
 from src.logging_utils import get_logger
 
 from .BaseInterface import BaseInterface
@@ -136,7 +134,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         # print(f"self.init_pvs: {self.init_pvs}")
 
         for pv in self.pv_list:
-            
+
             if "type" in config["variables"][pv]:
                 pv_type = config["variables"][pv]["type"]
                 if pv_type == "image":
@@ -195,7 +193,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
             def put(pv: SharedPV, op: ServOpWrap):
                 pv.post(op.value(), timestamp=time.time())
                 op.done()
-            
+
             self.shared_pvs[pv] = pv_item[pv]
 
 
@@ -206,7 +204,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         self.server = Server(
             providers=[self.provider], conf={"EPICS_PVA_SERVER_PORT": str(port)}
         )
-        
+
         # for pv in self.pv_list:
         #     self.server.start()
         logger.info(

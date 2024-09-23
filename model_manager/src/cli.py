@@ -9,12 +9,13 @@ import traceback
 
 import numpy as np
 import torch
-
 from src.config import ConfigParser
 from src.interfaces import registered_interfaces
 from src.logging_utils import get_logger, make_logger
 from src.model_utils import registered_model_getters
 from src.transformers import registered_transformers
+
+from model_manager.src._version import __version__
 
 logger = get_logger()
 
@@ -144,8 +145,23 @@ def setup():
         default=False,
         action="store_true",
     )
+    
+    # version print and exit
+    parser.add_argument(
+        "-V",
+        "--version",
+        help="Print version and exit",
+        required=False,
+        default=False,
+        action="store_true",
+    )
 
     args = parser.parse_args()
+
+    if args.version:
+        os.environ["version"] = __version__
+        print(f"Model Manager version: {os.environ['version']}")
+        sys.exit(0)
 
     # change logger level
     if args.debug:

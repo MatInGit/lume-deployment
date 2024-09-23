@@ -1,11 +1,11 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import time
+
+import matplotlib.pyplot as plt
+import numpy as np
+from p4p.nt import NTScalar
 from p4p.server import Server
 from p4p.server.raw import ServOpWrap
 from p4p.server.thread import SharedPV
-from p4p.nt import NTScalar, NTNDArray
-import numpy as np
 
 
 class RandomMIMO_System:
