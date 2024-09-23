@@ -51,4 +51,8 @@ quote-style = "single"
 [project.scripts]
 model_manager = "model_manager.scripts.main:main"
 
+[tool.hatch.envs.default.env-vars]
+PYTHONPATH = "model_manager/src"
 
+[tool.hatch.envs.default.scripts]
+test = "pytest"
