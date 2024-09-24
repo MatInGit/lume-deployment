@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: False
       matrix:
-          python-version: ["3.12","3.11", "3.10"]
+          python-version: ["3.11"]
           
 
     steps:
