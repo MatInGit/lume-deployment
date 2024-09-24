@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 import sympy as sp
-from src.logging_utils.make_logger import get_logger
+from model_manager.src.logging_utils.make_logger import get_logger
 
 logger = get_logger()
 
