@@ -31,6 +31,7 @@ if os.path.exists("build-info.json"):
 print("=" * 120)
 print(f"Commit head: {os.environ['vcs-ref']}")
 print(f"Build time: {os.environ['build-date']}")
+print(f"Version: {__version__}")
 print("=" * 120 + "\n")
 
 
