@@ -15,10 +15,10 @@ authors = [
     {"name" = "Jesse Bellister"},
 ]
 dependencies = [
-    "argparse",
-    "botorch",
-    "tensorflow",
-    "lume-model@git+https://github.com/slaclab/lume-model.git@2921e6583a6cfd49285833eb851b361aacf65b4c",
+    "argparse>=1.4.0",
+    "botorch>=0.12.0",
+    "tensorflow>=2.3.1",
+#    "lume-model@git+https://github.com/slaclab/lume-model.git@2921e6583a6cfd49285833eb851b361aacf65b4c",
     "pandas>=2.0.1",
     "numpy<2.0",
     "keras==3.1.1",
@@ -34,11 +34,9 @@ dependencies = [
 
 [tool.hatch.version]
 source = "vcs"
-path = "model_manager/src/_version.py"
 
 [tool.hatch.build.hooks.vcs]
-source = "vcs"
-version-file = "model_manager/src/_version.py"
+version-file = "_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["model_manager"]
@@ -56,3 +54,6 @@ PYTHONPATH = "model_manager/src"
 
 [tool.hatch.envs.default.scripts]
 test = "pytest"
+
+[tool.hatch.version.raw-options]
+local_scheme = "no-local-version"
