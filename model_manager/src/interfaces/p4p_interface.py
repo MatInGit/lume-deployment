@@ -185,9 +185,9 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
                 self.value_build_fn = None
 
             pv_item = {pv: SharedPV(initial=pv_type_init, nt=pv_type_nt)}
-            print(f"pv_item: {pv_item}")
-            print(f"pv_type_init: {pv_type_init}")
-            print(f"pv_type_nt: {pv_type_nt}")
+            # print(f"pv_item: {pv_item}")
+            # print(f"pv_type_init: {pv_type_init}")
+            # print(f"pv_type_nt: {pv_type_nt}")
 
             @pv_item[pv].put
             def put(pv: SharedPV, op: ServOpWrap):
