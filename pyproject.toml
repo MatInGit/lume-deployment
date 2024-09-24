@@ -15,7 +15,6 @@ authors = [
     {"name" = "Jesse Bellister"},
 ]
 dependencies = [
-    "argparse>=1.4.0",
     "botorch>=0.12.0",
     "tensorflow>=2.3.1",
 #    "lume-model@git+https://github.com/slaclab/lume-model.git@2921e6583a6cfd49285833eb851b361aacf65b4c",
