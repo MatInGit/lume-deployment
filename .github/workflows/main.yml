@@ -6,7 +6,7 @@ on:
     tags:
       - '*'
     paths:
-      - .github/workflows/main.yml
+      - .github/workflows/**
 
 jobs:
   Build:
