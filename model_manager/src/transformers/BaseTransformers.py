@@ -1,13 +1,12 @@
 import time
-
 import numpy as np
 import sympy as sp
 from model_manager.src.logging_utils.make_logger import get_logger
+from model_manager.src.transformers.BaseTransformer import BaseTransformer
 
 logger = get_logger()
 
-
-class SimpleTransformer:
+class SimpleTransformer(BaseTransformer):
     def __init__(self, config):
         """
         config: dict
