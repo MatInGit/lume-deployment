@@ -20,41 +20,41 @@ logger = get_logger()
 
 class SimplePVAInterface(BaseInterface):
     def __init__(self, config):
-        self.ctxt = Context("pva", nt=False)
-        if "EPICS_PVA_NAME_SERVERS" in os.environ:
+        self.ctxt = Context('pva', nt=False)
+        if 'EPICS_PVA_NAME_SERVERS' in os.environ:
             logger.debug(
                 f"EPICS_PVA_NAME_SERVERS: {os.environ['EPICS_PVA_NAME_SERVERS']}"
             )
-        elif "EPICS_PVA_NAME_SERVERS" in config:
-            os.environ["EPICS_PVA_NAME_SERVERS"] = config["EPICS_PVA_NAME_SERVERS"]
+        elif 'EPICS_PVA_NAME_SERVERS' in config:
+            os.environ['EPICS_PVA_NAME_SERVERS'] = config['EPICS_PVA_NAME_SERVERS']
             logger.debug(
                 f"EPICS_PVA_NAME_SERVERS: {os.environ['EPICS_PVA_NAME_SERVERS']}"
             )
         else:
             logger.warning(
-                "EPICS_PVA_NAME_SERVERS not set in config or environment, using localhost:5075"
+                'EPICS_PVA_NAME_SERVERS not set in config or environment, using localhost:5075'
             )
-            os.environ["EPICS_PVA_NAME_SERVERS"] = "localhost:5075"
+            os.environ['EPICS_PVA_NAME_SERVERS'] = 'localhost:5075'
 
-        pv_dict = config["variables"]
+        pv_dict = config['variables']
         pv_list = []
         for pv in pv_dict:
             try:
-                assert pv_dict[pv]["proto"] == "pva"
+                assert pv_dict[pv]['proto'] == 'pva'
             except Exception:
-                logger.error(f"Protocol for {pv} is not pva")
+                logger.error(f'Protocol for {pv} is not pva')
                 raise AssertionError
-            pv_list.append(pv_dict[pv]["name"])
+            pv_list.append(pv_dict[pv]['name'])
         self.pv_list = pv_list
         self.variable_list = list(pv_dict.keys())
-        logger.debug(f"SimplePVAInterface initialized with pv_url_list: {self.pv_list}")
+        logger.debug(f'SimplePVAInterface initialized with pv_url_list: {self.pv_list}')
 
     def __handler_wrapper(self, handler, name):
         # unwrap p4p.Value into name, value
         def wrapped_handler(value):
             # logger.debug(f"SimplePVAInterface handler for {name, value['value']}")
 
-            handler(name, {"value": value["value"]})
+            handler(name, {'value': value['value']})
 
         return wrapped_handler
 
@@ -65,25 +65,25 @@ class SimplePVAInterface(BaseInterface):
                 self.ctxt.monitor(pv, new_handler)
             except Exception as e:
                 logger.error(
-                    f"Error monitoring in function monitor for SimplePVAInterface: {e}"
+                    f'Error monitoring in function monitor for SimplePVAInterface: {e}'
                 )
-                logger.error(f"pv: {pv}")
+                logger.error(f'pv: {pv}')
                 raise e
 
     def get(self, name, **kwargs):
         value = self.ctxt.get(name)
-        if isinstance(value["value"], np.ndarray):
+        if isinstance(value['value'], np.ndarray):
             # if value has dimension
-            if "dimension" in value:
-                y_size = value["dimension"][0]["size"]
-                x_size = value["dimension"][1]["size"]
-                value = value["value"].reshape((y_size, x_size))
+            if 'dimension' in value:
+                y_size = value['dimension'][0]['size']
+                x_size = value['dimension'][1]['size']
+                value = value['value'].reshape((y_size, x_size))
             else:
-                value = value["value"]
+                value = value['value']
         else:
-            value = value["value"]
+            value = value['value']
 
-        value = {"value": value}
+        value = {'value': value}
         return name, value
 
     def put(self, name, value, **kwargs):
@@ -101,7 +101,7 @@ class SimplePVAInterface(BaseInterface):
         pass
 
     def close(self):
-        logger.debug("Closing SimplePVAInterface")
+        logger.debug('Closing SimplePVAInterface')
         self.ctxt.close()
 
 
@@ -116,8 +116,8 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         pv_type_init = None
         pv_type_nt = None
 
-        if "port" in config:
-            port = config["port"]
+        if 'port' in config:
+            port = config['port']
         else:
             port = (
                 5075  # this will fail if we have two servers running on the same port
@@ -134,52 +134,51 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         # print(f"self.init_pvs: {self.init_pvs}")
 
         for pv in self.pv_list:
-
-            if "type" in config["variables"][pv]:
-                pv_type = config["variables"][pv]["type"]
-                if pv_type == "image":
+            if 'type' in config['variables'][pv]:
+                pv_type = config['variables'][pv]['type']
+                if pv_type == 'image':
                     # note the y and x are flipped when reshaping (rows, columns) -> (y, x)
-                    y_size = config["variables"][pv]["image_size"]["y"]
-                    x_size = config["variables"][pv]["image_size"]["x"]
+                    y_size = config['variables'][pv]['image_size']['y']
+                    x_size = config['variables'][pv]['image_size']['x']
                     intial_value = np.zeros((y_size, x_size))
                     pv_type_nt = NTNDArray()
                     pv_type_init = intial_value
                     self.value_build_fn = None
-                    if "default" in config["variables"][pv]:
+                    if 'default' in config['variables'][pv]:
                         raise NotImplementedError(
-                            "Default values for images not implemented"
+                            'Default values for images not implemented'
                         )
 
                 # waveform or array
-                elif pv_type == "waveform" or pv_type == "array":
-                    print(f"pv: {pv}")
-                    if "length" in config["variables"][pv]:
-                        length = config["variables"][pv]["length"]
+                elif pv_type == 'waveform' or pv_type == 'array':
+                    print(f'pv: {pv}')
+                    if 'length' in config['variables'][pv]:
+                        length = config['variables'][pv]['length']
                     else:
                         length = 10
-                    if "default" in config["variables"][pv]:
-                        intial_value = np.array(config["variables"][pv]["default"])
+                    if 'default' in config['variables'][pv]:
+                        intial_value = np.array(config['variables'][pv]['default'])
                     else:
                         intial_value = np.zeros(length, dtype=np.float64)
 
-                    pv_type_nt = NTScalar("ad")
-                    pv_type_nt_bd = NTScalar.buildType("ad")
-                    self.value_build_fn = Value(pv_type_nt_bd, {"value": intial_value})
+                    pv_type_nt = NTScalar('ad')
+                    pv_type_nt_bd = NTScalar.buildType('ad')
+                    self.value_build_fn = Value(pv_type_nt_bd, {'value': intial_value})
                     pv_type_init = intial_value
 
-                elif pv_type == "scalar":
-                    pv_type_nt = NTScalar("d")
-                    if "default" in config["variables"][pv]:
-                        pv_type_init = float(config["variables"][pv]["default"])
+                elif pv_type == 'scalar':
+                    pv_type_nt = NTScalar('d')
+                    if 'default' in config['variables'][pv]:
+                        pv_type_init = float(config['variables'][pv]['default'])
                     else:
                         pv_type_init = 0.0
 
                 else:
-                    raise TypeError(f"Unknown PV type for {pv}: {pv_type}")
+                    raise TypeError(f'Unknown PV type for {pv}: {pv_type}')
             else:
-                pv_type_nt = NTScalar("d")
-                if "default" in config["variables"][pv]:
-                    pv_type_init = float(config["variables"][pv]["default"])
+                pv_type_nt = NTScalar('d')
+                if 'default' in config['variables'][pv]:
+                    pv_type_init = float(config['variables'][pv]['default'])
                 else:
                     pv_type_init = 0.0
                 self.value_build_fn = None
@@ -196,23 +195,22 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
 
             self.shared_pvs[pv] = pv_item[pv]
 
-
-        self.provider = StaticProvider("pva")
+        self.provider = StaticProvider('pva')
         for name, pv in self.shared_pvs.items():
             self.provider.add(name, pv)
 
         self.server = Server(
-            providers=[self.provider], conf={"EPICS_PVA_SERVER_PORT": str(port)}
+            providers=[self.provider], conf={'EPICS_PVA_SERVER_PORT': str(port)}
         )
 
         # for pv in self.pv_list:
         #     self.server.start()
         logger.info(
-            f"SimplePVAInterfaceServer initialized with config: {self.server.conf()}"
+            f'SimplePVAInterfaceServer initialized with config: {self.server.conf()}'
         )
 
     def close(self):
-        logger.debug("Closing SimplePVAInterfaceServer")
+        logger.debug('Closing SimplePVAInterfaceServer')
         self.server.stop()
         super().close()
 
@@ -227,9 +225,9 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         value_raw = self.shared_pvs[name].current().raw
         if isinstance(value_raw.value, np.ndarray):
             # if value has dimension
-            if "dimension" in value_raw:
-                y_size = value_raw.dimension[0]["size"]
-                x_size = value_raw.dimension[1]["size"]
+            if 'dimension' in value_raw:
+                y_size = value_raw.dimension[0]['size']
+                x_size = value_raw.dimension[1]['size']
                 value = value_raw.value.reshape((y_size, x_size))
             else:
                 value = value_raw.value
@@ -242,9 +240,9 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
             value = value_raw.value
 
         else:
-            raise ValueError(f"Unknown type for value_raw: {type(value_raw.value)}")
+            raise ValueError(f'Unknown type for value_raw: {type(value_raw.value)}')
         # print(f"value: {value}")
-        return name, {"value": value}
+        return name, {'value': value}
 
     def put_many(self, data, **kwargs):
         for key, value in data.items():

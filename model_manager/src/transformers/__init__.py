@@ -7,28 +7,28 @@ class TransformerLoader(AbstractInterfaceLoader):
 
     def keys(self):
         return [
-            "SimpleTransformer",
-            "CAImageTransfomer",
-            "CompoundTransformer",
-            "PassThroughTransformer",
+            'SimpleTransformer',
+            'CAImageTransfomer',
+            'CompoundTransformer',
+            'PassThroughTransformer',
         ]
 
     def _load_interface(self, key):
-        if key == "SimpleTransformer":
+        if key == 'SimpleTransformer':
             return self.import_module(
-                ".transformers.BaseTransformers", "SimpleTransformer"
+                '.transformers.BaseTransformers', 'SimpleTransformer'
             )
-        elif key == "CAImageTransfomer":
+        elif key == 'CAImageTransfomer':
             return self.import_module(
-                ".transformers.BaseTransformers", "CAImageTransfomer"
+                '.transformers.BaseTransformers', 'CAImageTransfomer'
             )
-        elif key == "CompoundTransformer":
+        elif key == 'CompoundTransformer':
             return self.import_module(
-                ".transformers.CompoundTransformer", "CompoundTransformer"
+                '.transformers.CompoundTransformer', 'CompoundTransformer'
             )
-        elif key == "PassThroughTransformer":
+        elif key == 'PassThroughTransformer':
             return self.import_module(
-                ".transformers.BaseTransformers", "PassThroughTransformer"
+                '.transformers.BaseTransformers', 'PassThroughTransformer'
             )
         else:
             raise KeyError(f"Interface '{key}' not registered.")

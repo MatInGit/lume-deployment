@@ -2,7 +2,7 @@ from p4p.client.thread import Context
 
 # server
 
-ctxt = Context("pva")
+ctxt = Context('pva')
 from matplotlib import pyplot as plt
 
 fig, ax = plt.subplots()
@@ -17,19 +17,19 @@ state1 = []
 
 
 while True:
-    input.append(ctxt.get("lume:test:mimo:test:input_0"))
-    output.append(ctxt.get("lume:test:mimo:test:output_0"))
-    state0.append(ctxt.get("lume:test:mimo:test:state_0"))
-    state1.append(ctxt.get("lume:test:mimo:test:state_1"))
+    input.append(ctxt.get('lume:test:mimo:test:input_0'))
+    output.append(ctxt.get('lume:test:mimo:test:output_0'))
+    state0.append(ctxt.get('lume:test:mimo:test:state_0'))
+    state1.append(ctxt.get('lume:test:mimo:test:state_1'))
     if len(input) > 100:
         input.pop(0)
         output.pop(0)
         state0.pop(0)
         state1.pop(0)
     ax.clear()
-    ax.plot(input, label="Input")
-    ax.plot(output, label="Output")
-    ax.plot(state0, label="State 0")
-    ax.plot(state1, label="State 1")
+    ax.plot(input, label='Input')
+    ax.plot(output, label='Output')
+    ax.plot(state0, label='State 0')
+    ax.plot(state1, label='State 1')
     ax.legend()
     plt.pause(0.1)

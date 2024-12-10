@@ -3,22 +3,22 @@ import logging
 import colorlog
 
 
-def make_logger(name="model_manager", level=logging.INFO):
+def make_logger(name='model_manager', level=logging.INFO):
     logger = colorlog.getLogger(name)
     handler = colorlog.StreamHandler()
     formatter = colorlog.ColoredFormatter(
-        "%(log_color)s[%(filename)s:%(lineno)s:%(funcName)s] %(levelname)s: %(message)s",
+        '%(log_color)s[%(filename)s:%(lineno)s:%(funcName)s] %(levelname)s: %(message)s',
         datefmt=None,
         reset=True,
         log_colors={
-            "DEBUG": "cyan",
-            "INFO": "green",
-            "WARNING": "yellow",
-            "ERROR": "red",
-            "CRITICAL": "red,bg_white",
+            'DEBUG': 'cyan',
+            'INFO': 'green',
+            'WARNING': 'yellow',
+            'ERROR': 'red',
+            'CRITICAL': 'red,bg_white',
         },
         secondary_log_colors={},
-        style="%",
+        style='%',
     )
     handler.setFormatter(formatter)
 
@@ -36,7 +36,7 @@ def make_logger(name="model_manager", level=logging.INFO):
 
 
 def get_logger():
-    logger = logging.getLogger("model_manager")
+    logger = logging.getLogger('model_manager')
     return logger
 
 

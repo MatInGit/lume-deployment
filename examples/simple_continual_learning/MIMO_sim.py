@@ -64,12 +64,12 @@ class RandomMIMO_System:
             V = self.A[j, i] * X + self.A[j, j] * Y
             if len(unique_states) == 1:
                 axs.streamplot(X, Y, U, V)
-                axs.set_xlabel("State " + str(i))
-                axs.set_ylabel("State " + str(j))
+                axs.set_xlabel('State ' + str(i))
+                axs.set_ylabel('State ' + str(j))
             else:
                 axs[z].streamplot(X, Y, U, V)
-                axs[z].set_xlabel("State " + str(i))
-                axs[z].set_ylabel("State " + str(j))
+                axs[z].set_xlabel('State ' + str(i))
+                axs[z].set_ylabel('State ' + str(j))
 
         plt.show()
 
@@ -85,12 +85,12 @@ mimo.plot_phase_portraits()
 
 x = mimo.reset()
 
-name_proto_float = "lume:test:mimo:test:"
+name_proto_float = 'lume:test:mimo:test:'
 
 
-pv_list_state = [name_proto_float + "state_" + str(i) for i in range(states)]
-pv_list_input = [name_proto_float + "input_" + str(i) for i in range(inputs)]
-pv_list_output = [name_proto_float + "output_" + str(i) for i in range(outputs)]
+pv_list_state = [name_proto_float + 'state_' + str(i) for i in range(states)]
+pv_list_input = [name_proto_float + 'input_' + str(i) for i in range(inputs)]
+pv_list_output = [name_proto_float + 'output_' + str(i) for i in range(outputs)]
 
 pv_list = pv_list_state + pv_list_input + pv_list_output
 
@@ -99,7 +99,7 @@ shared_pv_lookup = {}
 for pv in pv_list:
     # self.shared_pvs.append(pv)
     pv_item = {}
-    pv_item[pv] = SharedPV(nt=NTScalar("d"), initial=0)
+    pv_item[pv] = SharedPV(nt=NTScalar('d'), initial=0)
 
     @pv_item[pv].put
     def put(pv: SharedPV, op: ServOpWrap):

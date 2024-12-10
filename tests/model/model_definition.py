@@ -7,7 +7,7 @@ from lume_model.variables import ScalarInputVariable, ScalarOutputVariable
 class ExampleModel(LUMEBaseModel):
     def evaluate(self, input_dict):
         output_dict = {}
-        output_dict["y"] = np.max([input_dict["x1"], input_dict["x2"]])
+        output_dict['y'] = np.max([input_dict['x1'], input_dict['x2']])
         return output_dict
 
 
@@ -15,10 +15,10 @@ class ExampleModel(LUMEBaseModel):
 class ModelFactory:
     def __init__(self):
         input_variables = [
-            ScalarInputVariable(name="x1", default=0, value_range=[-100000, 1000000]),
-            ScalarInputVariable(name="x2", default=0, value_range=[-100000, 1000000]),
+            ScalarInputVariable(name='x1', default=0, value_range=[-100000, 1000000]),
+            ScalarInputVariable(name='x2', default=0, value_range=[-100000, 1000000]),
         ]
-        output_variables = [ScalarOutputVariable(name="y")]
+        output_variables = [ScalarOutputVariable(name='y')]
         lume_model = ExampleModel(
             input_variables=input_variables, output_variables=output_variables
         )
