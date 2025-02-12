@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 from model_manager.src.interfaces import registered_interfaces
 from model_manager.src.logging_utils.make_logger import make_logger
+import sys
 
 SimplePVAInterface = registered_interfaces['p4p']
 # start mailbox.py as a subprocess
@@ -20,7 +21,7 @@ def setup():
     global process
     # process = subprocess.Popen(["python", "mailbox.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     process = subprocess.Popen(
-        ['python', './tests/mailbox.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        [sys.executable, './tests/mailbox.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     yield
     process.kill()
