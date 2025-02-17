@@ -99,10 +99,11 @@ class TransformerObserver(Observer):
 
 
 class InterfaceObserver(Observer):
-    def __init__(self, interface: BaseInterface, topic: str):
+    def __init__(self, interface: BaseInterface, topic: str, sanitise: bool = True):
         """wraps around the interface.put_many method"""
-        self.interface = interface
-        self.topic = topic
+        self.interface: BaseInterface = interface
+        self.topic: str = topic
+        self.sanitise = sanitise
 
     def update(self, message: Message) -> None:
         if os.environ['PUBLISH'] == 'True':
@@ -124,14 +125,25 @@ class InterfaceObserver(Observer):
         """get all variables from the interface based on internal variable list"""
         for key in self.interface.variable_list:
             _, value = self.interface.get(key)
-        
             if value is not None:
                 return Message(
                     topic=self.topic,
                     source='interface',
                     key=key,
                     value=value
-                )        
+                )
+                
+    def get_many(self, message: Message) -> None:
+        """get many variables from the interface"""
+        _, values = self.interface.get_many(message.value)
+        
+        if values is not None:
+            return Message(
+                topic=self.topic,
+                source='interface',
+                key=message.key,
+                value=values
+            )        
 
     def put(self, message: Message) -> None:
         """put a single variable into the interface"""
@@ -140,6 +152,22 @@ class InterfaceObserver(Observer):
     def put_many(self, message: Message) -> None:
         """put many variables into the interface"""
         self.interface.put_many(message.value)
+
+    
+    # unused due to the issues in p4p with the monitor method
+
+    # def __monitor_handler(self, key, value):
+    #     """internal handler for sending message to broker on change from interfeces monitor method"""
+    #     return Message(
+    #         topic=self.topic,
+    #         source='interface',
+    #         key=key,
+    #         value=value
+    #     )
+    
+    # def monitor(self) -> None:
+    #     """monitor a variable in the interface"""
+        
 
 # class ModelObserver(Observer):
 #     def __init__(self, model):
