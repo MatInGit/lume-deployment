@@ -1,47 +1,4 @@
 digraph "classes" {
 rankdir=BT
 charset="utf-8"
-"model_manager.src.utils.lazyInterfaceLoader.AbstractInterfaceLoader" [color="black", fontcolor="black", label="{AbstractInterfaceLoader|\l|import_module(module_name, class_name)\lkeys()\l}", shape="record", style="solid"];
-"model_manager.src.interfaces.BaseInterface.BaseDataInterface" [color="black", fontcolor="black", label="{BaseDataInterface|\l|load()\lsave(data)\l}", shape="record", style="solid"];
-"model_manager.src.interfaces.BaseInterface.BaseInterface" [color="black", fontcolor="black", label="{BaseInterface|\l|get(name)\lget_many(data)\lmonitor(name, handler)\lput(name, value)\lput_many(data)\l}", shape="record", style="solid"];
-"model_manager.src.transformers.BaseTransformer.BaseTransformer" [color="black", fontcolor="black", label="{BaseTransformer|\l|handler(pv_name: str, value)\ltransform()\l}", shape="record", style="solid"];
-"model_manager.src.transformers.BaseTransformers.CAImageTransfomer" [color="black", fontcolor="black", label="{CAImageTransfomer|handler_time : NoneType\limg\limg_list : list\linput_list : list\llatest_input\llatest_transformed\lupdated : bool\lvariables : dict\l|handler(variable_name: str, value: dict)\ltransform()\l}", shape="record", style="solid"];
-"model_manager.src.transformers.CompoundTransformer.CompoundTransformer" [color="black", fontcolor="black", label="{CompoundTransformer|handler_time : int\linput_list : list\llatest_input : dict\llatest_transformed : dict\ltransformers : list\lupdated : bool\l|handler(name, data)\ltransform(data)\l}", shape="record", style="solid"];
-"model_manager.src.config.config_object.ConfigObject" [color="black", fontcolor="black", label="{ConfigObject|deployment\linput_data\linput_data_to_model\loutput_data_to\loutput_model_to_data\loutputs_model\l|}", shape="record", style="solid"];
-"model_manager.src.config.parser.ConfigParser" [color="black", fontcolor="black", label="{ConfigParser|config_path\l|parse()\l}", shape="record", style="solid"];
-"model_manager.src.config.config_object.DeploymentConfig" [color="black", fontcolor="black", label="{DeploymentConfig|type : str\l|}", shape="record", style="solid"];
-"model_manager.src.config.config_object.InputDataConfig" [color="black", fontcolor="black", label="{InputDataConfig|config\lget_method : str\l|}", shape="record", style="solid"];
-"model_manager.src.config.config_object.InputDataToModelConfig" [color="black", fontcolor="black", label="{InputDataToModelConfig|config\ltype : str\l|check_type(cls, v)\l}", shape="record", style="solid"];
-"model_manager.src.interfaces.InterfaceLoader" [color="black", fontcolor="black", label="{InterfaceLoader|\l|keys()\l}", shape="record", style="solid"];
-"model_manager.src.interfaces.k2eg_interface.K2EGInterface" [color="black", fontcolor="black", label="{K2EGInterface|client : dml\lpv_url_list : list\lreverse_url_lookup\lsymbol_list : list\lurl_lookup\lvariable_list : list\l|close()\lget(name)\lget_many(data)\lmonitor(handler)\lput(name, value)\lput_many(data)\l}", shape="record", style="solid"];
-"model_manager.src.model_utils.LocalModelGetter.LocalModelGetter" [color="black", fontcolor="black", label="{LocalModelGetter|model_class_name\lmodel_module_path\lmodel_type : str\l|get_model()\lget_requirements()\l}", shape="record", style="solid"];
-"model_manager.src.model_utils.MlflowModelGetter.MLflowModelGetter" [color="black", fontcolor="black", label="{MLflowModelGetter|client : MlflowClient\lmodel_name\lmodel_type : str, NoneType\lmodel_version\ltags : NoneType\l|get_config()\lget_model()\lget_requirements()\lget_tags()\l}", shape="record", style="solid"];
-"model_manager.src.model_utils.ModelGetterBase.ModelGetterBase" [color="black", fontcolor="black", label="{ModelGetterBase|\l|get_model()\lget_requirements()\l}", shape="record", style="solid"];
-"model_manager.src.config.config_object.ModelToOutputDataConfig" [color="black", fontcolor="black", label="{ModelToOutputDataConfig|config\ltype : str\l|check_type(cls, v)\l}", shape="record", style="solid"];
-"model_manager.src.config.config_object.OutputDataToConfig" [color="black", fontcolor="black", label="{OutputDataToConfig|config\lput_method : str\l|}", shape="record", style="solid"];
-"model_manager.src.config.config_object.OutputModelConfig" [color="black", fontcolor="black", label="{OutputModelConfig|config\l|}", shape="record", style="solid"];
-"model_manager.src.transformers.BaseTransformers.PassThroughTransformer" [color="black", fontcolor="black", label="{PassThroughTransformer|handler_time : int\linput_list : list\llatest_input : dict\llatest_transformed : dict\lpv_mapping\lupdated : bool\l|handler(pv_name, value)\ltransform()\l}", shape="record", style="solid"];
-"model_manager.src.interfaces.p4p_interface.SimlePVAInterfaceServer" [color="black", fontcolor="black", label="{SimlePVAInterfaceServer|provider : StaticProvider\lserver : Server\lshared_pvs : dict\lvalue_build_fn : Value, NoneType\l|close()\lget(name)\lput(name, value)\lput_many(data)\l}", shape="record", style="solid"];
-"model_manager.src.interfaces.p4p_interface.SimplePVAInterface" [color="black", fontcolor="black", label="{SimplePVAInterface|ctxt : Context\lpv_list : list\lvariable_list : list\l|close()\lget(name)\lget_many(data)\lmonitor(handler)\lput(name, value)\lput_many(data)\l}", shape="record", style="solid"];
-"model_manager.src.transformers.BaseTransformers.SimpleTransformer" [color="black", fontcolor="black", label="{SimpleTransformer|handler_time : list, NoneType\linput_list\llatest_input\llatest_transformed\lpv_mapping\lupdated : bool\l|handler(pv_name, value)\ltransform()\l}", shape="record", style="solid"];
-"model_manager.src.transformers.TransformerLoader" [color="black", fontcolor="black", label="{TransformerLoader|\l|keys()\l}", shape="record", style="solid"];
-"model_manager.src.interfaces.file_interface.h5dfInterface" [color="black", fontcolor="black", label="{h5dfInterface|path\l|load()\lmonitor(handler)\lsave(data)\l}", shape="record", style="solid"];
-"model_manager.src.interfaces.InterfaceLoader" -> "model_manager.src.utils.lazyInterfaceLoader.AbstractInterfaceLoader" [arrowhead="empty", arrowtail="none"];
-"model_manager.src.interfaces.file_interface.h5dfInterface" -> "model_manager.src.interfaces.BaseInterface.BaseDataInterface" [arrowhead="empty", arrowtail="none"];
-"model_manager.src.interfaces.k2eg_interface.K2EGInterface" -> "model_manager.src.interfaces.BaseInterface.BaseInterface" [arrowhead="empty", arrowtail="none"];
-"model_manager.src.interfaces.p4p_interface.SimlePVAInterfaceServer" -> "model_manager.src.interfaces.p4p_interface.SimplePVAInterface" [arrowhead="empty", arrowtail="none"];
-"model_manager.src.interfaces.p4p_interface.SimplePVAInterface" -> "model_manager.src.interfaces.BaseInterface.BaseInterface" [arrowhead="empty", arrowtail="none"];
-"model_manager.src.model_utils.LocalModelGetter.LocalModelGetter" -> "model_manager.src.model_utils.ModelGetterBase.ModelGetterBase" [arrowhead="empty", arrowtail="none"];
-"model_manager.src.model_utils.MlflowModelGetter.MLflowModelGetter" -> "model_manager.src.model_utils.ModelGetterBase.ModelGetterBase" [arrowhead="empty", arrowtail="none"];
-"model_manager.src.transformers.BaseTransformers.CAImageTransfomer" -> "model_manager.src.transformers.BaseTransformer.BaseTransformer" [arrowhead="empty", arrowtail="none"];
-"model_manager.src.transformers.BaseTransformers.PassThroughTransformer" -> "model_manager.src.transformers.BaseTransformer.BaseTransformer" [arrowhead="empty", arrowtail="none"];
-"model_manager.src.transformers.BaseTransformers.SimpleTransformer" -> "model_manager.src.transformers.BaseTransformer.BaseTransformer" [arrowhead="empty", arrowtail="none"];
-"model_manager.src.transformers.CompoundTransformer.CompoundTransformer" -> "model_manager.src.transformers.BaseTransformer.BaseTransformer" [arrowhead="empty", arrowtail="none"];
-"model_manager.src.transformers.TransformerLoader" -> "model_manager.src.utils.lazyInterfaceLoader.AbstractInterfaceLoader" [arrowhead="empty", arrowtail="none"];
-"model_manager.src.config.config_object.DeploymentConfig" -> "model_manager.src.config.config_object.ConfigObject" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="deployment", style="solid"];
-"model_manager.src.config.config_object.InputDataConfig" -> "model_manager.src.config.config_object.ConfigObject" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="input_data", style="solid"];
-"model_manager.src.config.config_object.InputDataToModelConfig" -> "model_manager.src.config.config_object.ConfigObject" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="input_data_to_model", style="solid"];
-"model_manager.src.config.config_object.ModelToOutputDataConfig" -> "model_manager.src.config.config_object.ConfigObject" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="output_model_to_data", style="solid"];
-"model_manager.src.config.config_object.OutputDataToConfig" -> "model_manager.src.config.config_object.ConfigObject" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="output_data_to", style="solid"];
-"model_manager.src.config.config_object.OutputModelConfig" -> "model_manager.src.config.config_object.ConfigObject" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="outputs_model", style="solid"];
 }

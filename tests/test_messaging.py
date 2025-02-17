@@ -42,7 +42,7 @@ def test_detach_observer(message_broker, test_observer):
 def test_notify_observers(message_broker, test_observer):
     message_broker.attach(test_observer, "test_topic")
     message = Message(
-        destination="test_topic", source="source", key="key", value="value"
+        topic="test_topic", source="source", key="key", value="value"
     )
     message_broker.notify(message)
     assert len(test_observer.messages) == 1
@@ -50,7 +50,7 @@ def test_notify_observers(message_broker, test_observer):
 
 
 def test_notify_no_observers(message_broker, caplog):
-    message = Message(destination="no_topic", source="source", key="key", value="value")
+    message = Message(topic="no_topic", source="source", key="key", value="value")
     message_broker.notify(message)
     # assert "no observers for no_topic" in caplog.text
 
@@ -59,7 +59,7 @@ def test_parse_queue(message_broker, test_observer):
     test_observer.messages = []
     message_broker.attach(test_observer, "test_topic")
     message = Message(
-        destination="test_topic", source="test_topic", key="key0", value="value1"
+        topic="test_topic", source="test_topic", key="key0", value="value1"
     )
     message_broker.queue.append(message)
     message_broker.parese_queue()
@@ -69,17 +69,17 @@ def test_parse_queue(message_broker, test_observer):
 
 def test_TransformerObserver(message_broker, test_observer):
     config1 = {
-        "variables": {"x2": {"formula": "A1 + B1"}, "x1": {"formula": "A1"}},
+        "variables": {"x2": {"formula": "A1 * B1"}, "x1": {"formula": "A1"}},
         "symbols": ["A1", "B1"],
     }
     st = SimpleTransformer(config1)
     stObserver = TransformerObserver(st, "test_topic")
 
     message1 = Message(
-        destination="test_topic", source="source", key="A1", value={"value": 1}
+        topic="test_topic", source="source", key="A1", value={"value": 2}
     )
     message2 = Message(
-        destination="test_topic", source="source", key="B1", value={"value": 1}
+        topic="test_topic", source="source", key="B1", value={"value": 2}
     )
 
     message_broker.attach(stObserver, "test_topic")
@@ -87,5 +87,5 @@ def test_TransformerObserver(message_broker, test_observer):
     assert st.updated == False
     message_broker.notify(message2)
     assert st.updated == True
-    assert st.latest_transformed["x2"] == 1 + 1
-    assert st.latest_transformed["x1"] == 1
+    assert st.latest_transformed["x2"] == 2 * 2
+    assert st.latest_transformed["x1"] == 2
