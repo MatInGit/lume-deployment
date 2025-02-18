@@ -35,8 +35,7 @@ def test_interface_observer_put(interface_observer):
     message = Message(
         topic="interface",
         source="model",
-        key="test_scalar",
-        value=5.0
+        value={"test_scalar": {"value": 5.0}}
     )
     
     # Set environment variable for publishing
@@ -54,8 +53,7 @@ def test_interface_observer_put(interface_observer):
     message = Message(
         topic="interface",
         source="model",
-        key="test_scalar",
-        value=6.0
+        value={"test_scalar": {"value": 6.0}}
     )
     
     interface_observer.put(message)
@@ -68,8 +66,8 @@ def test_interface_observer_put(interface_observer):
 def test_interface_observer_put_many(interface_observer):
     # Test putting multiple values
     values = {
-        'test_scalar': 7.0,
-        'test_array': [4.0, 5.0, 6.0]
+        'test_scalar': {'value': 7.0},
+        'test_array': {'value': np.array([4.0, 5.0, 6.0])}
     }
     
     message = Message(
@@ -81,7 +79,7 @@ def test_interface_observer_put_many(interface_observer):
     
     os.environ['PUBLISH'] = 'True'
     
-    interface_observer.put_many(message)
+    interface_observer.put(message)
     
     # Verify values were set
     name, scalar_value = interface_observer.interface.get('test_scalar')
@@ -98,22 +96,20 @@ def test_interface_observer_get(interface_observer):
     message = Message(
         topic="interface",
         source="request",
-        key="test_scalar",
-        value=None
+        value={"test_scalar": {"value": None}}
     )
     
-    result = interface_observer.get(message)
+    result = interface_observer.get(message)[0]
     
     assert result.topic == "next_step"
-    assert result.source == "interface"
-    assert result.key == "test_scalar"
-    assert result.value['value'] == 3.0
+    assert result.keys == ["test_scalar"]
+    assert result.value['test_scalar']['value'] == 3.0
 
 def test_interface_observer_get_all(interface_observer):
     # Set some values first
     values = {
-        'test_scalar': 9.0,
-        'test_array': [7.0, 8.0, 9.0]
+        'test_scalar': {'value': 9.0},
+        'test_array': {'value': np.array([7.0, 8.0, 9.0])}
     }
     os.environ['PUBLISH'] = 'True'
     interface_observer.interface.put_many(values)
@@ -123,14 +119,10 @@ def test_interface_observer_get_all(interface_observer):
     
     assert len(result) == 2
     assert result[0].topic == "next_step"
-    assert result[0].source == "interface"
-    assert result[0].key == "test_scalar"
-    assert result[0].value['value'] == 9.0
+    assert result[0].value == {'test_scalar': {'value': 9.0}}
     
     assert result[1].topic == "next_step"
-    assert result[1].source == "interface"
-    assert result[1].key == "test_array"
-    np.testing.assert_array_equal(result[1].value['value'], np.array([7.0, 8.0, 9.0]))
+    np.testing.assert_array_equal(result[1].value['test_array']['value'], np.array([7.0, 8.0, 9.0]))
 
 def test_interface_observer_update_no_publish(interface_observer):
     # Test update method when PUBLISH is False
@@ -139,15 +131,14 @@ def test_interface_observer_update_no_publish(interface_observer):
     message = Message(
         topic="interface",
         source="model",
-        key="test_scalar",
-        value=10.0
+        value={"test_scalar": {"value": 10.0}}
     )
     
     # Should not update when PUBLISH is False
     interface_observer.update(message)
     
     name, value_dict = interface_observer.interface.get('test_scalar')
-    assert value_dict['value'] == 0.0  # Should still be default value
+    assert value_dict['value'] == 0.0  # Should not have updated
 
 @pytest.mark.asyncio
 async def test_interface_observer_async_updates(interface_observer):
@@ -161,8 +152,7 @@ async def test_interface_observer_async_updates(interface_observer):
             message = Message(
                 topic="interface",
                 source="model",
-                key="test_scalar",
-                value=float(i)
+                value={"test_scalar": {"value": float(i)}}
             )
             interface_observer.update(message)
             await asyncio.sleep(0.1)

@@ -436,7 +436,7 @@ async def model_main(
                 # print("=" * 20)
                 for key in output:
                     # logger.debug(f"Output: {key}: {output[key]}")
-                    out_transformer.handler(key, {"value": output[key]})
+                    out_transformer.handler(key, {"value": output[key]}) # need to removr the "value" adding logic from here
 
                 if out_transformer.updated:
                     try:
