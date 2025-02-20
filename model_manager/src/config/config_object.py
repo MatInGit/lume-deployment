@@ -1,8 +1,12 @@
-from typing import Any
-
+from typing import Any, Optional, Union
+from pydantic import computed_field, model_validator
 import pydantic
-
+import networkx as nx
 from ..transformers import registered_transformers
+from enum import Enum
+from matplotlib import pyplot as plt
+from uuid import uuid4
+import os
 
 allowed_transformers = list(registered_transformers.keys())
 
@@ -50,25 +54,121 @@ class OutputDataToConfig(pydantic.BaseModel):
 
 class OutputModelConfig(pydantic.BaseModel):
     config: Any
+    
+    
+class allowedRoutingTypes(Enum):
+    in_interface: str = "in_interface"
+    in_transformer: str = "in_transformer"
+    model: str = "model"
+    out_transformer: str = "out_transformer"
+    out_interface: str = "out_interface"
+    model_evaluator: str = "model_evaluator"
+    misc: str = "misc"
+    
+class RoutingObject(pydantic.BaseModel):
+    type: allowedRoutingTypes
+    topic: Optional[str] = None
+    sub: Optional[str] = None
+    args: Optional[dict[str, Union[str, dict, bool]]] | str = None
 
+
+class RoutingConfig(pydantic.BaseModel):
+    config: dict[str, RoutingObject]
+    
+    class Config:
+        arbitrary_types_allowed = True # to allow nx.DiGraph
+    
+    @computed_field(return_type=nx.DiGraph)
+    @property
+    def graph(self):
+        G = nx.DiGraph()
+        # topics are nodes and subs are edges
+        nodes = []
+        edges = []
+        for key, value in self.config.items():
+            nodes.append(value.topic)
+            nodes.append(value.sub)
+            edges.append((value.sub, value.topic))
+
+        # keep only unique nodes
+        nodes = list(set(nodes))
+        # remove none values
+        nodes = [x for x in nodes if x is not None]
+        # remove none values
+        edges = [x for x in edges if x[0] is not None and x[1] is not None]
+        G.add_nodes_from(nodes)
+        G.add_edges_from(edges)
+        return G
+        
+        
+    @pydantic.field_validator('graph')
+    def check_routing(cls, v):
+        isolated_nodes = list(nx.isolates(v))
+        if isolated_nodes:
+            raise ValueError(
+                f'Isolated nodes found in routing graph: {isolated_nodes}'
+            )
+        return v
+
+def makeDefaultRoutingConfig():
+    config = {
+        "input_data": {
+            "type": "in_interface",
+            "topic": "in_interface",
+            "sub": "update",
+            "args": None
+        },
+        "input_data_to_model": {
+            "type": "in_transformer",
+            "topic": "in_transformer",
+            "sub": "in_interface",
+            "args": None
+        },
+        "model": {
+            "type": "model",
+            "topic": "model",
+            "sub": "in_transformer",
+            "args": None
+        },
+        "output_model_to_data": {
+            "type": "out_transformer",
+            "topic": "out_transformer",
+            "sub": "model",
+            "args": {
+                "unpack_data": True
+            }
+        },
+        "output_data_to": {
+            "type": "out_interface",
+            "topic": None,
+            "sub": "out_transformer",
+            "args": None
+        }
+    }
+    return RoutingConfig(config=config)
+            
 
 class ConfigObject(pydantic.BaseModel):
+    
+    routing: Optional[RoutingConfig] = None
     deployment: DeploymentConfig
     input_data: InputDataConfig
     input_data_to_model: InputDataToModelConfig
     output_model_to_data: ModelToOutputDataConfig
     output_data_to: OutputDataToConfig
     outputs_model: OutputModelConfig
+    
 
-
-# input_data:
-#   get_method: "k2eg"
-#   config:
-#     intialize: false
-#     variables:
-#       QUAD:LTUH:680:BCTRL:
-#         proto: ca
-#         name: QUAD:LTUH:680:BCTRL
-#       LUME:MLFLOW:TEST_A:
-#         proto: ca
-#         name: LUME:MLFLOW:TEST_A
+    @model_validator(mode='before')
+    @classmethod
+    def set_default_routing(cls, values):
+        if 'routing' not in values:
+            values['routing'] = makeDefaultRoutingConfig()
+        return values
+    
+    def draw_routing_graph(self):
+        G = self.routing.graph
+        nx.draw(G, with_labels=True)
+        if not os.path.exists("./graphs"):
+            os.makedirs("./graphs")
+        plt.savefig("./graphs/{}_routing_graph.png".format(uuid4()))
