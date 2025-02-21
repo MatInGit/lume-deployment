@@ -8,6 +8,7 @@ from model_manager.src.utils.messaging import (
 from model_manager.src.transformers.BaseTransformers import SimpleTransformer
 import logging
 
+
 class TestObserver(Observer):
     def __init__(self):
         self.messages = []
@@ -41,9 +42,7 @@ def test_detach_observer(message_broker, test_observer):
 
 def test_notify_observers(message_broker, test_observer):
     message_broker.attach(test_observer, "test_topic")
-    message = Message(
-        topic="test_topic", source="source", value={"key": {"value": 1}}
-    )
+    message = Message(topic="test_topic", source="source", value={"key": {"value": 1}})
     message_broker.notify(message)
     assert len(test_observer.messages) == 1
     assert test_observer.messages[0] == message
@@ -60,9 +59,7 @@ def test_notify_no_observers(message_broker, caplog):
 def test_parse_queue(message_broker, test_observer):
     test_observer.messages = []
     message_broker.attach(test_observer, "test_topic")
-    message = Message(
-        topic="test_topic", source="source", value={"key": {"value": 1}}
-    )
+    message = Message(topic="test_topic", source="source", value={"key": {"value": 1}})
     message_broker.queue.append(message)
     message_broker.parese_queue()
     assert len(test_observer.messages) == 1
@@ -77,12 +74,8 @@ def test_TransformerObserver(message_broker, test_observer):
     st = SimpleTransformer(config1)
     stObserver = TransformerObserver(st, "test_topic")
 
-    message1 = Message(
-        topic="test_topic", source="source", value={"A1": {"value": 2}}
-    )
-    message2 = Message(
-        topic="test_topic", source="source", value={"B1": {"value": 2}}
-    )
+    message1 = Message(topic="test_topic", source="source", value={"A1": {"value": 2}})
+    message2 = Message(topic="test_topic", source="source", value={"B1": {"value": 2}})
 
     message_broker.attach(stObserver, "test_topic")
     message_broker.notify(message1)
