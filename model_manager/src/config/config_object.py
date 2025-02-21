@@ -8,11 +8,11 @@ from matplotlib import pyplot as plt
 from uuid import uuid4
 import os
 import logging
+
 allowed_transformers = list(registered_transformers.keys())
 
 
 # # all of the below objects need more work
-
 
 
 # class InputDataConfig(pydantic.BaseModel):
@@ -53,8 +53,8 @@ allowed_transformers = list(registered_transformers.keys())
 
 # class OutputModelConfig(pydantic.BaseModel):
 #     config: Any
-    
-    
+
+
 # class allowedRoutingTypes(Enum):
 #     in_interface: str = "in_interface"
 #     in_transformer: str = "in_transformer"
@@ -63,7 +63,7 @@ allowed_transformers = list(registered_transformers.keys())
 #     out_interface: str = "out_interface"
 #     model_evaluator: str = "model_evaluator"
 #     misc: str = "misc"
-    
+
 # class RoutingObject(pydantic.BaseModel):
 #     type: allowedRoutingTypes
 #     pub: Optional[str] = None
@@ -73,10 +73,10 @@ allowed_transformers = list(registered_transformers.keys())
 
 # class RoutingConfig(pydantic.BaseModel):
 #     config: dict[str, RoutingObject]
-    
+
 #     class Config:
 #         arbitrary_types_allowed = True # to allow nx.DiGraph
-    
+
 #     @computed_field(return_type=nx.DiGraph)
 #     @property
 #     def graph(self):
@@ -98,8 +98,8 @@ allowed_transformers = list(registered_transformers.keys())
 #         G.add_nodes_from(nodes)
 #         G.add_edges_from(edges)
 #         return G
-        
-        
+
+
 #     @pydantic.field_validator('graph')
 #     def check_routing(cls, v):
 #         isolated_nodes = list(nx.isolates(v))
@@ -111,20 +111,23 @@ allowed_transformers = list(registered_transformers.keys())
 
 # above is legacy code, below is the new simplified version
 
+
 class ModuleConfig(pydantic.BaseModel):
     name: str
     pub: Optional[str] = None
     sub: Optional[Union[str, list]] = None
     module_args: Optional[Union[dict[str, Union[str, dict, bool]], str]] = None
-    config: Any = None # kind of a free for all for now but we can narrow down the specifics later
+    config: Any = (
+        None  # kind of a free for all for now but we can narrow down the specifics later
+    )
 
-    @pydantic.field_validator('module_args', mode = "before")
+    @pydantic.field_validator("module_args", mode="before")
     def validate_module_args(cls, v):
         if isinstance(v, str):
             return {}
         return v
 
-    
+
 class DeploymentConfig(pydantic.BaseModel):
     type: str
 
@@ -132,9 +135,9 @@ class DeploymentConfig(pydantic.BaseModel):
 class ConfigObject(pydantic.BaseModel):
     deployment: DeploymentConfig
     modules: dict[str, ModuleConfig]
+
     class Config:
-        arbitrary_types_allowed = True # to allow nx.DiGraph
-        
+        arbitrary_types_allowed = True  # to allow nx.DiGraph
 
     @computed_field(return_type=nx.DiGraph)
     @property
@@ -152,36 +155,33 @@ class ConfigObject(pydantic.BaseModel):
                         # normalise them all to lists
                         if isinstance(value2.sub, str):
                             value2.sub = [value2.sub]
-                            
+
                         for pub in value.pub:
                             for sub in value2.sub:
                                 if pub == sub and value.name != value2.name:
-                                    edges.append((
-                                        value.name,
-                                        value2.name
-                                    ))
-                                
+                                    edges.append((value.name, value2.name))
+
             nodes.append(value.name)
-            
+
         logging.debug(f"Nodes: {nodes}")
         logging.debug(f"Edges: {edges}")
         nodes = list(set(nodes))
         nodes = [x for x in nodes if x is not None]
         edges = [tuple(x) for x in edges]
-        
+
         G.add_nodes_from(nodes)
         G.add_edges_from(edges)
         return G
-    
-    @pydantic.field_validator('graph')
+
+    @pydantic.field_validator("graph")
     def check_routing(cls, v):
         isolated_nodes = list(nx.isolates(v))
         if isolated_nodes:
             raise ValueError(
-                f'Isolated nodes found in routing graph: {isolated_nodes}, this means that a modules is niether a publisher or subscriber to any other module'
+                f"Isolated nodes found in routing graph: {isolated_nodes}, this means that a modules is niether a publisher or subscriber to any other module"
             )
-        return v    
-    
+        return v
+
     def draw_routing_graph(self):
         G = self.graph
         plt.figure(figsize=(10, 10))

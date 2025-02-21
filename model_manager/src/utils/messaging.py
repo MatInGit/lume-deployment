@@ -1,6 +1,13 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
-from pydantic import BaseModel, Field, ValidationError, ValidationInfo, field_validator, computed_field
+from pydantic import (
+    BaseModel,
+    Field,
+    ValidationError,
+    ValidationInfo,
+    field_validator,
+    computed_field,
+)
 import time
 from model_manager.src.logging_utils import get_logger
 from model_manager.src.transformers import BaseTransformer
@@ -16,10 +23,10 @@ class Message(BaseModel):
     ## key: str made a mess of this by including a key, no need to include a key
     value: dict = Field(default_factory=dict)
     timestamp: float = Field(default_factory=time.time)
-    # optional 
-    allow_unsafe: Optional[bool] = False 
-    
-    @field_validator('value')
+    # optional
+    allow_unsafe: Optional[bool] = False
+
+    @field_validator("value")
     @classmethod
     def check_value(cls, value):
         if not isinstance(value, dict):
@@ -43,7 +50,7 @@ class Message(BaseModel):
                 if not isinstance(struct["metadata"], dict):
                     raise ValueError("metadata must be a dictionary")
         return value
-    
+
     @computed_field
     def keys(self) -> list[str]:
         return list(self.value.keys())
@@ -51,7 +58,6 @@ class Message(BaseModel):
     @computed_field
     def values(self) -> list[Any]:
         return list(self.value.values())
-    
 
     def __str__(self):
         return f"Message(topic={self.topic}, source={self.source}, value={self.value}, timestamp={self.timestamp})"
@@ -76,13 +82,13 @@ class MessageBroker:
 
     def attach(self, observer: Observer, topic: str | list[str]) -> None:
         """add observer to topic"""
-        
+
         if isinstance(topic, list):
             for t in topic:
                 if t not in self._observers:
                     self._observers[t] = []
                 self._observers[t].append(observer)
-                
+
         else:
             if topic not in self._observers:
                 self._observers[topic] = []
@@ -90,7 +96,7 @@ class MessageBroker:
 
     def detach(self, observer: Observer, topic: str | list[str]) -> None:
         """remove observer from topic, we will probably never use this"""
-        
+
         if isinstance(topic, list):
             for t in topic:
                 if t in self._observers:
@@ -112,7 +118,7 @@ class MessageBroker:
                             self.queue.append(r)
                     else:
                         self.queue.append(result)
-                
+
         else:
             logger.error(f"no observers for {message.topic}")
 
@@ -127,62 +133,58 @@ class MessageBroker:
 
 
 class TransformerObserver(Observer):
-    def __init__(self, transformer: BaseTransformer, topic: str, unpack_output: bool = False):
+    def __init__(
+        self, transformer: BaseTransformer, topic: str, unpack_output: bool = False
+    ):
         """wraps around the transformer.handler method"""
         self.transformer = transformer
         self.topic = topic
         self.unpack_output = unpack_output
 
     def update(self, message: Message) -> Message | list[Message]:
-        
+
         for key, value in message.value.items():
             self.transformer.handler(key, value)
-            
+
         if self.transformer.updated:
-            value=self.transformer.latest_transformed
-            
+            value = self.transformer.latest_transformed
+
             if self.unpack_output:
                 for key, value in value.items():
                     if isinstance(value, dict) and "value" in value:
                         return Message(
-                            topic=self.topic,
-                            source=str(self),
-                            value={key: value}
+                            topic=self.topic, source=str(self), value={key: value}
                         )
                     elif isinstance(value, dict) and "value" not in value:
                         return Message(
                             topic=self.topic,
                             source=str(self),
-                            value={key: {"value": value}}
+                            value={key: {"value": value}},
                         )
                     else:
                         return Message(
                             topic=self.topic,
                             source=str(self),
-                            value={key: {"value": value}}
+                            value={key: {"value": value}},
                         )
-                
-            
+
             else:
                 if not isinstance(value, dict):
                     raise ValueError(f"value must be a dictionary, got {value}")
-                
-                if isinstance(value, dict) and  "value" in value:
+
+                if isinstance(value, dict) and "value" in value:
                     return Message(
-                        topic=self.topic,
-                        source=str(self),
-                        value={"transformed": value}
+                        topic=self.topic, source=str(self), value={"transformed": value}
                     )
-                elif isinstance(value, dict) and  "value" not in value:
+                elif isinstance(value, dict) and "value" not in value:
                     return Message(
                         topic=self.topic,
                         source=str(self),
-                        value={"transformed": {"value": value}}
+                        value={"transformed": {"value": value}},
                     )
                 else:
                     raise ValueError(f"value must be a dictionary, got {value}")
-            
-            
+
 
 class InterfaceObserver(Observer):
     def __init__(self, interface: BaseInterface, topic: str, sanitise: bool = True):
@@ -192,69 +194,60 @@ class InterfaceObserver(Observer):
         self.sanitise = sanitise
 
     def update(self, message: Message) -> Message | list[Message]:
-        if message.topic == 'get_all':
+        if message.topic == "get_all":
             messages = self.get_all()
             return messages
         else:
             logger.debug(f"updating {self} with {message}")
-            if os.environ['PUBLISH'] == 'True':
+            if os.environ["PUBLISH"] == "True":
                 self.interface.put_many(message.value)
-            
+
     def get(self, message: Message) -> list[Message]:
         """get a single variable from the interface"""
         messages = []
         for key in message.keys:
             key, value = self.interface.get(key)
-            messages.append(Message(
-                topic=self.topic,
-                source=str(self),
-                value={key: value}
-            ))
+            messages.append(
+                Message(topic=self.topic, source=str(self), value={key: value})
+            )
         return messages
 
-    
     def get_all(self) -> list[Message]:
         """get all variables from the interface based on internal variable list"""
         messages = []
         for key in self.interface.variable_list:
-            key, value = self.interface.get(key)  
+            key, value = self.interface.get(key)
             if value is not None:
-                messages.append(Message(
-                    topic=self.topic,
-                    source=str(self),
-                    value={key: value}
-                ))
-        return messages   
-                
+                messages.append(
+                    Message(topic=self.topic, source=str(self), value={key: value})
+                )
+        return messages
+
     def get_many(self, message: Message) -> list[Message]:
         """get many variables from the interface"""
         keys, values = self.interface.get_many(message.value)
-        
+
         messages = []
         for key, value in values.items():
-            messages.append(Message(
-                topic=self.topic,
-                source=str(self),
-                value= {key: value}
-            ))
-        return messages    
+            messages.append(
+                Message(topic=self.topic, source=str(self), value={key: value})
+            )
+        return messages
 
     def put(self, message: Message) -> None:
         """put a single variable into the interface"""
         if not isinstance(message.value, dict):
             raise ValueError("message value must be a dictionary")
-        
+
         for key, value in zip(message.keys, message.values):
             self.interface.put(key, value)
-        
+
     def put_many(self, message: Message) -> None:
         """put many variables into the interface"""
         if not isinstance(message.value, dict):
             raise ValueError("message value must be a dictionary")
         self.interface.put_many(message.value)
-        
 
-    
     # unused due to the issues in p4p with the monitor method
 
     # def __monitor_handler(self, key, value):
@@ -265,10 +258,10 @@ class InterfaceObserver(Observer):
     #         key=key,
     #         value=value
     #     )
-    
+
     # def monitor(self) -> None:
     #     """monitor a variable in the interface"""
-        
+
 
 class ModelObserver(Observer):
     def __init__(self, model, topic: str):
@@ -280,12 +273,11 @@ class ModelObserver(Observer):
         pred = self.model.predict(message.value)
         messages = []
         for key, value in pred.items():
-            messages.append(Message(
-                topic=self.topic,
-                source=str(self),
-                value={key: value}
-            ))
+            messages.append(
+                Message(topic=self.topic, source=str(self), value={key: value})
+            )
         return messages
+
 
 # class GenericObserver(Observer):
 #     def __init__(self, callback):
