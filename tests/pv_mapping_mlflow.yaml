@@ -11,7 +11,7 @@ modules:
     type: "interface.p4p_server"
     pub: "in_interface"
     sub: 
-      - "update"
+      - "get_all"
       - "out_transformer" # look we can do this now!               
     module_args: None # defines what arguments to pass to the module observer, if any this can inform unpacking etc
     config: 
@@ -49,7 +49,10 @@ modules:
     sub: "in_transformer"
     module_args: None
     config:
-      type: "mock"
+      type: "MlflowModelGetter"
+      args:
+        model_name: "torch_model"
+        model_version : 17
       variables:
         y:
           type: "scalar"

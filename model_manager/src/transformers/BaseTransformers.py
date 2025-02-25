@@ -46,25 +46,33 @@ class SimpleTransformer(BaseTransformer):
     def handler(self, pv_name, value):
         # logger.debug(f"SimpleTransformer handler for {pv_name} with value {value}")
 
-        # assert valus is float
-        try:
-            if isinstance(value['value'], (float, int)):
-                value = float(value['value'])
-            elif isinstance(value['value'], (np.ndarray, list)):
-                value = np.array(value['value']).astype(float)
-        except Exception as e:
-            logger.error(f'Error converting value to float: {e}')
-            raise e
+        
+        # chek if pv_name is in sel.input_list
+        if pv_name in self.input_list:
+            # assert value is float
+            try:
+                if isinstance(value['value'], (float, int, np.float32)):
+                    value = float(value['value'])
+                elif isinstance(value['value'], (np.ndarray, list)):
+                    value = np.array(value['value']).astype(float)
+                else :
+                    raise Exception(f'Invalid type for value: {value}, type: {type(value["value"])}')
+            except Exception as e:
+                logger.error(f'Error converting value to float: {e}')
+                raise e
 
-        self.latest_input[pv_name] = value
-        try:
-            if all([value is not None for value in self.latest_input.values()]):
-                time_start = time.time()
-                self.transform()
-                self.handler_time = time.time() - time_start
-        except Exception as e:
-            logger.error(f'Error transforming: {e}')
-            raise e
+            self.latest_input[pv_name] = value
+            
+            try:
+                if all([value is not None for value in self.latest_input.values()]):
+                    time_start = time.time()
+                    self.transform()
+                    self.handler_time = time.time() - time_start
+            except Exception as e:
+                logger.error(f'Error transforming: {e}')
+                raise e
+        else:
+            logger.warning(f'PV name {pv_name} not in input list')
 
     def transform(self):
         # logger.debug("Transforming")

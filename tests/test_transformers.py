@@ -67,7 +67,7 @@ config2a = {
         'x3': {'formula': 'B1 + A1'},
         'x4': {'formula': 'C1*B1'},
     },
-    'symbols': ['A1', 'B1'],
+    'symbols': ['A1', 'B1','C1'],
 }
 
 
