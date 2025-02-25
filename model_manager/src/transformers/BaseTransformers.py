@@ -72,7 +72,7 @@ class SimpleTransformer(BaseTransformer):
                 logger.error(f'Error transforming: {e}')
                 raise e
         else:
-            logger.warning(f'PV name {pv_name} not in input list')
+            logger.debug(f'PV name {pv_name} not in input list')
 
     def transform(self):
         # logger.debug("Transforming")

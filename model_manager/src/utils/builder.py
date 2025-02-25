@@ -66,10 +66,18 @@ class Builder():
                 interface = InterfaceObserver(registered_interfaces[module_subtype](self.config.modules[module].config), self.config.modules[module].pub, *args)
                 loaded_observers[module] = interface
             elif module_type == "transformer":
-                transformer = TransformerObserver(registered_transformers[module_subtype](self.config.modules[module].config), self.config.modules[module].pub)
+                if self.config.modules[module].module_args is not None:
+                    args = self.config.modules[module].module_args
+                else :
+                    args = {}
+                transformer = TransformerObserver(registered_transformers[module_subtype](self.config.modules[module].config), self.config.modules[module].pub, *args)
                 loaded_observers[module] = transformer
             elif module_type == "model":
-                observer = ModelObserver(config = self.config.modules[module].config,topic = self.config.modules[module].pub)
+                if self.config.modules[module].module_args is not None:
+                    args = self.config.modules[module].module_args
+                else :
+                    args = {}
+                observer = ModelObserver(config = self.config.modules[module].config,topic = self.config.modules[module].pub, *args)
                 loaded_observers[module] = observer
             else:
                 raise ValueError(f"Invalid module type: {module_type}")

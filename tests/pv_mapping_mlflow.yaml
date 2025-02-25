@@ -2,7 +2,7 @@
 
 deployment:
   type: "continuous"
-  rate: 1 #seconds
+  rate: 0.1 #seconds
 
 modules: 
   
@@ -15,7 +15,7 @@ modules:
       - "out_transformer" # look we can do this now!               
     module_args: None # defines what arguments to pass to the module observer, if any this can inform unpacking etc
     config: 
-      EPICS_PVA_NAME_SERVERS: "localhost:5075"
+      EPICS_PVA_NAME_SERVERS: "talos.isis.rl.ac.uk:5075"
       variables:
         LUME:MLFLOW:TEST_B:
           proto: pva

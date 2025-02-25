@@ -47,7 +47,7 @@ def test_mlflow(caplog, make_builder):
         response = requests.get(f"http://athena.isis.rl.ac.uk:5000/health")
         assert response.status_code == 200
     except Exception as e:
-        pytest.fail(f"MLflow server is not reachable: {os.environ['MLFLOW_TRACKING_URI']}")    
+        pytest.skip(f"MLflow server is not reachable: {os.environ['MLFLOW_TRACKING_URI']}")    
     caplog.set_level(logging.DEBUG)
     builder = make_builder("./tests/pv_mapping_mlflow.yaml")
     message_broker = builder.build()
@@ -64,18 +64,18 @@ def test_mlflow(caplog, make_builder):
     logging.info(message_broker.queue)
     for message in message_broker.queue:
         assert message.topic == "in_interface"
-    message_broker.parese_queue()
+    message_broker.parse_queue()
     assert len(message_broker.queue) == 1
     logging.info(message_broker.queue)
     assert message_broker.queue[0].topic == "in_transformer"
-    message_broker.parese_queue()
+    message_broker.parse_queue()
     assert len(message_broker.queue) == 1
     logging.info(message_broker.queue)
     assert message_broker.queue[0].topic == "model"
-    message_broker.parese_queue()
+    message_broker.parse_queue()
     assert len(message_broker.queue) == 1
     logging.info(message_broker.queue)
     assert message_broker.queue[0].topic == "out_transformer"
-    message_broker.parese_queue()
+    message_broker.parse_queue()
     assert len(message_broker.queue) == 0  # no messages left in the queue
     

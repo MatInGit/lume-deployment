@@ -146,8 +146,15 @@ class MessageBroker:
 
     def get_stats(self):
         return self._stats
+    
+    def get_all(self) -> None:
+        refresh_msg = Message(
+            topic="get_all", source="clock", value={"dummy": {"value": 1}}
+        )
+        self.notify(refresh_msg)
+        return None
 
-    def parese_queue(self):
+    def parse_queue(self):
         queue_snapshot = self.queue.copy()
         for message in queue_snapshot:
             self.notify(message)
@@ -172,7 +179,6 @@ class TransformerObserver(Observer):
 
         if self.transformer.updated:
             value = self.transformer.latest_transformed
-
             if self.unpack_output:
                 for key, value in value.items():
                     if isinstance(value, dict) and "value" in value:
@@ -230,6 +236,8 @@ class InterfaceObserver(Observer):
             logger.debug(f"updating {self} with {message}")
             if os.environ["PUBLISH"] == "True":
                 self.interface.put_many(message.value)
+            else:
+                logger.warning("PUBLISH is set to False, this will not publish to the interface")
 
     def get(self, message: Message) -> list[Message]:
         """get a single variable from the interface"""
@@ -276,20 +284,6 @@ class InterfaceObserver(Observer):
         if not isinstance(message.value, dict):
             raise ValueError("message value must be a dictionary")
         self.interface.put_many(message.value)
-
-    # unused due to the issues in p4p with the monitor method
-
-    # def __monitor_handler(self, key, value):
-    #     """internal handler for sending message to broker on change from interfeces monitor method"""
-    #     return Message(
-    #         topic=self.topic,
-    #         source='interface',
-    #         key=key,
-    #         value=value
-    #     )
-
-    # def monitor(self) -> None:
-    #     """monitor a variable in the interface"""
 
 
 class MockModel:
