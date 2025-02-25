@@ -19,3 +19,4 @@ torch_model
 local_test/
 lebt_torch_model/
 cookiecutter-*
+*.json
