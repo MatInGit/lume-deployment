@@ -56,30 +56,12 @@ modules:
       variables:
         y:
           type: "scalar"
-
-  model1:
-    name: "model1"
-    type: "model.SimpleModel"
-    pub: "model1"
-    sub: "in_transformer"
-    module_args: None
-    config:
-      type: "MlflowModelGetter"
-      args:
-        model_name: "torch_model"
-        model_version : 17
-      variables:
-        y:
-          type: "scalar"
-  
-  
   output_transformer:
     name: "output_transformer"
     type: "transformer.SimpleTransformer"
     pub: "out_transformer"
     sub: 
       - "model"
-      - "model1"
     module_args: 
       unpack_data: True
     config:

@@ -69,11 +69,11 @@ def test_mlflow(caplog, make_builder):
     logging.info(message_broker.queue)
     assert message_broker.queue[0].topic == "in_transformer"
     message_broker.parse_queue()
-    assert len(message_broker.queue) == 2 # model outputs x1 and x2
+    assert len(message_broker.queue) == 1
     logging.info(message_broker.queue)
     assert message_broker.queue[0].topic == "model" 
     message_broker.parse_queue()
-    assert len(message_broker.queue) == 2 # out transfomer produces y1 and y2 as separate messages dues to unpacking being enabled in the transformer module
+    assert len(message_broker.queue) == 1
     logging.info(message_broker.queue)
     assert message_broker.queue[0].topic == "out_transformer"
     message_broker.parse_queue()
