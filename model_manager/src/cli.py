@@ -137,14 +137,14 @@ def setup():
         required=False,
     )
 
-    # parser.add_argument(
-    #     "-o",
-    #     "--one_shot",
-    #     help="One shot mode, run once and exit, helpful for debugging",
-    #     required=False,
-    #     default=False,
-    #     action="store_true",
-    # )
+    parser.add_argument(
+        "-o",
+        "--one_shot",
+        help="One shot mode, run once and exit, helpful for debugging",
+        required=False,
+        default=False,
+        action="store_true",
+    )
 
     # publish
     parser.add_argument(
@@ -322,6 +322,9 @@ async def model_main(
                 
                 if len(broker.queue) > 0:
                     broker.parse_queue()
+                    if args.one_shot:
+                        logger.info("One shot mode, exiting")
+                        break
                 
                 await asyncio.sleep(0.01)
     

@@ -2,7 +2,7 @@
 
 deployment:
   type: "continuous"
-  rate: 0.1 #seconds
+  rate: 0.25 #seconds
 
 modules: 
   
