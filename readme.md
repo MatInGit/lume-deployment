@@ -1,3 +1,6 @@
+NEW DOCS in progress
+use old docs in the meantime: [old docs](./readme_old.md)
+
 # Lume-Deployment
 
 Lume-Deployment - soon to be renamed, is a package that allows you do deploy any model with an arbitrary number of inputs and outputs, related data transformations and system interfaces. 
