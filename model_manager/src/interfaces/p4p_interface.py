@@ -38,6 +38,7 @@ class SimplePVAInterface(BaseInterface):
 
         pv_dict = config['variables']
         pv_list = []
+        print(f"pv_dict: {pv_dict}")
         for pv in pv_dict:
             try:
                 assert pv_dict[pv]['proto'] == 'pva'
