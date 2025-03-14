@@ -79,7 +79,7 @@ def test_simple_transformer_complex_array_in():
 
     st.handler('A1', {'value': np.array([1, 2, 3])})
     st.handler('B1', {'value': np.array([4, 5, 6])})
-    st.handler('C1', {'value': 7})
+    st.handler('C1', {'value': np.array([4, 5, 6])})
 
     assert st.updated
     expected_result = np.outer(np.array([1, 2, 3]), np.array([4, 5, 6]))

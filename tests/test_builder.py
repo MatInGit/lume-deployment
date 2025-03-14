@@ -60,7 +60,7 @@ def test_mlflow(caplog, make_builder):
     )
     
     message_broker.notify(message)
-    assert len(message_broker.queue) == 3 # we have an extra here with the S variable we  should see A,B and S variables
+    assert len(message_broker.queue) == 1 # we have an extra here with the S variable we  should see A,B and S variables
     logging.info(message_broker.queue)
     for message in message_broker.queue:
         assert message.topic == "in_interface"

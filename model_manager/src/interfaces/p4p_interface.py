@@ -13,6 +13,10 @@ from model_manager.src.logging_utils import get_logger
 
 from .BaseInterface import BaseInterface
 
+# multi pool 
+from multiprocessing.pool import ThreadPool
+
+
 logger = get_logger()
 
 # os.environ["EPICS_PVA_NAME_SERVERS"] = "localhost:5075"
@@ -99,7 +103,24 @@ class SimplePVAInterface(BaseInterface):
             self.put(key, value)
 
     def get_many(self, data, **kwargs):
-        pass
+        results = self.ctxt.get(data, throw=False)
+        output = {}
+        # print(f"results: {results}")
+        for value, key in zip(results, data):
+            if isinstance(value['value'], np.ndarray):
+                # if value has dimension
+                if 'dimension' in value:
+                    y_size = value['dimension'][0]['size']
+                    x_size = value['dimension'][1]['size']
+                    value = value['value'].reshape((y_size, x_size))
+                else:
+                    value = value['value']
+            else:
+                value = value['value']
+            
+            output[key] = {'value': value}
+        
+        return output
 
     def close(self):
         logger.debug('Closing SimplePVAInterface')
@@ -116,6 +137,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         self.shared_pvs = {}
         pv_type_init = None
         pv_type_nt = None
+        self.kv_store = {}
 
         if 'port' in config:
             port = config['port']
@@ -152,7 +174,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
 
                 # waveform or array
                 elif pv_type == 'waveform' or pv_type == 'array':
-                    print(f'pv: {pv}')
+                    # print(f'pv: {pv}')
                     if 'length' in config['variables'][pv]:
                         length = config['variables'][pv]['length']
                     else:
@@ -246,5 +268,28 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         return name, {'value': value}
 
     def put_many(self, data, **kwargs):
+        # for key, value in data.items():
+        #     self.put(key, value)
+        channel_names = []
+        values = []
         for key, value in data.items():
-            self.put(key, value)
+            # result = self.ctxt.put(key, value)
+            self.shared_pvs[key].post(value, timestamp=time.time())
+        # result = self.ctxt.put(channel_names,values, throw=False)
+        # with ThreadPool(processes=24) as pool:
+            # for key, value in data.items():
+            #     channel_names.append(key)
+            #     values.append(value)
+            # pool.starmap(self.put, zip(channel_names, values))
+    def get_many(self, data, **kwargs):
+        output_dict = {}
+        for key in data:
+            result = self.get(key)
+            output_dict[result[0]] = result[1]
+        # with ThreadPool(processes=24) as pool:
+        #     results = pool.starmap(self.get, [(key,) for key in data])
+        #     for result in results:
+        #         output_dict[result[0]] = result[1]
+        
+        return output_dict
+            

@@ -3,7 +3,7 @@ import numpy as np
 import sympy as sp
 from model_manager.src.logging_utils.make_logger import get_logger
 from model_manager.src.transformers.BaseTransformer import BaseTransformer
-
+from concurrent.futures import ThreadPoolExecutor, as_completed
 logger = get_logger()
 
 
@@ -34,6 +34,13 @@ class SimpleTransformer(BaseTransformer):
         self.latest_transformed = {key: 0 for key in self.pv_mapping.keys()}
         self.updated = False
         self.handler_time = None
+        self.formulas = {}
+        self.lambdified_formulas = {}
+        for key, value in self.pv_mapping.items():
+            self.formulas[key] = sp.sympify(value['formula'].replace(':', '_'))
+            input_list_renamed = [symbol.replace(':', '_') for symbol in self.input_list]
+            self.lambdified_formulas[key] = sp.lambdify(input_list_renamed, self.formulas[key], modules='numpy')
+
 
         self.handler_time = []
 
@@ -68,46 +75,76 @@ class SimpleTransformer(BaseTransformer):
                     time_start = time.time()
                     self.transform()
                     self.handler_time = time.time() - time_start
+                    # logger.info(f'Handler time for {pv_name} is {self.handler_time}')
+                    # if self.handler_time > 0.5:
+                    #     logger.warning(f'Handler time for {pv_name} is {self.handler_time}')
+                    #     print(f'self.latest_input: {self.latest_input}')
+                    #     print(f'self.latest_transformed: {self.latest_transformed}')
             except Exception as e:
                 logger.error(f'Error transforming: {e}')
                 raise e
         else:
             logger.debug(f'PV name {pv_name} not in input list')
 
+    # def transform(self):
+    #     # logger.debug("Transforming")
+    #     transformed = {}
+    #     pvs_renamed = {
+    #         key.replace(':', '_'): value for key, value in self.latest_input.items()
+    #     }
+    #     pv_shapes = {}
+
+    #     # convert to sympy symbols
+
+    #     for key, value in pvs_renamed.items():
+    #         if isinstance(value, (np.ndarray, list)):
+    #             pv_shapes[key] = value.shape
+    #             pvs_renamed[key] = sp.Matrix(value)
+    #         elif isinstance(value, (float, int)):
+    #             pvs_renamed[key] = value
+    #         else:
+    #             raise Exception(f'Invalid type for value: {value}')
+
+    #     for key, value in self.pv_mapping.items():
+    #         try:
+    #             # formula = value['formula'].replace(':', '_')
+
+    #             # formula = sp.sympify(formula)
+    #             formula = self.formulas[key]
+    #             transformed[key] = formula.subs(pvs_renamed)
+    #             # print(transformed[key])
+    #             # converted to float
+    #             if isinstance(transformed[key], sp.Matrix | sp.ImmutableDenseMatrix):
+    #                 # bit hacky but casuse sympy is meant to be symbolic only and not numerical
+    #                 s = sp.symbols('s')
+    #                 numpy_value = sp.lambdify(s, transformed[key], modules='numpy')
+    #                 numpy_value = numpy_value(0)
+    #                 transformed[key] = numpy_value
+    #                 # drop last dim if it is 1
+    #                 if transformed[key].shape[-1] == 1:
+    #                     transformed[key] = transformed[key].squeeze()
+    #             else:
+    #                 transformed[key] = float(transformed[key])
+
+    #         except Exception as e:
+    #             logger.error(f'Error transforming: {e}')
+    #             raise e
+
+    #     for key, value in transformed.items():
+    #         self.latest_transformed[key] = value
+    #     self.updated = True
     def transform(self):
-        # logger.debug("Transforming")
         transformed = {}
         pvs_renamed = {
             key.replace(':', '_'): value for key, value in self.latest_input.items()
         }
-        pv_shapes = {}
-
-        # convert to sympy symbols
-
-        for key, value in pvs_renamed.items():
-            if isinstance(value, (np.ndarray, list)):
-                pv_shapes[key] = value.shape
-                pvs_renamed[key] = sp.Matrix(value)
-            elif isinstance(value, (float, int)):
-                pvs_renamed[key] = value
-            else:
-                raise Exception(f'Invalid type for value: {value}')
 
         for key, value in self.pv_mapping.items():
             try:
-                formula = value['formula'].replace(':', '_')
+                lambdified_formula = self.lambdified_formulas[key]
+                transformed[key] = lambdified_formula(*[pvs_renamed[symbol.replace(':', '_')] for symbol in self.input_list])
 
-                formula = sp.sympify(formula)
-                transformed[key] = formula.subs(pvs_renamed)
-                # print(transformed[key])
-                # converted to float
-                if isinstance(transformed[key], sp.Matrix | sp.ImmutableDenseMatrix):
-                    # bit hacky but casuse sympy is meant to be symbolic only and not numerical
-                    s = sp.symbols('s')
-                    numpy_value = sp.lambdify(s, transformed[key], modules='numpy')
-                    numpy_value = numpy_value(0)
-                    transformed[key] = numpy_value
-                    # drop last dim if it is 1
+                if isinstance(transformed[key], np.ndarray):
                     if transformed[key].shape[-1] == 1:
                         transformed[key] = transformed[key].squeeze()
                 else:
@@ -120,8 +157,6 @@ class SimpleTransformer(BaseTransformer):
         for key, value in transformed.items():
             self.latest_transformed[key] = value
         self.updated = True
-
-
 class CAImageTransfomer(BaseTransformer):
     """Input only image transformation"""
 
