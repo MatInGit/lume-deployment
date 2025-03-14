@@ -52,7 +52,7 @@ modules:
       type: "MlflowModelGetter"
       args:
         model_name: "torch_model"
-        model_version : 17
+        model_version : 19
       variables:
         y:
           type: "scalar"
