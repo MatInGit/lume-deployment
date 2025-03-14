@@ -329,7 +329,7 @@ async def model_main(
                         logger.info("One shot mode, exiting")
                         break
                 
-                await asyncio.sleep(0.001) # sleep for 100ms
+                await asyncio.sleep(0.01) # sleep for 10ms
     
         else:
             raise Exception("Deployment type not supported")
