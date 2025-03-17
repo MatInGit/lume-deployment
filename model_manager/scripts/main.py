@@ -2,7 +2,6 @@ def main():
     import asyncio
     import logging
     import os
-
     from model_manager.src.cli import model_main, setup
     from model_manager.src.logging_utils import make_logger, reset_logging
 
