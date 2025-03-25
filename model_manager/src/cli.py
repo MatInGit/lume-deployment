@@ -7,20 +7,9 @@ import sys
 import time
 import traceback
 
-import numpy as np
-import torch
 from model_manager.src.config import ConfigParser
-from model_manager.src.interfaces import registered_interfaces
 from model_manager.src.logging_utils import get_logger, make_logger
 from model_manager.src.model_utils import registered_model_getters
-from model_manager.src.transformers import registered_transformers
-from model_manager.src.utils.messaging import (
-    Message,
-    MessageBroker,
-    TransformerObserver,
-    InterfaceObserver,
-    ModelObserver,
-)
 
 from model_manager.src.utils.builder import Builder
 
@@ -54,17 +43,6 @@ def initailize_config(config_path):
         raise e
 
 
-def get_model_getter(model_getter, config=None):
-    """Get the model."""
-    logger.debug(f"Getting model: {model_getter} with config: {config}")
-    try:
-        model_getter = registered_model_getters[model_getter](config)
-        return model_getter
-    except Exception as e:
-        logger.error(f"Error getting model getter: {e}")
-        raise e
-
-
 def env_config(env_config):
     """Set the environment variables."""
     logger.debug(f"Setting environment variables from: {env_config}")
@@ -82,14 +60,6 @@ def env_config(env_config):
 def setup():
     """Setup the model manager."""
     parser = argparse.ArgumentParser(description="Model Manager CLI")
-
-    # parser.add_argument(
-    #     "-l",  # expects 3 arguments
-    #     "--local",
-    #     help="Local mode, run without mlflow",
-    #     required=False,
-    #     nargs=2,
-    # )
 
     parser.add_argument(
         "-d",
@@ -116,11 +86,14 @@ def setup():
     #     required=False,
     #     help="Name of the model to be loaded from mlflow",
     # )
-    # parser.add_argument(
-    #     "-v",
-    #     "--model_version",
-    #     help="Version of the model to be loaded from mlflow",
-    # )
+    parser.add_argument(
+        "-v",
+        "--Version",
+        help="Print Version and exit",
+        required=False,
+        default=False,
+        action="store_true",
+    )
     parser.add_argument(
         "-r",
         "--reqirements",
@@ -198,38 +171,6 @@ def setup():
     if args.env:
         env_config(args.env)
 
-    # if args.local is not None:
-    #     # model getter
-    #     model_getter = get_model_getter(
-    #         "local",
-    #         {
-    #             "model_path": args.local[0],
-    #             "model_factory_class": args.local[1],
-    #         },
-    #     )
-    # else:
-    #     # model getter
-    #     model_getter = get_model_getter(
-    #         "mlflow",
-    #         {
-    #             "model_name": args.model_name,
-    #             "model_version": args.model_version,
-    #         },
-        # )
-
-    # requirements install and quit
-    # if args.reqirements:
-    #     deps = model_getter.get_requirements()
-    #     for line in open(deps).readlines():
-    #         logger.debug(f"Installing {line}")
-    #         os.system(f"pip install {line}")
-    #     logger.info("Requirements installed, exiting")
-    #     sys.exit(0)
-
-    # get model and config
-
-    # model = model_getter.get_model()
-
     if not args.config:
         logger.info(
             "No configuration file provided, getting config from model artifacts"
@@ -245,47 +186,6 @@ def setup():
     
     
     broker = builder.build()
-
-    # in_interface = registered_interfaces[config.input_data.get_method](
-    #     config.input_data.config
-    # )
-    # out_interface = registered_interfaces[config.output_data_to.put_method](
-    #     config.output_data_to.config
-    # )
-    # in_transformer = registered_transformers[config.input_data_to_model.type](
-    #     config.input_data_to_model.config
-    # )
-    # out_transformer = registered_transformers[config.output_model_to_data.type](
-    #     config.output_model_to_data.config
-    # )
-
-    # # wrap in observer
-    # in_interface_wrapped = InterfaceObserver(in_interface)
-    # out_interface_wrapped = InterfaceObserver(out_interface)
-    # in_transformer_wrapped = TransformerObserver(in_transformer)
-    # out_transformer_wrapped = TransformerObserver(out_transformer)
-    # model_wrapped = ModelObserver(model)
-
-    # # add observers to message broker
-    # broker = MessageBroker()
-    # # default sequence
-    # # in_interface -> in_transformer -> model -> out_transformer -> out_interface
-    # # this will be specified in the config file or default to the above, not implemented as of yet
-    # broker.attach(in_interface_wrapped, "update_trigger") # update_trigger is a topic that is used to trigger the update of the model
-    # broker.attach(in_transformer_wrapped, "in_interface")
-    # broker.attach(model_wrapped, "in_transformer")
-    # broker.attach(out_transformer_wrapped, "model")
-    # broker.attach(out_interface_wrapped, "out_transformer")
-    
-
-    # logger.debug("Model manager setup complete")
-    # logger.debug(f"Broker: {broker}")
-    # logger.debug(f"Observers attached: {broker._observers}")
-
-    # logger.info(f"Model: {args.model_name} version: {args.model_version} loaded")
-    # logger.info(f"Model type: {model_getter.model_type}")
-
-    # logger.info(f"Model loaded in {time.time() - init_time} seconds")
 
     return (
         args,
