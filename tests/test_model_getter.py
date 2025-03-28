@@ -1,4 +1,4 @@
-from model_manager.src.model_utils.LocalModelGetter import LocalModelGetter
+from poly_lithic.src.model_utils.LocalModelGetter import LocalModelGetter
 import cProfile
 import os
 def test_LocalModelGetter():

@@ -1,4 +1,4 @@
-from model_manager.src.config.parser import ConfigParser
+from poly_lithic.src.config.parser import ConfigParser
 import logging
 import pytest
 

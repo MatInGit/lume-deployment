@@ -1,8 +1,8 @@
 import pytest
 import os
 import numpy as np
-from model_manager.src.utils.messaging import Message, InterfaceObserver
-from model_manager.src.interfaces import registered_interfaces
+from poly_lithic.src.utils.messaging import Message, InterfaceObserver
+from poly_lithic.src.interfaces import registered_interfaces
 
 
 @pytest.fixture
