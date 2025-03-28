@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 allow-direct-references = true
 
 [project]
-name = "Poly_Lithic"
+name = "poly-lithic"
 dynamic = ["version"]
 description = "A package for deploying AI models and more using lume inspired interfaces"
 authors = [

@@ -1,11 +1,17 @@
 import mlflow
-from lume_model.models import TorchModel, TorchModule
 from mlflow import MlflowClient
 from mlflow.models.model import get_model_info
 from poly_lithic.src.logging_utils import get_logger
 from poly_lithic.src.model_utils import ModelGetterBase
 
 logger = get_logger()
+
+try:
+    from lume_model.models import TorchModel, TorchModule
+    LUME_MODEL_AVAILABLE = True
+except ImportError:
+    logger.warning("lume_model is not installed. TorchModel and TorchModule functionality will not be available.")
+    LUME_MODEL_AVAILABLE = False
 
 
 class MLflowModelGetter(ModelGetterBase):

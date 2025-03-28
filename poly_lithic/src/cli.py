@@ -87,7 +87,7 @@ def setup():
     # )
     parser.add_argument(
         '-v',
-        '--Version',
+        '--version',
         help='Print Version and exit',
         required=False,
         default=False,
@@ -129,20 +129,20 @@ def setup():
     )
 
     # version print and exit
-    parser.add_argument(
-        '-V',
-        '--version',
-        help='Print version and exit',
-        required=False,
-        default=False,
-        action='store_true',
-    )
+    # parser.add_argument(
+    #     '-v',
+    #     '--version',
+    #     help='Print version and exit',
+    #     required=False,
+    #     default=False,
+    #     action='store_true',
+    # )
 
     args = parser.parse_args()
 
     if args.version:
         os.environ['version'] = __version__
-        print(f'Model Manager version: {os.environ["version"]}')
+        print(f'Ploy-Lithic version: {os.environ["version"]}')
         sys.exit(0)
 
     # change logger level
