@@ -8,6 +8,7 @@ from poly_lithic.src.utils.messaging import (
     MessageBroker,
     TransformerObserver,
 )
+
 logger = get_logger()
 
 
@@ -17,22 +18,21 @@ class MockModel:
 
     def evaluate(self, value):
         """placeholder for model prediction"""
-        return {"not_initialized": {"value": -99999999999}}
+        return {'not_initialized': {'value': -99999999999}}
 
 
-class Builder():
+class Builder:
     def __init__(self, config_path):
         self.config = self.__initailise_config(config_path)
         self.logger = get_logger()
-    
-        
+
     def __initailise_config(self, config_path):
         """Initialise the configuration."""
         try:
             config_parser = ConfigParser(config_path)
             return config_parser.parse()
         except Exception as e:
-            logger.error(f"Error initializing configuration: {e}")
+            logger.error(f'Error initializing configuration: {e}')
             raise e
 
     def build(self) -> MessageBroker:
@@ -40,56 +40,80 @@ class Builder():
 
         self.__build_observers()
         self.__build_broker()
-        
-        for name,observer in self.loaded_observers.items():
+
+        for name, observer in self.loaded_observers.items():
             self.broker.attach(observer, self.config.modules[name].sub)
-        
+
         return self.broker
-    
+
     def __build_observers(self):
         """Build the observers."""
 
         loaded_observers: dict[str, object] = {}
         for module in self.config.modules:
             try:
-                module_type, module_subtype = self.config.modules[module].type.split(".")
+                module_type, module_subtype = self.config.modules[module].type.split(
+                    '.'
+                )
             except ValueError:
-                raise ValueError(f"Invalid module type: {self.config.modules[module].type} must be of the form 'type.subtype'")
-            
-            if module_type == "interface":
+                raise ValueError(
+                    f"Invalid module type: {self.config.modules[module].type} must be of the form 'type.subtype'"
+                )
+
+            if module_type == 'interface':
                 if self.config.modules[module].module_args is not None:
                     args = self.config.modules[module].module_args
-                else :
+                else:
                     args = {}
-                interface = InterfaceObserver(registered_interfaces[module_subtype](self.config.modules[module].config), self.config.modules[module].pub, *args)
+                interface = InterfaceObserver(
+                    registered_interfaces[module_subtype](
+                        self.config.modules[module].config
+                    ),
+                    self.config.modules[module].pub,
+                    *args,
+                )
                 loaded_observers[module] = interface
-            elif module_type == "transformer":
+            elif module_type == 'transformer':
                 if self.config.modules[module].module_args is not None:
                     args = self.config.modules[module].module_args
-                else :
+                else:
                     args = {}
-                transformer = TransformerObserver(registered_transformers[module_subtype](self.config.modules[module].config), self.config.modules[module].pub, *args)
+                transformer = TransformerObserver(
+                    registered_transformers[module_subtype](
+                        self.config.modules[module].config
+                    ),
+                    self.config.modules[module].pub,
+                    *args,
+                )
                 loaded_observers[module] = transformer
-            elif module_type == "model":
+            elif module_type == 'model':
                 if self.config.modules[module].module_args is not None:
                     args = self.config.modules[module].module_args
-                else :
+                else:
                     args = {}
-                observer = ModelObserver(config = self.config.modules[module].config,topic = self.config.modules[module].pub, *args)
+                observer = ModelObserver(
+                    config=self.config.modules[module].config,
+                    topic=self.config.modules[module].pub,
+                    *args,
+                )
                 loaded_observers[module] = observer
             else:
-                raise ValueError(f"Invalid module type: {module_type}")
-        logger.debug(f"Loaded observers: {loaded_observers}")
-        
+                raise ValueError(f'Invalid module type: {module_type}')
+        logger.debug(f'Loaded observers: {loaded_observers}')
+
         # lets validate all of them are Observers
         for observer in loaded_observers:
-            if not isinstance(loaded_observers[observer], (ModelObserver, InterfaceObserver, TransformerObserver)):
-                raise ValueError(f"Invalid observer: {observer} must be of type ModelObserver, InterfaceObserver or TransformerObserver")
+            if not isinstance(
+                loaded_observers[observer],
+                (ModelObserver, InterfaceObserver, TransformerObserver),
+            ):
+                raise ValueError(
+                    f'Invalid observer: {observer} must be of type ModelObserver, InterfaceObserver or TransformerObserver'
+                )
         self.loaded_observers = loaded_observers
         return None
-                
-    
+
     def __build_broker(self):
         """Build the message broker."""
         self.broker = MessageBroker()
-        logger.debug(f"Built broker: {self.broker}")
+        logger.debug(f'Built broker: {self.broker}')

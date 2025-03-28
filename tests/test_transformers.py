@@ -67,10 +67,10 @@ config2a = {
         'x3': {'formula': 'B1 + A1'},
         'x4': {'formula': 'C1*B1'},
     },
-    'symbols': ['A1', 'B1','C1'],
+    'symbols': ['A1', 'B1', 'C1'],
 }
 
-# removed for now 
+# removed for now
 # def test_simple_transformer_complex_array_in():
 #     st = SimpleTransformer(config2a)
 

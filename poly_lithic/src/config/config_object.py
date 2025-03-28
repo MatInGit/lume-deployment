@@ -17,11 +17,9 @@ class ModuleConfig(pydantic.BaseModel):
     pub: Optional[Union[str, list]] = None
     sub: Optional[Union[str, list]] = None
     module_args: Optional[Union[dict[str, Union[str, dict, bool]], str]] = None
-    config: Any = (
-        None  # kind of a free for all for now but we can narrow down the specifics later
-    )
+    config: Any = None  # kind of a free for all for now but we can narrow down the specifics later
 
-    @pydantic.field_validator("module_args", mode="before")
+    @pydantic.field_validator('module_args', mode='before')
     def validate_module_args(cls, v):
         if isinstance(v, str):
             return {}
@@ -30,11 +28,13 @@ class ModuleConfig(pydantic.BaseModel):
 
 class DeploymentConfig(pydantic.BaseModel):
     type: str
-    rate: Optional[Union[float,int]] = None
+    rate: Optional[Union[float, int]] = None
+
 
 class ConfigObject(pydantic.BaseModel):
     deployment: DeploymentConfig
     modules: dict[str, ModuleConfig]
+
     class Config:
         arbitrary_types_allowed = True  # to allow nx.DiGraph
 
@@ -46,7 +46,7 @@ class ConfigObject(pydantic.BaseModel):
         edges = []
         # to collect edges we need to go through each item , look at what its publishing and find matching subsribers, this will form an edge
         for key, value in self.modules.items():
-            if value.pub is not None or value.pub.lower() != "none":
+            if value.pub is not None or value.pub.lower() != 'none':
                 if isinstance(value.pub, str):
                     value.pub = [value.pub]
                 for key2, value2 in self.modules.items():
@@ -62,8 +62,8 @@ class ConfigObject(pydantic.BaseModel):
 
             nodes.append(value.name)
 
-        logging.debug(f"Nodes: {nodes}")
-        logging.debug(f"Edges: {edges}")
+        logging.debug(f'Nodes: {nodes}')
+        logging.debug(f'Edges: {edges}')
         nodes = list(set(nodes))
         nodes = [x for x in nodes if x is not None]
         edges = [tuple(x) for x in edges]
@@ -72,12 +72,12 @@ class ConfigObject(pydantic.BaseModel):
         G.add_edges_from(edges)
         return G
 
-    @pydantic.field_validator("graph")
+    @pydantic.field_validator('graph')
     def check_routing(cls, v):
         isolated_nodes = list(nx.isolates(v))
         if isolated_nodes:
             raise ValueError(
-                f"Isolated nodes found in routing graph: {isolated_nodes}, this means that a modules is niether a publisher or subscriber to any other module"
+                f'Isolated nodes found in routing graph: {isolated_nodes}, this means that a modules is niether a publisher or subscriber to any other module'
             )
         return v
 
@@ -85,6 +85,6 @@ class ConfigObject(pydantic.BaseModel):
         G = self.graph
         plt.figure(figsize=(10, 10))
         nx.draw(G, with_labels=True)
-        if not os.path.exists("./graphs"):
-            os.makedirs("./graphs")
-        plt.savefig("./graphs/{}_routing_graph.png".format(uuid4()))
+        if not os.path.exists('./graphs'):
+            os.makedirs('./graphs')
+        plt.savefig('./graphs/{}_routing_graph.png'.format(uuid4()))

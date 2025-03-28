@@ -8,11 +8,7 @@ def main():
     logger = make_logger('model_manager')
     logger.info('Starting model manager')
 
-    (
-        args,
-        config,
-        broker
-    ) = setup()
+    (args, config, broker) = setup()
     print('resetting logging...')
     reset_logging()
 
@@ -21,13 +17,7 @@ def main():
     else:
         logger = make_logger('model_manager')
 
-    asyncio.run(
-        model_main(
-            args,
-            config,
-            broker
-        )
-    )
+    asyncio.run(model_main(args, config, broker))
 
 
 if __name__ == '__main__':
