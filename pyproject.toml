@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 allow-direct-references = true
 
 [project]
-name = "lume-deploy"
+name = "Poly-Lithic"
 dynamic = ["version"]
 description = "A package for deploying AI models and more using lume inspired interfaces"
 authors = [
@@ -15,8 +15,6 @@ authors = [
     {"name" = "Jesse Bellister"},
 ]
 dependencies = [
-    "botorch>=0.12.0",
-    "tensorflow>=2.3.1",
     "pandas>=2.0.1",
     "numpy<2.0",
     "keras>=3.1.1",

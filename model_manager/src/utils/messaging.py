@@ -14,7 +14,7 @@ from model_manager.src.transformers import BaseTransformer
 from model_manager.src.interfaces import BaseInterface
 from model_manager.src.model_utils import registered_model_getters
 import os
-from deepdiff import DeepDiff
+# from deepdiff import DeepDiff
 from concurrent.futures import ThreadPoolExecutor, as_completed
 logger = get_logger()
 
@@ -144,7 +144,7 @@ class MessageBroker:
                     self._observers[t].remove(observer)
         else:
             self._observers[topic].remove(observer)
-    @profileit
+    # @profileit
     def notify(self, message: Message) -> None:
         """notify all observers of a message"""
         # if message.topic in self._observers:
@@ -203,8 +203,8 @@ class MessageBroker:
                 fmt_pretty_str = "\n\t\n"+"\t\n".join([f"{k}: {v:.2f}ms" for k, v in fmt_stats.items()])
                 # sum all _stats
                 sum_time = sum([v for v in self._stats.values()])
-                logger.info(f"real time factor: {sum_time/1000:.2f} must be less than 1")
-                logger.info(f"average time per topic: {fmt_pretty_str}")
+                logger.info(f"real time factor: {sum_time/1000:.2f} must be less than 1, mean time per update: {sum_time/len(self._stats_cnt):.2f}ms")
+                # logger.info(f"average time per topic: {fmt_pretty_str}")
                 self._stats = {}
             
         else:
