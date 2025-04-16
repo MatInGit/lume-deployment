@@ -1,0 +1,38 @@
+stages:
+  - format-lint
+  - test
+  # - build-release
+  # - build-container
+
+
+# lifted from Ivan Finch's snowsignal 
+.before_script_template: &before_script_template
+  before_script: 
+    - python -m pip install --upgrade pip
+    - pip install hatch
+    - pip install pytest
+    - pip install -r requirements.txt
+
+format:
+  <<: *before_script_template
+  image: python:latest
+  stage: format-lint
+  script:
+    - ruff check --no-fix
+    - ruff format --diff
+
+.test_job_template: &test_job_template
+  <<: *before_script_template
+  stage: test
+  image: "python:$VERSION"
+  parallel:
+    matrix:
+      - VERSION: ['3.11', '3.12', '3.13']
+  script:
+      - hatch build
+      - ls -l dist
+      - pip install dist/*.whl
+      - pytest
+
+  
+  
