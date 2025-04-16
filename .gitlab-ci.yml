@@ -36,7 +36,7 @@ test:
       - ls -l dist
       - pip install dist/*.whl
       - cp $env_file ./tests/env.json
-      - pytest --cov=your_package_name --cov-report=xml
+      - pytest --cov=poly-lithic --cov-report=xml
   coverage: '/^TOTAL\s+\d+\s+\d+\s+(\d+)%/'
   artifacts:
     paths:
