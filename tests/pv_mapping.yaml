@@ -1,5 +1,3 @@
-# new schema 
-
 deployment:
   type: "continuous"
   rate: 1 #seconds
