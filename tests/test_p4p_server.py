@@ -113,7 +113,7 @@ def test_p4p_as_image_input():
     p4p.put('test', np.ones((10, 10)))
     name, value_dict = p4p.get('test')
     pt.handler('test', value_dict)
-    assert pt.updated == True
+    assert pt.updated is True
     assert pt.latest_transformed['IMG1'].shape == (10, 10)
     p4p.close()
 

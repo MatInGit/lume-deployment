@@ -81,8 +81,8 @@ def test_TransformerObserver(message_broker, test_observer):
 
     message_broker.attach(stObserver, 'test_topic')
     message_broker.notify(message1)
-    assert st.updated == False
+    assert st.updated is False
     message_broker.notify(message2)
-    assert st.updated == False
+    assert st.updated is False
     assert st.latest_transformed['x2'] == 2 * 2
     assert st.latest_transformed['x1'] == 2

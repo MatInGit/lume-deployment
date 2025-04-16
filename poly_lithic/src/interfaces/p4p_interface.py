@@ -269,8 +269,6 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
     def put_many(self, data, **kwargs):
         # for key, value in data.items():
         #     self.put(key, value)
-        channel_names = []
-        values = []
         for key, value in data.items():
             # result = self.ctxt.put(key, value)
             self.shared_pvs[key].post(value, timestamp=time.time())

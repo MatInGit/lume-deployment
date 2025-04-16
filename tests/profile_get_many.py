@@ -1,7 +1,6 @@
 import cProfile
 import pstats
 import io
-from poly_lithic.src.logging_utils.make_logger import make_logger
 from poly_lithic.src.interfaces import registered_interfaces
 
 SimplePVAInterfaceServer = registered_interfaces['p4p_server']

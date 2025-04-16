@@ -203,11 +203,7 @@ async def model_main(args, config, broker):
     logger = get_logger()
     logger.info('Starting model manager')
 
-    stats_inference = []
-    stats_input_transform = []
-    stats_output_transform = []
-    stats_put = []
-    last_stat_report = time.time()
+    time.time()
     os.environ['PUBLISH'] = str(args.publish)
     try:
         if config.deployment.type == 'continuous':
