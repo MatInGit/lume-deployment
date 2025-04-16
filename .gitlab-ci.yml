@@ -1,5 +1,6 @@
 stages:
   # - format-lint
+  - test-cov
   - test
   # - build-release
   # - build-container
@@ -27,13 +28,11 @@ stages:
   image: "python:$VERSION"
   parallel:
     matrix:
-      - VERSION: ['3.10', '3.11', '3.12']
-
-
-
+      - VERSION: ['3.10', '3.12', '3.13']
 
 test-coverage-3.11:
-  stage: test
+  <<: *before_script_template
+  stage: test-cov
   image: "python:3.11"
   script:
       - hatch build
