@@ -37,7 +37,7 @@ test:
       - pip install dist/*.whl
       - cp $env_file ./tests/env.json
       - pytest --cov=poly_lithic --cov-report=xml
-  coverage: '/^TOTAL\s+\d+\s+\d+\s+(\d+)%/'
+  coverage: '/TOTAL.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     paths:
       - htmlcov/
