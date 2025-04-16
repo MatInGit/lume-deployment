@@ -27,7 +27,10 @@ stages:
   image: "python:$VERSION"
   parallel:
     matrix:
-      - VERSION: ['3.11']
+      - VERSION: ['3.10', '3.11', '3.12']
+
+
+test-coverage-3.11
 
 test:
   <<: *test_job_template
@@ -36,16 +39,15 @@ test:
       - ls -l dist
       - pip install dist/*.whl
       - cp $env_file ./tests/env.json
-      - pytest --cov=poly_lithic --cov-report=xml
-  coverage: '/TOTAL.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+      - pytest --junitxml=report.xml --cov-report term-missing --cov=poly_lithic
+  coverage: '/TOTAL.*\s+(\d+\%)/'
   artifacts:
     paths:
       # - htmlcov/
       - coverage.xml
     reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
+      junit: report.xml
+
   allow_failure: true
 
   
