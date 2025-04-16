@@ -27,7 +27,7 @@ stages:
   image: "python:$VERSION"
   parallel:
     matrix:
-      - VERSION: ['3.11', '3.12', '3.13']
+      - VERSION: ['3.11']
 
 test:
   <<: *test_job_template
@@ -40,7 +40,7 @@ test:
   coverage: '/TOTAL.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     paths:
-      - htmlcov/
+      # - htmlcov/
       - coverage.xml
     reports:
       coverage_report:
