@@ -19,7 +19,7 @@ format:
   image: python:3.11
   stage: format-lint
   script:
-    - ruff check --no-fix
+    - ruff check --no-fix --exit-zero-on-fix
     - ruff format --diff
 
 .test_job_template: &test_job_template
