@@ -9,8 +9,7 @@ stages:
 .before_script_template: &before_script_template
   before_script: 
     - python -m pip install --upgrade pip
-    - pip install hatch
-    - pip install pytest
+    - pip install pytest pytest-asyncio hatch pytroch pytest-cov
     - pip install -r requirements.txt
     - pip install ruff
 
@@ -37,7 +36,16 @@ test:
       - ls -l dist
       - pip install dist/*.whl
       - cp $env_file ./tests/env.json
-      - pytest
+      - pytest --cov=your_package_name --cov-report=xml
+  coverage: '/^TOTAL\s+\d+\s+\d+\s+(\d+)%/'
+  artifacts:
+    paths:
+      - htmlcov/
+      - coverage.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
   allow_failure: true
 
   
