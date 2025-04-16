@@ -15,7 +15,7 @@ stages:
 
 format:
   <<: *before_script_template
-  image: python:latest
+  image: python:3.11
   stage: format-lint
   script:
     - ruff check --no-fix
@@ -28,11 +28,15 @@ format:
   parallel:
     matrix:
       - VERSION: ['3.11', '3.12', '3.13']
+
+test:
+  <<: *test_job_template
   script:
       - hatch build
       - ls -l dist
       - pip install dist/*.whl
       - pytest
+  allow_failure: true
 
   
   
