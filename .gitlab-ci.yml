@@ -44,7 +44,7 @@ test-coverage-3.11:
   coverage: '/TOTAL.*\s+(\d+\%)/'
   artifacts:
     paths:
-      - coverage.xml
+      - report.xml
     reports:
       junit: report.xml
 
