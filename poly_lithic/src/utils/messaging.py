@@ -12,7 +12,8 @@ from poly_lithic.src.transformers import BaseTransformer
 from poly_lithic.src.interfaces import BaseInterface
 from poly_lithic.src.model_utils import registered_model_getters
 import os
-from deepdiff import DeepDiff
+# from deepdiff import DeepDiff
+import hashlib
 logger = get_logger()
 
 import cProfile
@@ -96,8 +97,8 @@ class Message(BaseModel):
             value_items = frozenset((k, str(v)) for k, v in value.items())
             items.append((key, value_items))
         
-        return str(frozenset(items))
-        
+        return hashlib.md5(str(frozenset(items)).encode()).hexdigest()
+            
 
     def __str__(self):
         return f'Message(topic={self.topic}, source={self.source}, value={self.value}, timestamp={self.timestamp})'
@@ -163,12 +164,20 @@ class MessageBroker:
     def notify(self, message: Message) -> None:
         """notify all observers of a message"""
         if message.topic in self._observers:
-            start = time.time()
+            
             # logger.debug(f"notifying observers of {message}")
 
             for observer in self._observers[message.topic]:
                 logger.debug(f'notifying {observer}')
+                start = time.time()
                 result = observer.update(message)
+                end = time.time()
+                
+                if str(observer) not in self._stats:
+                    self._stats[str(observer)] = 0
+                    self._stats_cnt[str(observer)] = 0
+                self._stats[str(observer)] += (end - start) * 1000
+                self._stats_cnt[str(observer)] += 1
 
                 if result is not None:
                     # if list of messages
@@ -177,16 +186,8 @@ class MessageBroker:
                             self.queue.append(r)
                     else:
                         self.queue.append(result)
-
-            end = time.time()
-            # print(f"message update time: {(end-start)*1000:.2f}ms for {message.topic}")
-            if message.topic in self._stats:
-                self._stats[message.topic] += (end - start) * 1000
-                self._stats_cnt[message.topic] += 1
-            else:
-                self._stats[message.topic] = (end - start) * 1000
-                self._stats_cnt[message.topic] = 1
-
+                        
+        
             if time.time() - self.last_update > 1:
                 self.last_update = time.time()
                 fmt_stats = {k: v / self._stats_cnt[k] for k, v in self._stats.items()}
@@ -195,11 +196,14 @@ class MessageBroker:
                 ])
                 # sum all _stats
                 sum_time = sum([v for v in self._stats.values()])
+                cnt = sum([v for v in self._stats_cnt.values()])
                 logger.info(
-                    f'real time factor: {sum_time / 1000:.2f} must be less than 1, mean time per update: {sum_time / len(self._stats_cnt):.2f}ms'
+                    f'real time factor: {sum_time / 1000:.2f} must be less than 1, time spent updating this cycle : {sum_time:.2f}ms'
                 )
-                # logger.info(f"average time per topic: {fmt_pretty_str}")
+                # print(self._stats)
+                # print(self._stats_cnt) 
                 self._stats = {}
+                self._stats_cnt = {}
 
         else:
             logger.error(f'no observers for {message.topic}')
@@ -271,7 +275,7 @@ class InterfaceObserver(Observer):
                     return messages
                 else:
                     logger.debug('no diff')
-                    return []
+                    return None
             else:
                 self.last_get_all = messages
                 return messages
