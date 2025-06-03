@@ -14,5 +14,3 @@ def test_LocalModelGetter():
         input_dict['x2'] = i * 2.0
         output_dict = model.evaluate(input_dict)
         assert output_dict['y'] == max(input_dict['x1'], input_dict['x2'])
-        
-        
