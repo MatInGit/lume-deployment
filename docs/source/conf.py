@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Poly-Lithic'
-copyright = '2025, Matuesz Leputa'
+copyright = '2025, STFC'
 author = 'Matuesz Leputa'
 
 # -- General configuration ---------------------------------------------------

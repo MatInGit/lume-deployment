@@ -23,10 +23,18 @@ jobs:
         pip install sphinx furo
         pip install sphinx-autodoc-typehints
 
-    - name: 🛠️ Build documentation
-      run: |
-        sphinx-build -b html docs/source docs/build/html
+    # - name: 🛠️ Build documentation
+    #   run: |
+    #     sphinx-build -b html docs/source docs/build/html
 
+    - name: 🛠️ Build docs # using make
+      run: |
+        cd docs
+        make html
+    - name: 📂 List build directory
+      run: |
+        echo "Listing contents of docs/build/html:"
+        ls -la docs/build/html
     - name: 🚀 Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
       with:
