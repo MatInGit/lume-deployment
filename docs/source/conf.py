@@ -29,4 +29,3 @@ exclude_patterns = []
 
 # Optional theme
 html_theme = 'furo'  # or 'alabaster', 'sphinx_rtd_theme', etc.
-html_static_path = ['_static']
