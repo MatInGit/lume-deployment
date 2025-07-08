@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Poly-Lithic'
-copyright = '2025, STFC'
+copyright = '2025, Matuesz Leputa'
 author = 'Matuesz Leputa'
 
 # -- General configuration ---------------------------------------------------
@@ -29,3 +29,4 @@ exclude_patterns = []
 
 # Optional theme
 html_theme = 'furo'  # or 'alabaster', 'sphinx_rtd_theme', etc.
+html_static_path = ['_static']
