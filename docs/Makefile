@@ -1,5 +1,4 @@
 # Minimal makefile for Sphinx documentation
-#
 
 # You can set these variables from the command line, and also
 # from the environment for the first two.
@@ -8,13 +7,24 @@ SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
 
-# Put it first so that "make" without argument is like "make help".
+# Adjust this to point to your Python package directory (relative to this Makefile)
+APIDOCSRC     = ../poly_lithic
+APIDOCOUT     = $(SOURCEDIR)/api
+
+.PHONY: help Makefile apidoc
+
+# Default target: "make" is like "make help"
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help Makefile
+# Autogenerate .rst files from Python source using sphinx-apidoc
+apidoc:
+	sphinx-apidoc -o $(APIDOCOUT) $(APIDOCSRC) --force --no-toc --separate
 
-# Catch-all target: route all unknown targets to Sphinx using the new
-# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
+# Build HTML docs, running apidoc first
+html: apidoc
+	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+# Catch-all target: route all unknown targets to Sphinx
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

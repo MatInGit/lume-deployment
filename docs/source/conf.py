@@ -15,7 +15,7 @@ author = 'Matuesz Leputa'
 
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',  # For Google/NumPy docstrings
+    'sphinx.ext.napoleon',
     'sphinx_autodoc_typehints',
 ]
 
@@ -30,3 +30,6 @@ exclude_patterns = []
 # Optional theme
 html_theme = 'furo'  # or 'alabaster', 'sphinx_rtd_theme', etc.
 html_static_path = ['_static']
+
+autodoc_member_order = 'bysource'  # show functions in source order
+autodoc_typehints = 'description'  # show type hints in function descriptions
