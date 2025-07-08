@@ -35,9 +35,6 @@ jobs:
       run: |
         echo "Listing contents of docs/build/html:"
         ls -la docs/build/html
+        
     - name: 🚀 Deploy to GitHub Pages
       uses: actions/deploy-pages@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docs/build/html
-        disable_nojekyll: false
