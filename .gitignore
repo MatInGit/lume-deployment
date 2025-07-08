@@ -48,4 +48,4 @@ notify.profile
 test.yaml
 test_files/
 old_examples/
-docs/build
+!docs/build/*
