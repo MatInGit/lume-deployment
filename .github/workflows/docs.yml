@@ -32,9 +32,9 @@ jobs:
           make html
 
       - name: 📂 Upload artifact
-        uses: actions/upload-pages-artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/build/html
+          path: docs/build/html/
 
   deploy:
     needs: build
