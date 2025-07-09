@@ -10,7 +10,6 @@ Welcome to the Poly-Lithic documentation!
 
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :caption: API Reference
-
    api/poly_lithic

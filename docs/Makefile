@@ -18,12 +18,12 @@ help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 # Autogenerate .rst files from Python source using sphinx-apidoc
-apidoc:
-	sphinx-apidoc -o $(APIDOCOUT) $(APIDOCSRC) --force --no-toc --separate
+# apidoc:
+# 	sphinx-apidoc -o $(APIDOCOUT) $(APIDOCSRC) --force --no-toc --separate
 
-# Build HTML docs, running apidoc first
-html: apidoc
-	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+# # Build HTML docs, running apidoc first
+# html: apidoc
+# 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 # Catch-all target: route all unknown targets to Sphinx
 %: Makefile
