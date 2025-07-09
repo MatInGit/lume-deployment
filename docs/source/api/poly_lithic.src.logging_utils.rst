@@ -14,5 +14,5 @@ Module contents
 
 .. automodule:: poly_lithic.src.logging_utils
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

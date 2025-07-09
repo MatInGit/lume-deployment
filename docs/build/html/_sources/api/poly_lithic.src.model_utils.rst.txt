@@ -16,5 +16,5 @@ Module contents
 
 .. automodule:: poly_lithic.src.model_utils
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
