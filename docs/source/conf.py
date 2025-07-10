@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Poly-Lithic'
-copyright = '2025, Matuesz Leputa'
+copyright = '2025, Matuesz Leputa - ISIS Neutron and Muon Source at RAL - Science and Technology Facilities Council'
 author = 'Matuesz Leputa'
 
 # -- General configuration ---------------------------------------------------
@@ -18,6 +18,8 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx_autodoc_typehints',
     'sphinxemoji.sphinxemoji',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.todo'
 ]
 
 templates_path = ['_templates']
