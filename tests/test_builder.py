@@ -35,7 +35,7 @@ def env_config(env_config):
 
 
 def test_build(caplog, make_builder):
-    caplog.set_level(logging.DEBUG)
+    # caplog.set_level(logging.DEBUG)
     builder = make_builder('./tests/pv_mapping.yaml')
     message_broker = builder.build()
     message = Message(topic='get_all', source='clock', value={'dummy': {'value': 1}})
@@ -44,7 +44,7 @@ def test_build(caplog, make_builder):
 
 
 def test_mlflow_legacy(caplog, make_builder):
-    caplog.set_level(logging.DEBUG)
+    # caplog.set_level(logging.DEBUG)
     try:
         response = requests.get('http://athena.isis.rl.ac.uk:5000/health')
         assert response.status_code == 200
@@ -52,12 +52,12 @@ def test_mlflow_legacy(caplog, make_builder):
         pytest.skip(
             f'MLflow server is not reachable: {os.environ["MLFLOW_TRACKING_URI"]}'
         )
-    caplog.set_level(logging.DEBUG)
+    # caplog.set_level(logging.DEBUG)
     builder = make_builder('./tests/pv_mapping_mlflow_legacy.yaml')
     message_broker = builder.build()
     caplog.set_level(logging.INFO)
     builder.config.draw_routing_graph()  # for debugging
-    caplog.set_level(logging.DEBUG)
+    # caplog.set_level(logging.DEBUG)
     # lets run it
     message = Message(topic='get_all', source='clock', value={'dummy': {'value': 1}})
 
@@ -87,7 +87,7 @@ def test_mlflow_legacy(caplog, make_builder):
 
 
 def test_mlflow(caplog, make_builder):
-    caplog.set_level(logging.DEBUG)
+    # caplog.set_level(logging.DEBUG)
     try:
         response = requests.get('http://athena.isis.rl.ac.uk:5000/health')
         assert response.status_code == 200
@@ -95,12 +95,12 @@ def test_mlflow(caplog, make_builder):
         pytest.skip(
             f'MLflow server is not reachable: {os.environ["MLFLOW_TRACKING_URI"]}'
         )
-    caplog.set_level(logging.DEBUG)
+    # caplog.set_level(logging.DEBUG)
     builder = make_builder('./tests/pv_mapping_mlflow.yaml')
     message_broker = builder.build()
     caplog.set_level(logging.INFO)
     builder.config.draw_routing_graph()  # for debugging
-    caplog.set_level(logging.DEBUG)
+    # caplog.set_level(logging.DEBUG)
     # lets run it
     message = Message(topic='get_all', source='clock', value={'dummy': {'value': 1}})
 
