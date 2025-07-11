@@ -1,31 +1,29 @@
-# new schema 
-
 deployment:
   type: "continuous"
-  rate: 0.25 #seconds
+  rate: 1 #seconds
 
 modules: 
-  
   p4p_server:
-    name: "p4p_server" # overrides the top key
+    name: "p4p_server"
     type: "interface.p4p_server"
-    pub: "in_interface"
+    pub: 
+      - "in_interface"
     sub: 
       - "get_all"
       - "out_transformer" # look we can do this now!               
     module_args: None # defines what arguments to pass to the module observer, if any this can inform unpacking etc
     config: 
-      EPICS_PVA_NAME_SERVERS: "talos.isis.rl.ac.uk:5075"
+      EPICS_PVA_NAME_SERVERS: "localhost:5075"
       variables:
-        LUME:MLFLOW:TEST_B:
+        ML:LOCAL:TEST_B:
           proto: pva
-          name: LUME:MLFLOW:TEST_B 
-        LUME:MLFLOW:TEST_A:
+          name: ML:LOCAL:TEST_B 
+        ML:LOCAL:TEST_A:
           proto: pva
-          name: LUME:MLFLOW:TEST_A
-        LUME:MLFLOW:TEST_S:
+          name: ML:LOCAL:TEST_A
+        ML:LOCAL:TEST_S:
           proto: pva
-          name: LUME:MLFLOW:TEST_S
+          name: ML:LOCAL:TEST_S
   
   input_transformer:
     name: "input_transformer"
@@ -35,41 +33,40 @@ modules:
     module_args: None
     config:
       symbols:
-        - "LUME:MLFLOW:TEST_B"
-        - "LUME:MLFLOW:TEST_A"
+        - "ML:LOCAL:TEST_B"
+        - "ML:LOCAL:TEST_A"
       variables:
-        x:
-          formula: "LUME:MLFLOW:TEST_B"
+        x: # note this is where we change the name to match what the model expects
+          formula: "ML:LOCAL:TEST_A"
         y: 
-          formula: "LUME:MLFLOW:TEST_A"
+          formula: "ML:LOCAL:TEST_B"
   model:
     name: "model"
-    type: "model.SimpleModel"
+    type: "model.SimpleModel" # unrelated to our simple model, this just defines the python model interface
     pub: "model"
     sub: "in_transformer"
     module_args: None
     config:
       type: "MlflowModelGetter"
-      args:
+      args: 
         model_name: "SimpleModel"
-        model_version : 4
+        model_version: 4
+        # or 
+        # model_uri: "models:/mlflow_model/1"
       variables:
-        y:
+        max:
           type: "scalar"
+  
   output_transformer:
     name: "output_transformer"
     type: "transformer.SimpleTransformer"
     pub: "out_transformer"
-    sub: 
-      - "model"
+    sub: "model"
     module_args: 
       unpack_data: True
     config:
       symbols:
         - "output"
       variables:
-        LUME:MLFLOW:TEST_S:
+        ML:LOCAL:TEST_S:
           formula: "output"
-
-
-    
