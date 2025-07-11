@@ -156,8 +156,8 @@ class MLflowModelGetter(MLflowModelGetterLegacy):
 
             # access the wrapped Python Pyfunc model
             model = mlflow_model.unwrap_python_model()
-            res = model.evaluate({"x": 0, "y": 0})  # test if the model has an evaluate method
-            print(f'Model evaluation result: {res}') # cant test becuse of mlflow wierdness
+            # res = model.evaluate({"x": 0, "y": 0})  # test if the model has an evaluate method
+            # print(f'Model evaluation result: {res}') # cant test becuse of mlflow wierdness
         else:
             raise TypeError(
                 f'Expected a pyfunc model, but got {loader_module}.'
