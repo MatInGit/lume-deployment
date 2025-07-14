@@ -500,10 +500,3 @@ See the [local example notebook](./examples/base/simple_model_local.ipynb) for m
 | 📊 🧭 **Time Series Aggregation**              | 3–6 Months   | 🥉       |
 | 📈 🔍 **Model Evaluator Module**               | 3–6 Months   | 🥉       |
 | 🔁 🔧 **Model Retrainer Module**               | 6–12 Months  | 🥈       |
-
----
-
-### 🏅 Priority Legend
-- 🥇 = High Priority  
-- 🥈 = Medium Priority  
-- 🥉 = Low Priority
