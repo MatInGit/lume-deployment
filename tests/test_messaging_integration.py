@@ -138,4 +138,4 @@ def test_interface_observer_put(interface_observer, interface_observer_out, tran
     assert message_broker.queue[0].topic == "out_transformer"
     assert message_broker.queue[0].value['out_scaled']['value'] == 0.5 # if you are looking at this and wondering why it returns a different shape looks for the unpack_output=True in the transformer_observer_out fixture
     message_broker.parese_queue()
-    assert len(message_broker.queue) == 0 # no messahes left in the queue
+    assert len(message_broker.queue) == 0 # no messages left in the queue
