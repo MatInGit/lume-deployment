@@ -22,7 +22,7 @@ test.ipynb
 image_model
 test.h5
 .vscode
-build
+/build
 env.json
 creds.json
 test.py
