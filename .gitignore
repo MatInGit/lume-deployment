@@ -44,4 +44,7 @@ graphs/
 .vscode
 tmp*
 notify.profile
-.code-wrokspace
+*.code-workspace
+test.yaml
+test_files/
+old_examples/

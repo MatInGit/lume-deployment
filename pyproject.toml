@@ -25,7 +25,7 @@ dependencies = [
     "k2eg==0.2.7",
     "psutil>=6.0.0",
     "colorlog>=6.8.2",
-    "p4p==4.1.12",
+    "p4p==4.2.0",
     "pyepics==3.5.7",
 ]
 
@@ -34,6 +34,10 @@ source = "vcs"
 
 [tool.hatch.build.hooks.vcs]
 version-file = "poly_lithic/_version.py"
+
+[tool.hatch.build.targets.sdist]
+# exclude everying apart gthan the src directory
+include =["poly_lithic"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["poly_lithic"]
