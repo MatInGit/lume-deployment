@@ -30,10 +30,11 @@ stages:
       - VERSION: ['3.10', '3.11', '3.12']
 
 
-test-coverage-3.11
 
-test:
-  <<: *test_job_template
+
+test-coverage-3.11:
+  stage: test
+  image: "python:3.11"
   script:
       - hatch build
       - ls -l dist
@@ -43,12 +44,20 @@ test:
   coverage: '/TOTAL.*\s+(\d+\%)/'
   artifacts:
     paths:
-      # - htmlcov/
       - coverage.xml
     reports:
       junit: report.xml
 
-  allow_failure: true
+  allow_failure: false
 
+test-other-versions:
+  <<: *test_job_template
+  script:
+    - hatch build
+    - ls -l dist
+    - pip install dist/*.whl
+    - cp $env_file ./tests/env.json
+    - pytest
+  allow_failure: true
   
   
