@@ -204,7 +204,7 @@ class MessageBroker:
             if time.time() - self.last_update > 1:
                 self.last_update = time.time()
                 fmt_stats = {k: v / self._stats_cnt[k] for k, v in self._stats.items()}
-                fmt_pretty_str = '\n\t\n' + '\t\n'.join([
+                '\n\t\n' + '\t\n'.join([
                     f'{k}: {v:.2f}ms' for k, v in fmt_stats.items()
                 ])
                 # sum all _stats
@@ -296,7 +296,7 @@ class InterfaceObserver(Observer):
         messages = []
         output_dict = {}
 
-        values = self.interface.get_many(self.interface.variable_list)
+        self.interface.get_many(self.interface.variable_list)
         # print(f"values: {values}")
         for key in self.interface.variable_list:
             key, value = self.interface.get(key)

@@ -1,6 +1,9 @@
 from poly_lithic.src.utils.builder import Builder
 from poly_lithic.src.utils.messaging import Message
-import pytest, os, json, logging
+import pytest
+import os
+import json
+import logging
 import requests  # to check if we can rech the mlflow server
 
 
@@ -43,9 +46,9 @@ def test_build(caplog, make_builder):
 def test_mlflow(caplog, make_builder):
     caplog.set_level(logging.DEBUG)
     try:
-        response = requests.get(f'http://athena.isis.rl.ac.uk:5000/health')
+        response = requests.get('http://athena.isis.rl.ac.uk:5000/health')
         assert response.status_code == 200
-    except Exception as e:
+    except Exception:
         pytest.skip(
             f'MLflow server is not reachable: {os.environ["MLFLOW_TRACKING_URI"]}'
         )

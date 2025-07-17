@@ -11,7 +11,7 @@ class h5dfInterface(BaseDataInterface):
         self.path = config['path']
         # check if file exists
         try:
-            with open(self.path) as f:
+            with open(self.path):
                 pass
         except FileNotFoundError:
             raise FileNotFoundError(f'File {self.path} not found')

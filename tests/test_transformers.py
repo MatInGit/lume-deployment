@@ -26,7 +26,7 @@ def test_simple_transformer():
     st.handler('A1', {'value': 1})
     st.handler('B1', {'value': 2})
 
-    assert st.updated == True
+    assert st.updated is True
     print(st.latest_transformed)
 
     assert st.latest_transformed['x2'] == 1 + 2
@@ -53,7 +53,7 @@ def test_simple_transformer_complex():
     st.handler('A1', {'value': 1})
     st.handler('B1', {'value': 2})
 
-    assert st.updated == True
+    assert st.updated is True
 
     assert st.latest_transformed['x2'] == 1**2
     assert st.latest_transformed['x1'] == 1
@@ -131,7 +131,7 @@ def test_ca_image_transformer():
     img_transformer.handler('MY_TEST_CA_Y2', {'value': img_2_y})
     img_transformer.handler('MY_TEST_C2', {'value': img_2})
 
-    assert img_transformer.updated == True
+    assert img_transformer.updated is True
 
     assert img_transformer.latest_transformed['img_1'].shape == (3, 3)
     assert img_transformer.latest_transformed['img_2'].shape == (3, 4)
@@ -179,7 +179,7 @@ def test_compound_transformer():
     ct.handler('MY_TEST_CA_Y2', {'value': img_2_y})
     ct.handler('MY_TEST_C2', {'value': img_2})
 
-    assert ct.updated == True
+    assert ct.updated is True
 
     assert ct.latest_transformed['img_1'].shape == (3, 3)
     assert ct.latest_transformed['img_2'].shape == (3, 4)
@@ -214,10 +214,10 @@ config5 = {
 
 def test_pass_through_transformer():
     pt = PassThroughTransformer(config5)
-    assert pt.updated == False
+    assert pt.updated is False
     pt.handler('input_image', {'value': np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])})
     pt.handler('input_var1', {'value': 1})
-    assert pt.updated == True
+    assert pt.updated is True
     assert pt.latest_transformed['IMG1'].shape == (3, 3)
     assert pt.latest_transformed['var1'] == 1
     print(pt.latest_transformed)
