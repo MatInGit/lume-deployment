@@ -38,5 +38,7 @@ jobs:
           pip install dist/*.whl
       
       - name: Run tests
+        env:
+            PYTHONPATH: ${{ github.workspace }}/model_manager/src
         run: |
           pytest
