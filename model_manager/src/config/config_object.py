@@ -113,8 +113,9 @@ allowed_transformers = list(registered_transformers.keys())
 
 
 class ModuleConfig(pydantic.BaseModel):
+    type: str
     name: str
-    pub: Optional[str] = None
+    pub: Optional[Union[str, list]] = None
     sub: Optional[Union[str, list]] = None
     module_args: Optional[Union[dict[str, Union[str, dict, bool]], str]] = None
     config: Any = (
@@ -135,7 +136,6 @@ class DeploymentConfig(pydantic.BaseModel):
 class ConfigObject(pydantic.BaseModel):
     deployment: DeploymentConfig
     modules: dict[str, ModuleConfig]
-
     class Config:
         arbitrary_types_allowed = True  # to allow nx.DiGraph
 

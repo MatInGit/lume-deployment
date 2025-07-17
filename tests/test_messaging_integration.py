@@ -16,7 +16,7 @@ class MockModel:
     def __init__(self):
         self.predictions = []
 
-    def predict(self, value):
+    def evaluate(self, value):
         """our model expects a dictionary with {"name": {"value": value}, ...}"""
         logging.info(f"Model received: {value}")
         self.predictions.append(value)
@@ -72,7 +72,7 @@ def p4p_server_out():
 
 @pytest.fixture
 def model_observer(mock_model):
-    return ModelObserver(mock_model, "model_out")
+    return ModelObserver(model = mock_model, topic = "model_out")
 
 
 @pytest.fixture
@@ -130,7 +130,7 @@ def test_interface_observer_put(
 
     # get_all
     message = Message(
-        topic="get_all", source="get_all", key="key", value={"dummy": {"value": 1}}
+        topic="get_all", source="clock", value={"dummy": {"value": 1}}
     )
 
     # this should trigger the interface to get all variables

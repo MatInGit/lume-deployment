@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union
 from pydantic import (
     BaseModel,
     Field,
@@ -12,13 +12,14 @@ import time
 from model_manager.src.logging_utils import get_logger
 from model_manager.src.transformers import BaseTransformer
 from model_manager.src.interfaces import BaseInterface
+from model_manager.src.model_utils import registered_model_getters
 import os
 
 logger = get_logger()
 
 
 class Message(BaseModel):
-    topic: str
+    topic: Union[str, list[str]]
     source: str
     ## key: str made a mess of this by including a key, no need to include a key
     value: dict = Field(default_factory=dict)
@@ -26,6 +27,20 @@ class Message(BaseModel):
     # optional
     allow_unsafe: Optional[bool] = False
 
+    @field_validator("topic")
+    @classmethod
+    def check_topic(cls, topic):
+        if not isinstance(topic, (str, list)):
+            raise ValueError("topic must be a string or list of strings")
+        elif isinstance(topic, list):
+            t_len = len(topic)
+            if t_len == 0 or t_len > 1:
+                raise ValueError("topic list must contain one element")
+            else:
+                return topic[0]
+        else:
+            return topic
+    
     @field_validator("value")
     @classmethod
     def check_value(cls, value):
@@ -64,6 +79,13 @@ class Message(BaseModel):
 
     def __repr__(self):
         return f"Message(topic={self.topic}, source={self.source}, value={self.value}, timestamp={self.timestamp})"
+    
+    def __eq__(self, value):
+        # value timestamp source and topic must be the same
+        if self.topic == value.topic and self.source == value.source and self.timestamp == value.timestamp and self.value == value.value:
+            return True
+        else:
+            return False
 
 
 class Observer(ABC):
@@ -82,6 +104,7 @@ class MessageBroker:
 
     def attach(self, observer: Observer, topic: str | list[str]) -> None:
         """add observer to topic"""
+        logger.debug(f"attaching {observer} to {topic}")
 
         if isinstance(topic, list):
             for t in topic:
@@ -107,7 +130,7 @@ class MessageBroker:
     def notify(self, message: Message) -> None:
         """notify all observers of a message"""
         if message.topic in self._observers:
-            # print (f"observers for {message.topic}")
+            logger.debug(f"notifying observers of {message}")
             for observer in self._observers[message.topic]:
                 logger.debug(f"notifying {observer} of {message}")
                 result = observer.update(message)
@@ -118,7 +141,6 @@ class MessageBroker:
                             self.queue.append(r)
                     else:
                         self.queue.append(result)
-
         else:
             logger.error(f"no observers for {message.topic}")
 
@@ -130,6 +152,8 @@ class MessageBroker:
         for message in queue_snapshot:
             self.notify(message)
             self.queue.remove(message)
+            logger.debug(f"queue length: {len(self.queue)}")
+            logger.debug(f"queue: {self.queue}")
 
 
 class TransformerObserver(Observer):
@@ -152,16 +176,19 @@ class TransformerObserver(Observer):
             if self.unpack_output:
                 for key, value in value.items():
                     if isinstance(value, dict) and "value" in value:
+                        self.transformer.updated = False
                         return Message(
                             topic=self.topic, source=str(self), value={key: value}
                         )
                     elif isinstance(value, dict) and "value" not in value:
+                        self.transformer.updated = False
                         return Message(
                             topic=self.topic,
                             source=str(self),
                             value={key: {"value": value}},
                         )
                     else:
+                        self.transformer.updated = False
                         return Message(
                             topic=self.topic,
                             source=str(self),
@@ -173,10 +200,12 @@ class TransformerObserver(Observer):
                     raise ValueError(f"value must be a dictionary, got {value}")
 
                 if isinstance(value, dict) and "value" in value:
+                    self.transformer.updated = False
                     return Message(
                         topic=self.topic, source=str(self), value={"transformed": value}
                     )
                 elif isinstance(value, dict) and "value" not in value:
+                    self.transformer.updated = False
                     return Message(
                         topic=self.topic,
                         source=str(self),
@@ -263,14 +292,48 @@ class InterfaceObserver(Observer):
     #     """monitor a variable in the interface"""
 
 
+class MockModel:
+    def __init__(self):
+        """placeholder for model"""
+
+    def evaluate(self, value):
+        """placeholder for model prediction"""
+        return {"not_initialized": {"value": -99999999999}}
+
 class ModelObserver(Observer):
-    def __init__(self, model, topic: str):
+    def __init__(self, model=None, config = None, topic: str = "model"):
         """wraps around the model.predict method"""
         self.model = model
         self.topic = topic
+        self.config = config
+        
+        if self.model is None and self.config is not None:
+            self.model = self.__get_model()
+            if not hasattr(self.model, "evaluate"):
+                raise ValueError("model must have a .evaluate() method")
+        elif self.model is not None:
+            self.model = model
+        else:
+            raise ValueError("model must be provided or a config to load a model")
+        
+    def __get_model(self):
+        """load the model from the config"""
+        if self.config["type"] == "mock":
+            return MockModel()
+        if self.config["type"] == "MlflowModelGetter":
+            model_getter = registered_model_getters["mlflow"](self.config["args"]) # legacy name well make it consistent across the board in the future
+            model = model_getter.get_model()
+            # check model is not None
+            if model is None:
+                raise ValueError("model is None")
+            return model
 
+        else:
+            raise ValueError(f"model type not recognised: {self.config['type']}")
+        
     def update(self, message: Message) -> list[Message]:
-        pred = self.model.predict(message.value)
+        logger.debug(f"updating {self} with {message.value}")
+        pred = self.model.evaluate(message.value)
         messages = []
         for key, value in pred.items():
             messages.append(
