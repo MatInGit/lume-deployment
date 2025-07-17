@@ -43,3 +43,4 @@ graphs/
 .coverage
 .vscode
 tmp*
+notify.profile

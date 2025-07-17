@@ -12,8 +12,7 @@ from poly_lithic.src.transformers import BaseTransformer
 from poly_lithic.src.interfaces import BaseInterface
 from poly_lithic.src.model_utils import registered_model_getters
 import os
-
-# from deepdiff import DeepDiff
+from deepdiff import DeepDiff
 logger = get_logger()
 
 import cProfile
@@ -88,6 +87,17 @@ class Message(BaseModel):
     @computed_field
     def values(self) -> list[Any]:
         return list(self.value.values())
+    
+    @computed_field
+    def uid(self) -> str:
+        """return a unique id for the message"""
+        items = []
+        for key, value in self.value.items():
+            value_items = frozenset((k, str(v)) for k, v in value.items())
+            items.append((key, value_items))
+        
+        return str(frozenset(items))
+        
 
     def __str__(self):
         return f'Message(topic={self.topic}, source={self.source}, value={self.value}, timestamp={self.timestamp})'
@@ -151,30 +161,6 @@ class MessageBroker:
 
     # @profileit
     def notify(self, message: Message) -> None:
-        """notify all observers of a message"""
-        # if message.topic in self._observers:
-        #     start = time.time()
-        #     logger.debug(f"notifying observers of {message}")
-        #     with ThreadPoolExecutor() as executor:
-        #         futures = []
-        #         for observer in self._observers[message.topic]:
-        #             logger.debug(f"notifying {observer} of {message}")
-        #             futures.append(executor.submit(observer.update, message))
-
-        #         for future in as_completed(futures):
-        #             result = future.result()
-
-        #             if result is not None:
-        #                 # if list of messages
-        #                 if isinstance(result, list):
-        #                     for r in result:
-        #                         self.queue.append(r)
-        #                 else:
-        #                     self.queue.append(result)
-        #     end = time.time()
-        #     print(f"messsage update time: {(end-start)*1000:.2f}ms for {message.topic}")
-        # else:
-        #     logger.error(f"no observers for {message.topic}")
         """notify all observers of a message"""
         if message.topic in self._observers:
             start = time.time()
@@ -271,6 +257,27 @@ class InterfaceObserver(Observer):
     def update(self, message: Message) -> Message | list[Message]:
         if message.topic == 'get_all':
             messages = self.get_all()
+            # compare to last_get_all if not None
+            if self.last_get_all is not None:
+                # compare uid for each message
+                diff = False
+                for m in messages:
+                    if m.uid not in [msg.uid for msg in self.last_get_all]:
+                        diff = True
+                        break
+                # print(self.last_get_all, messages)
+                if diff:
+                    self.last_get_all = messages
+                    return messages
+                else:
+                    logger.debug('no diff')
+                    return []
+            else:
+                self.last_get_all = messages
+                return messages
+            
+            
+            
             return messages
         else:
             logger.debug(f'updating {self}')
