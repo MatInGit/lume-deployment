@@ -19,10 +19,10 @@ use old docs in the meantime: [old docs](./readme_old.md) -->
         - [PassThroughTransformer sample configuration](#passthroughtransformer-sample-configuration)
     - [Model](#model)
       - [Model Configs](#model-configs)
-  - [Example Model - Local Model](#example-model---local-model)
-  - [Example Model - MLFLow Model](#example-model---mlflow-model)
-  - [Working with Lume-Model](#working-with-lume-model)
+        - [Example Model - Local Model](#example-model---local-model)
+        - [Example Model - MLFLow Model](#example-model---mlflow-model)
 
+  - [Roadmap](#roadmap)
 # Poly-Lithic
 
 Poly-Lithic is a package that allows you do deploy any model with an arbitrary number of inputs and outputs, related data transformations and system interfaces. 
@@ -324,7 +324,24 @@ modules:
           img_y_ch: "MY_TEST_CA_Y2"
 ```
 
+##### `PassThroughTransformer` Sample configuration
+```yaml
+modules:
+  output_transformer:
+    name: "output_transformer"
+    type: "transformer.PassThroughTransformer"
+    pub: "system_output"
+    sub:
+    - "model_output"
+    module_args: None
+    config:
+      variables:
+        LUME:MLFLOW:TEST_IMAGE: "y_img"
+```
 ##### `CompoundTransformer` Sample configuration
+> [!CAUTION]
+> This module will be deprecated in the future, pub-sub model means that compound transformers are no longer needed.
+
 ```yaml
 modules:
   compound_transformer:
@@ -340,13 +357,13 @@ modules:
           type: "SimpleTransformer"
           config:
             symbols:
-              - "LUME:MLFLOW:TEST_B"
-              - "LUME:MLFLOW:TEST_A"
+              - "MY_TEST_A"
+              - "MY_TEST_B"
             variables:
               x2:
-                formula: "LUME:MLFLOW:TEST_B"
+                formula: "MY_TEST_A*2"
               x1: 
-                formula: "LUME:MLFLOW:TEST_A"
+                formula: "MY_TEST_B+MY_TEST_A"
         transformer_2:
           type: "CAImageTransformer"
           config:
@@ -361,20 +378,6 @@ modules:
                 img_y_ch: "MY_TEST_CA_Y2"
 ```
 
-##### `PassThroughTransformer` Sample configuration
-```yaml
-modules:
-  output_transformer:
-    name: "output_transformer"
-    type: "transformer.PassThroughTransformer"
-    pub: "system_output"
-    sub:
-    - "model_output"
-    module_args: None
-    config:
-      variables:
-        LUME:MLFLOW:TEST_IMAGE: "y_img"
-```
 
 ### Model
 
@@ -382,13 +385,24 @@ Models are the core of the deployment, they can be retrieved locally or from MLF
 
 All models have to implement the `evaluate` method that takes a dictionary of inputs and returns a dictionary of outputs. 
 
-#### Model Configs
-| Module | Description | YAML configuration | Compatible with: |
-| ------ | ----------- | ------------------ | --------------- |
-> TODO
+#### Model Config 
+
+```yaml
+model:                              # this is the name of the model module, it is used to identify the model in the graph
+    name: "model"                   # name of the model used to identify it in the graph, overrides the name in the module section
+    type: "model.SimpleModel"       # type of module, used to identify the model class and subclass, in this case we are saying it a model 
+    pub: "model"                    # where the model will publish its outputs, this is the topic that the model will publish to
+    sub: "in_transformer"           # topic that the model will subscribe to, this is the topic that the model will listen for inputs
+    module_args: None               # defines what arguments to pass to the model observer, if any this can inform unpacking etc
+    config:
+      type: "modelGetter"           # defines the type of model getter, this is used to identify the model getter class
+      args:                         # arguments to pass to the model getter class, in this case we are passing the path to the model definition file
+
+```
+See the following examples for usage
 
 
-## Example Model - Local Model
+###### Example Model - Local Model
 
 ```python
   
@@ -468,10 +482,28 @@ pl --publish -c examples/base/local/deployment_config.yaml
 ```
 See the [local example notebook](./examples/base/simple_model_local.ipynb) for more details.
 
-## Example Model - MLFLow Model
+#### Example Model - MLFLow Model
 >TODO
 
-## Working with Lume-Model
+#### Working with Lume-Model
 >TODO
 
 
+## Roadmap  
+
+- [ ] **Lume-Model Integration** *(1–3 Months)*                 🥇 🔧🧠  
+- [ ] **MLflow 3.x Support** *(1–3 Months)*                     🥇 📦🤖  
+- [ ] **Move to `gh-pages`** *(1–3 Months)*                     🥈 🌐🚀  
+
+- [ ] **Additional Modules** *(3–6 Months)*                     🥉 🔄🛠️
+  - [ ] **p4p4isis Interface** *(6–12 Months)*                    🥉 📡🔗
+  - [ ] **Time Series Aggregation** *(3–6 Months)*              🥉 ⏱️📊
+  - [ ] **Model Evaluator Module** *(3–6 Months)*               🥉 📈🔍
+  - [ ] **Model Retrainer Module** *(6–12 Months)*              🥉 🔄🔧
+
+
+
+### 🏅 Priority Legend  
+- 🥇 = High Priority  
+- 🥈 = Medium Priority  
+- 🥉 = Low Priority  
