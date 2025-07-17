@@ -8,6 +8,7 @@ on:
     # paths:
     #   - .github/workflows/**.yml
     branches:
+      - 18-improved-model-getting-and-examples
       - dev
     tags:
       - '*'
@@ -62,5 +63,12 @@ jobs:
           name: dist
           path: |
             dist
-      
+  TestPyPI:
+    permissions:
+      id-token: write 
+    if: github.ref == 'refs/heads/dev' || startsWith(github.ref, 'refs/tags/')
+    uses: pypa/gh-action-pypi-publish@release/v1
+    with:
+      repository-url: https://test.pypi.org/legacy/
+        
 
