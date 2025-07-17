@@ -1,17 +1,11 @@
 # set build time variables
 export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 export VCS_REF=$(git rev-parse --short HEAD)
-export VERSION=$(hatch version)
+export VERSION=0.1.6.dev6 #   $(hatch version)
 
 # # if build-info file exists, remove it
 # if [ -f build-info ]; then
 #     rm build-info.json
-# fi
-
-# get username from env or use default
-if [ -z "$GIT_USERNAME" ]; then
-    GIT_USERNAME=$(git config user.name)
-fi
 
 # # # create build-info file
 # touch build-info.json
