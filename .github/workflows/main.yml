@@ -1,20 +1,17 @@
 name: CI Pipeline
 
+# only on tagged commits or manual trigger
 on:
   push:
-    branches:
-      - main
-      - dev
-  pull_request:
-    branches:
-      - main
-      - dev
+    tags:
+      - 'v*'
+
 jobs:
-  setup:
+  Build and test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-          python-version: ["3.11"]
+          python-version: ["3.12","3.11", "3.10"]
 
     steps:
       - name: Checkout code
