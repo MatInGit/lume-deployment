@@ -1,6 +1,5 @@
-from lume_model.base import LUMEBaseModel
-
 import numpy as np
+from lume_model.base import LUMEBaseModel
 
 
 class ExampleModel(LUMEBaseModel):

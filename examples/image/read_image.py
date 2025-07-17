@@ -1,10 +1,6 @@
 from p4p.client.thread import Context
 
 # server
-from p4p.server import Server
-from p4p.nt import NTScalar, NTNDArray
-from p4p.server.thread import SharedPV
-import numpy as np
 
 ctxt = Context("pva")
 from matplotlib import pyplot as plt

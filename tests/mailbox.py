@@ -1,11 +1,12 @@
 # mail box server for testing
+import os
+
+import numpy as np
+from p4p.nt import NTNDArray, NTScalar
 from p4p.server import Server
 from p4p.server.raw import ServOpWrap
 from p4p.server.thread import SharedPV
-from p4p.nt import NTScalar, NTNDArray
-import numpy as np
-from p4p.wrapper import Value, Type
-import os
+from p4p.wrapper import Value
 
 # set env
 os.environ["EPICS_PVA_SERVER_PORT"] = "5577"

@@ -1,11 +1,10 @@
 # from src.interfaces import SimplePVAInterfaceServer
 # from src.transformers import PassThroughTransformer, CompoundTransformer
-from src.interfaces import registered_interfaces
-from src.transformers import registered_transformers
-
-from src.logging_utils.make_logger import get_logger, make_logger
 import numpy as np
 import pytest
+from src.interfaces import registered_interfaces
+from src.logging_utils.make_logger import make_logger
+from src.transformers import registered_transformers
 
 SimplePVAInterfaceServer = registered_interfaces["p4p_server"]
 CompoundTransformer = registered_transformers["CompoundTransformer"]
@@ -178,7 +177,7 @@ def test_initialise_with_defaults():
     p4p = SimplePVAInterfaceServer(config)
     assert p4p.shared_pvs["test"].isOpen()
     assert p4p.shared_pvs["test_array"].isOpen()
-    
+
     assert p4p.shared_pvs["test"].current().raw.value == 5
     assert p4p.shared_pvs["test_array"].current().raw.value[0] == 1
     assert p4p.shared_pvs["test_array"].current().raw.value[1] == 2

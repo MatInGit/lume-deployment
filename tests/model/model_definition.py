@@ -1,6 +1,6 @@
+import numpy as np
 from lume_model.base import LUMEBaseModel
 from lume_model.variables import ScalarInputVariable, ScalarOutputVariable
-import numpy as np
 
 
 # This is the model definition as in other examples

@@ -1,7 +1,9 @@
-from torch import nn
-import torch
-import time
 import logging
+import time
+
+import torch
+from torch import nn
+
 # simple PID controller implemented using pytorch, it has calculates the error and tracks the history
 # if the error is greater than the threshold, enable the adaptive learning on each step
 # the adaptive learning uses backpropagation to update the parameters of the PID controller

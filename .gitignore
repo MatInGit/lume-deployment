@@ -29,3 +29,11 @@ test.py
 cookiecutter-*
 .ruff_cache
 build-info*
+*-deployment-*/
+*-deployment/
+cookiecutter-*/
+astra_*/
+configs/
+lebt_*/
+*-surrograte/
+waterfall*/
