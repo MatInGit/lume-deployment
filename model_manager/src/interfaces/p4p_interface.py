@@ -1,14 +1,19 @@
 from p4p.client.thread import Context
-from p4p.server import Server
+from p4p.server import Server, StaticProvider
 from p4p.server.raw import ServOpWrap
 from p4p.server.thread import SharedPV
-from p4p.nt import NTScalar, NTNDArray, NTMultiChannel
+from p4p.nt import NTScalar, NTNDArray
 from p4p.wrapper import Value, Type
+
+import threading
 
 from .BaseInterface import BaseInterface
 from src.logging_utils import get_logger
 import os, time
 import numpy as np
+
+# anyScalar
+
 
 import warnings
 
@@ -112,6 +117,8 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
     def __init__(self, config):
         super().__init__(config)
         self.shared_pvs = {}
+        pv_type_init = None
+        pv_type_nt = None
 
         if "init" in config:
             # print(f"config['init']: {config['init']}")
@@ -127,7 +134,6 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         for pv in self.pv_list:
 
             if "type" in config["variables"][pv]:
-                warnings.warn(f"Type specified for {pv}")
 
                 pv_type = config["variables"][pv]["type"]
                 if pv_type == "image":
@@ -135,7 +141,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
                     y_size = config["variables"][pv]["image_size"]["y"]
                     x_size = config["variables"][pv]["image_size"]["x"]
                     # intialize with ones
-                    intial_value = np.ones((y_size, x_size))
+                    intial_value = np.zeros((y_size, x_size))
                     pv_type_nt = NTNDArray()
                     pv_type_init = intial_value
 
@@ -145,23 +151,21 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
                         length = config["variables"][pv]["length"]
                     else:
                         length = 10
-                    intial_value = np.ones(length)
+                    intial_value = np.zeros(length, dtype=np.float64)
                     pv_type_nt = NTScalar("ad")
                     pv_type_nt_bd = NTScalar.buildType("ad")
-                    pv_type_init = Value(pv_type_nt_bd, {"value": intial_value})
+                    # pv_type_init = Value(pv_type_nt_bd, {"value": intial_value})
+                    pv_type_init = intial_value
+                    print(f"pv_type_init: {pv_type_init}")
+                    
 
             else:
                 warnings.warn(f"No type specified for {pv}")
                 pv_type_nt = NTScalar("d")
                 pv_type_init = 0
+            
 
-            pv_item = {}
-            if self.init_pvs:
-                pv_item[pv] = SharedPV(nt=pv_type_nt, initial=pv_type_init)
-                # logger.debug(f"pv_item[pv]: {pv_item[pv]}")
-            else:
-                pv_item[pv] = SharedPV(nt=pv_type_nt, initial=None)
-                # logger.debug(f"pv_item[pv]: {pv_item[pv]}")
+            pv_item = {pv: SharedPV(initial=pv_type_init, nt=pv_type_nt)}
 
             @pv_item[pv].put
             def put(pv: SharedPV, op: ServOpWrap):
@@ -173,9 +177,15 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
             self.shared_pvs[pv] = pv_item[pv]
             # this feels ugly
 
-        self.server = Server(
-            providers=[{name: pv} for name, pv in self.shared_pvs.items()]
-        )
+        # self.server = Server(
+        #     providers=[{name: pv} for name, pv in self.shared_pvs.items()]
+        # )
+        # self.providers = [{name: pv} for name, pv in self.shared_pvs.items()]
+        self.provider = StaticProvider("pva")
+        for name, pv in self.shared_pvs.items():
+            self.provider.add(name, pv)
+        
+        self.server = Server(providers=[self.provider])
 
     def close(self):
         logger.debug("Closing SimplePVAInterfaceServer")
@@ -183,25 +193,32 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         super().close()
 
     def put(self, name, value, **kwargs):
-        # logger.debug(f"Putting {name} with value {value}")
+        logger.info(f"Putting {name} with value {value}")
         # if type(value) == np.ndarray:
         #     value = value.T # quick fix for the fact that the image is flipped
-        print(f"Putting {name} with value {value}")
+        # print(f"Putting {name} with value {value}")
         self.shared_pvs[name].post(value, timestamp=time.time())
 
     def get(self, name, **kwargs):
         # print(f"Getting {name}")
         value_raw = self.shared_pvs[name].current().raw
-
-        # print(f"value_raw_type: {type(value_raw.value)}")
         if type(value_raw.value) == np.ndarray:
-            value = value_raw.value
-            x_size = value_raw.dimension[0].size
-            y_size = value_raw.dimension[1].size
-            value = value.reshape((x_size, y_size))
-        else:
+            print(f"value_raw_type: {type(value_raw.value)}")
+            print(f"value_raw: {value_raw.value}")
+            print(f"value_raw_shape: {value_raw.value.shape}")
+            # ndtndarray has property dimension
+            if "dimension" in value_raw:
+                y_size = value_raw.dimension[0]["size"]
+                x_size = value_raw.dimension[1]["size"]
+                value = value_raw.value.reshape((y_size, x_size))
+            else:
+                value = value_raw.value
+                
+        elif type(value_raw.value) == float or type(value_raw.value) == int or type(value_raw.value) == bool:
             value = value_raw.value
 
+        else:
+            raise ValueError(f"Unknown type for value_raw: {type(value_raw.value)}")
         # print(f"value: {value}")
         return name, {"value": value}
 
