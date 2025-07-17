@@ -8,6 +8,11 @@ export VERSION=$(hatch version)
 #     rm build-info.json
 # fi
 
+# get username from env or use default
+if [ -z "$GIT_USERNAME" ]; then
+    GIT_USERNAME=$(git config user.name)
+fi
+
 # # # create build-info file
 # touch build-info.json
 # echo "{" >> build-info.json
@@ -27,3 +32,12 @@ docker build --pull --rm --target tensorflow -f "Dockerfile" -t harbor.stfc.ac.u
 docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:base-$VERSION
 docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:torch-$VERSION
 docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:tensorflow-$VERSION
+
+# docker hub retag and push matindocker/poly-lithic
+docker tag harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:base-$VERSION matindocker/poly-lithic:base-$VERSION
+docker tag harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:torch-$VERSION matindocker/poly-lithic:torch-$VERSION
+docker tag harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:tensorflow-$VERSION matindocker/poly-lithic:tensorflow-$VERSION
+
+docker push matindocker/poly-lithic:base-$VERSION
+docker push matindocker/poly-lithic:torch-$VERSION
+docker push matindocker/poly-lithic:tensorflow-$VERSION

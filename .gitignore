@@ -47,9 +47,6 @@ notify.profile
 test.yaml
 test_files/
 old_examples/
-<<<<<<< HEAD
 *code-workspace
 test-env
-=======
-*code-workspace
->>>>>>> 13600bf7db06710d99cb81684089c8c62fc7c206
+build-and-push-docker-image.sh
