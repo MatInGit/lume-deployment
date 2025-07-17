@@ -489,21 +489,21 @@ See the [local example notebook](./examples/base/simple_model_local.ipynb) for m
 >TODO
 
 
-## Roadmap  
+## Roadmap
 
-- [ ] **Lume-Model Integration** *(1–3 Months)*                 🥇 🔧🧠  
-- [ ] **MLflow 3.x Support** *(1–3 Months)*                     🥇 📦🤖  
-- [ ] **Move to `gh-pages`** *(1–3 Months)*                     🥈 🌐🚀  
+| Feature / Task                                | Timeline     | Priority |
+|-----------------------------------------------|--------------|----------|
+| 🧠 🔧 **Lume-Model Integration**               | 1–3 Months   | 🥇       |
+| 📦 🤖 **MLflow 3.x Support**                   | 1–3 Months   | 🥇       |
+| 🌐 🚀 **Move to `gh-pages`**                   | 1–3 Months   | 🥈       |
+| 🔗 🧪 **p4p4isis Interface**                   | 6–12 Months  | 🥉       |
+| 📊 🧭 **Time Series Aggregation**              | 3–6 Months   | 🥉       |
+| 📈 🔍 **Model Evaluator Module**               | 3–6 Months   | 🥉       |
+| 🔁 🔧 **Model Retrainer Module**               | 6–12 Months  | 🥈       |
 
-- [ ] **Additional Modules** *(3–6 Months)*                     🥉 🔄🛠️
-  - [ ] **p4p4isis Interface** *(6–12 Months)*                    🥉 📡🔗
-  - [ ] **Time Series Aggregation** *(3–6 Months)*              🥉 ⏱️📊
-  - [ ] **Model Evaluator Module** *(3–6 Months)*               🥉 📈🔍
-  - [ ] **Model Retrainer Module** *(6–12 Months)*              🥉 🔄🔧
+---
 
-
-
-### 🏅 Priority Legend  
+### 🏅 Priority Legend
 - 🥇 = High Priority  
 - 🥈 = Medium Priority  
-- 🥉 = Low Priority  
+- 🥉 = Low Priority
