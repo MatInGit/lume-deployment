@@ -20,3 +20,5 @@ local_test/
 lebt_torch_model/
 cookiecutter-*
 *.json
+* 
+!poly-lithic
