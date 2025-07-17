@@ -31,14 +31,14 @@ jobs:
           pip install hatch
           pip install pytest
           pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          hatch run test
       
       - name: Hatch build
         run: |
           hatch build
           pip install dist/*.whl
       
-      - name: Run tests
-        env:
-            PYTHONPATH: ${{ github.workspace }}/model_manager/src
-        run: |
-          pytest
+
