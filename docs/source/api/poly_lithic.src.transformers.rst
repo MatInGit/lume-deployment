@@ -16,5 +16,5 @@ Module contents
 
 .. automodule:: poly_lithic.src.transformers
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
