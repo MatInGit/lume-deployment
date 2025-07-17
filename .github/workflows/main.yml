@@ -35,6 +35,7 @@ jobs:
       - name: Hatch build
         run: |
           hatch build
+          pip install dist/*.whl
       
       - name: Run tests
         run: |
