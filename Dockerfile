@@ -1,6 +1,6 @@
 FROM python:3.11.8-slim-bullseye
 RUN apt-get update && apt-get install -y --no-install-recommends git iputils-ping curl
-# RUN python -m pip install botorch tensorflow pydantic torch==2.6.0 --no-cache-dir
+RUN python -m pip install botorch tensorflow pydantic torch==2.6.0 --no-cache-dir
 
 COPY requirements.txt /app/requirements.txt
 RUN python -m pip install -r /app/requirements.txt --no-cache-dir

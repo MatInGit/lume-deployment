@@ -21,7 +21,9 @@ def setup():
     global process
     # process = subprocess.Popen(["python", "mailbox.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     process = subprocess.Popen(
-        [sys.executable, './tests/mailbox.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        [sys.executable, './tests/mailbox.py'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
     yield
     process.kill()

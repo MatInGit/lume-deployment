@@ -3,6 +3,7 @@ import numpy as np
 import sympy as sp
 from poly_lithic.src.logging_utils.make_logger import get_logger
 from poly_lithic.src.transformers.BaseTransformer import BaseTransformer
+
 logger = get_logger()
 
 
@@ -37,9 +38,12 @@ class SimpleTransformer(BaseTransformer):
         self.lambdified_formulas = {}
         for key, value in self.pv_mapping.items():
             self.formulas[key] = sp.sympify(value['formula'].replace(':', '_'))
-            input_list_renamed = [symbol.replace(':', '_') for symbol in self.input_list]
-            self.lambdified_formulas[key] = sp.lambdify(input_list_renamed, self.formulas[key], modules='numpy')
-
+            input_list_renamed = [
+                symbol.replace(':', '_') for symbol in self.input_list
+            ]
+            self.lambdified_formulas[key] = sp.lambdify(
+                input_list_renamed, self.formulas[key], modules='numpy'
+            )
 
         self.handler_time = []
 
@@ -52,7 +56,6 @@ class SimpleTransformer(BaseTransformer):
     def handler(self, pv_name, value):
         # logger.debug(f"SimpleTransformer handler for {pv_name} with value {value}")
 
-        
         # chek if pv_name is in sel.input_list
         if pv_name in self.input_list:
             # assert value is float
@@ -61,14 +64,16 @@ class SimpleTransformer(BaseTransformer):
                     value = float(value['value'])
                 elif isinstance(value['value'], (np.ndarray, list)):
                     value = np.array(value['value']).astype(float)
-                else :
-                    raise Exception(f'Invalid type for value: {value}, type: {type(value["value"])}')
+                else:
+                    raise Exception(
+                        f'Invalid type for value: {value}, type: {type(value["value"])}'
+                    )
             except Exception as e:
                 logger.error(f'Error converting value to float: {e}')
                 raise e
 
             self.latest_input[pv_name] = value
-            
+
             try:
                 if all([value is not None for value in self.latest_input.values()]):
                     time_start = time.time()
@@ -141,7 +146,9 @@ class SimpleTransformer(BaseTransformer):
         for key, value in self.pv_mapping.items():
             try:
                 lambdified_formula = self.lambdified_formulas[key]
-                transformed[key] = lambdified_formula(*[pvs_renamed[symbol.replace(':', '_')] for symbol in self.input_list])
+                transformed[key] = lambdified_formula(*[
+                    pvs_renamed[symbol.replace(':', '_')] for symbol in self.input_list
+                ])
 
                 if isinstance(transformed[key], np.ndarray):
                     if transformed[key].shape[-1] == 1:
@@ -156,6 +163,8 @@ class SimpleTransformer(BaseTransformer):
         for key, value in transformed.items():
             self.latest_transformed[key] = value
         self.updated = True
+
+
 class CAImageTransfomer(BaseTransformer):
     """Input only image transformation"""
 

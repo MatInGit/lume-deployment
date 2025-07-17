@@ -124,16 +124,18 @@ class ModelFactory:  # used to create model instances when in local mode
         return PID()
 
 
-class TestPlant: 
+class TestPlant:
     # 3 state state space model SISO system
     def __init__(self):
-        self.A = torch.tensor([[0.9, -0.1, 0.0], [0.0, 0.9, 0.0], [0.0, 0.0, 0.9]], dtype=torch.float)
+        self.A = torch.tensor(
+            [[0.9, -0.1, 0.0], [0.0, 0.9, 0.0], [0.0, 0.0, 0.9]], dtype=torch.float
+        )
         self.B = torch.tensor([[0.1], [0.1], [0.1]], dtype=torch.float)
         self.C = torch.tensor([[1, 0, 0]], dtype=torch.float)
         self.x = torch.tensor([[0.0], [0.0], [0.0]], dtype=torch.float)
         self.u = torch.tensor([[1.0]], dtype=torch.float)
         self.y = torch.tensor([[1.0]], dtype=torch.float)
-        
+
     def step(self, u):
         u = u.view(1, 1)  # Ensure u is [1, 1]
         # print(f'1 A: {self.A.shape}, x: {self.x.shape}, B: {self.B.shape}, u: {u.shape}, C: {self.C.shape}, y: {self.y.shape}')
@@ -143,32 +145,32 @@ class TestPlant:
 
         # print(f'3 A: {self.A.shape}, x: {self.x.shape}, B: {self.B.shape}, u: {u.shape}, C: {self.C.shape}, y: {self.y.shape}')
         return self.y.item()  # Returns a scalar
-    
+
     def reset(self):
         self.x = torch.tensor([[0.0], [0.0], [0.0]], dtype=torch.float)
         self.u = torch.tensor([[0.0]], dtype=torch.float)
         self.y = torch.tensor([[0.0]], dtype=torch.float)
         return self.y
-    
+
 
 def main():
-    # test plant 
+    # test plant
     plant = TestPlant()
-    
+
     x = []
     y = []
     for i in range(1000):
-        setpoint = torch.tensor([torch.sin(torch.tensor([i/10]))])
+        setpoint = torch.tensor([torch.sin(torch.tensor([i / 10]))])
         system_output = plant.step(setpoint)
         print(f'Setpoint: {setpoint}, System Output: {system_output}')
         x.append(setpoint.item())
         y.append(system_output)
         # time.sleep(0.1)
-    
+
     plt.plot(x)
     plt.plot(y)
     plt.savefig('plant_output.png')
-    
+
 
 if __name__ == '__main__':
     main()

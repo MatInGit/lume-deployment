@@ -13,7 +13,7 @@ from poly_lithic.src.logging_utils import get_logger
 
 from .BaseInterface import BaseInterface
 
-# multi pool 
+# multi pool
 
 
 logger = get_logger()
@@ -26,12 +26,12 @@ class SimplePVAInterface(BaseInterface):
         self.ctxt = Context('pva', nt=False)
         if 'EPICS_PVA_NAME_SERVERS' in os.environ:
             logger.warning(
-                f"EPICS_PVA_NAME_SERVERS: {os.environ['EPICS_PVA_NAME_SERVERS']}"
+                f'EPICS_PVA_NAME_SERVERS: {os.environ["EPICS_PVA_NAME_SERVERS"]}'
             )
         elif 'EPICS_PVA_NAME_SERVERS' in config:
             os.environ['EPICS_PVA_NAME_SERVERS'] = config['EPICS_PVA_NAME_SERVERS']
             logger.warning(
-                f"EPICS_PVA_NAME_SERVERS: {os.environ['EPICS_PVA_NAME_SERVERS']}"
+                f'EPICS_PVA_NAME_SERVERS: {os.environ["EPICS_PVA_NAME_SERVERS"]}'
             )
         else:
             logger.warning(
@@ -116,9 +116,9 @@ class SimplePVAInterface(BaseInterface):
                     value = value['value']
             else:
                 value = value['value']
-            
+
             output[key] = {'value': value}
-        
+
         return output
 
     def close(self):
@@ -276,10 +276,11 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
             self.shared_pvs[key].post(value, timestamp=time.time())
         # result = self.ctxt.put(channel_names,values, throw=False)
         # with ThreadPool(processes=24) as pool:
-            # for key, value in data.items():
-            #     channel_names.append(key)
-            #     values.append(value)
-            # pool.starmap(self.put, zip(channel_names, values))
+        # for key, value in data.items():
+        #     channel_names.append(key)
+        #     values.append(value)
+        # pool.starmap(self.put, zip(channel_names, values))
+
     def get_many(self, data, **kwargs):
         output_dict = {}
         for key in data:
@@ -289,6 +290,5 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         #     results = pool.starmap(self.get, [(key,) for key in data])
         #     for result in results:
         #         output_dict[result[0]] = result[1]
-        
+
         return output_dict
-            
