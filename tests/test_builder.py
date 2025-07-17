@@ -60,20 +60,20 @@ def test_mlflow(caplog, make_builder):
     )
     
     message_broker.notify(message)
-    assert len(message_broker.queue) == 3 # we have an extra here with the S variable
+    assert len(message_broker.queue) == 3 # we have an extra here with the S variable we  should see A,B and S variables
     logging.info(message_broker.queue)
     for message in message_broker.queue:
         assert message.topic == "in_interface"
     message_broker.parse_queue()
-    assert len(message_broker.queue) == 1
+    assert len(message_broker.queue) == 1 # A and B get transformed S is discarded since its not in the transformer symbol list
     logging.info(message_broker.queue)
     assert message_broker.queue[0].topic == "in_transformer"
     message_broker.parse_queue()
-    assert len(message_broker.queue) == 1
+    assert len(message_broker.queue) == 2 # model outputs x1 and x2
     logging.info(message_broker.queue)
-    assert message_broker.queue[0].topic == "model"
+    assert message_broker.queue[0].topic == "model" 
     message_broker.parse_queue()
-    assert len(message_broker.queue) == 1
+    assert len(message_broker.queue) == 2 # out transfomer produces y1 and y2 as separate messages dues to unpacking being enabled in the transformer module
     logging.info(message_broker.queue)
     assert message_broker.queue[0].topic == "out_transformer"
     message_broker.parse_queue()
