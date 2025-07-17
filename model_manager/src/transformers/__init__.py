@@ -1,8 +1,10 @@
 registered_transformers = {}
 
-from .BaseTransformers import SimpleTransformer
-from .BaseTransformers import CAImageTransfomer
-from .BaseTransformers import PassThroughTransformer
+from .BaseTransformers import (
+    CAImageTransfomer,
+    PassThroughTransformer,
+    SimpleTransformer,
+)
 from .CompoundTransformer import CompoundTransformer
 
 registered_transformers["SimpleTransformer"] = SimpleTransformer

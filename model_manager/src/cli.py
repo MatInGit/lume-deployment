@@ -1,13 +1,20 @@
 import argparse
-import os, sys, json, time, traceback
-from src.config import ConfigParser
-from src.logging_utils import get_logger, make_logger, reset_logging
-from src.model_utils import registered_model_getters
-from src.interfaces import registered_interfaces
-from src.transformers import registered_transformers
-import torch
-import time, logging, asyncio
+import asyncio
+import json
+import logging
+import os
+import sys
+import time
+import traceback
+
 import numpy as np
+import torch
+
+from src.config import ConfigParser
+from src.interfaces import registered_interfaces
+from src.logging_utils import get_logger, make_logger
+from src.model_utils import registered_model_getters
+from src.transformers import registered_transformers
 
 logger = get_logger()
 
@@ -38,7 +45,7 @@ def env_config(env_config):
     logger.debug(f"Setting environment variables from: {env_config}")
     try:
         # load json
-        with open(env_config, "r") as stream:
+        with open(env_config) as stream:
             data = json.load(stream)
         for key, value in data.items():
             os.environ[key] = value
@@ -52,7 +59,7 @@ def setup():
     parser = argparse.ArgumentParser(description="Model Manager CLI")
 
     parser.add_argument(
-        "-l", # expects 3 arguments
+        "-l",  # expects 3 arguments
         "--local",
         help="Local mode, run without mlflow",
         required=False,
@@ -173,7 +180,7 @@ def setup():
     # requirements install and quit
     if args.reqirements:
         deps = model_getter.get_requirements()
-        for line in open(deps, "r").readlines():
+        for line in open(deps).readlines():
             logger.debug(f"Installing {line}")
             os.system(f"pip install {line}")
         logger.info("Requirements installed, exiting")
@@ -309,8 +316,8 @@ async def model_main(
                     stats_input_transform = []
                     stats_output_transform = []
                     stats_put = []
-                    
-            # # do update at 10 Hz 
+
+            # # do update at 10 Hz
             if True:
                 for key in in_interface.variable_list:
                     _, value = in_interface.get(key)
@@ -320,11 +327,12 @@ async def model_main(
                         else:
                             in_transformer.handler(key, value)
                     elif type(value["value"]) == np.ndarray:
-                        if np.array_equal(value["value"], in_transformer.latest_input[key]):
+                        if np.array_equal(
+                            value["value"], in_transformer.latest_input[key]
+                        ):
                             pass
                         else:
                             in_transformer.handler(key, value)
-
 
             if in_transformer.updated:
                 try:

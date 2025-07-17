@@ -1,8 +1,8 @@
 # not implemented yet warning
-from src.model_utils import ModelGetterBase
-from src.logging_utils import get_logger
 import importlib.util
-import pickle, os, sys
+
+from src.logging_utils import get_logger
+from src.model_utils import ModelGetterBase
 
 logger = get_logger()
 
@@ -15,11 +15,13 @@ class LocalModelGetter(ModelGetterBase):
 
     def get_model(self):
         # Import the model class from the specified module
-        spec = importlib.util.spec_from_file_location("model_module", self.model_module_path)
+        spec = importlib.util.spec_from_file_location(
+            "model_module", self.model_module_path
+        )
         model_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(model_module)
         model_factory_class = getattr(model_module, self.model_class_name)
-        
+
         # Create an instance of the model factory class
         model_factory = model_factory_class()
         model = model_factory.get_model()

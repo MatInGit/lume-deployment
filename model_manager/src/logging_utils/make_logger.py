@@ -1,4 +1,6 @@
-import colorlog, logging
+import logging
+
+import colorlog
 
 
 def make_logger(name="model_manager", level=logging.INFO):

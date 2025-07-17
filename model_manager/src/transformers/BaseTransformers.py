@@ -1,7 +1,9 @@
-from src.logging_utils.make_logger import get_logger
-import sympy as sp
-import numpy as np
 import time
+
+import numpy as np
+import sympy as sp
+
+from src.logging_utils.make_logger import get_logger
 
 logger = get_logger()
 
@@ -103,7 +105,7 @@ class CAImageTransfomer:
             if "unfold" in value.keys():
                 self.variables[key + "_unfolding"] = value["unfold"]
             else:
-                self.variables[key + "_unfolding"] = "row_major" #
+                self.variables[key + "_unfolding"] = "row_major"  #
             self.input_list.append(value["img_ch"])
             self.input_list.append(value["img_x_ch"])
             self.input_list.append(value["img_y_ch"])
@@ -136,12 +138,18 @@ class CAImageTransfomer:
             value = self.latest_input[self.variables[key]]
             # print x and y
             try:
-                transformed[key] = np.array(value).reshape((
-                    int(self.latest_input[self.variables[key + "_y"]]), # note the order, we are going from x,y to y,x (rows, columns) in numpy
-                    int(self.latest_input[self.variables[key + "_x"]]),
-                ), 
-                order="F" if self.variables[key + "_unfolding"] == "column_major" else "C")
-                
+                transformed[key] = np.array(value).reshape(
+                    (
+                        int(
+                            self.latest_input[self.variables[key + "_y"]]
+                        ),  # note the order, we are going from x,y to y,x (rows, columns) in numpy
+                        int(self.latest_input[self.variables[key + "_x"]]),
+                    ),
+                    order="F"
+                    if self.variables[key + "_unfolding"] == "column_major"
+                    else "C",
+                )
+
                 if self.variables[key + "_unfolding"] == "column_major":
                     transformed[key] = transformed[key].T
             except Exception as e:
@@ -149,6 +157,7 @@ class CAImageTransfomer:
         for key, value in transformed.items():
             self.latest_transformed[key] = value
         self.updated = True
+
 
 class PassThroughTransformer:
     def __init__(self, config):

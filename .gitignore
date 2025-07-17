@@ -26,3 +26,5 @@ build
 env.json
 creds.json
 test.py
+cookiecutter-*
+.ruff_cache

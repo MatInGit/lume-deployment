@@ -1,6 +1,6 @@
-from .BaseInterface import BaseDataInterface
 import h5py
 
+from .BaseInterface import BaseDataInterface
 
 # This is a simple interface that reads and writes to a h5df file
 # the structure should be dataset per variable so that we can read one at a time
@@ -11,12 +11,12 @@ class h5dfInterface(BaseDataInterface):
         self.path = config["path"]
         # check if file exists
         try:
-            with open(self.path, "r") as f:
+            with open(self.path) as f:
                 pass
         except FileNotFoundError:
             raise FileNotFoundError(f"File {self.path} not found")
 
-    # we want to be able to read one or write one at a time, yeild one at a time, in a generator fashion, this is for backtesting
+    # we want to be able to read one or write one at a time, yield one at a time, in a generator fashion, this is for backtesting
     def load(self, **kwargs):
         with h5py.File(self.path, "r") as f:
             for key in f.keys():

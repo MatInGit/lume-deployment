@@ -1,11 +1,11 @@
-import mlflow
-from mlflow.models.model import get_model_info
-from mlflow import MlflowClient
-import pandas as pd
-import yaml
-import sympy as sp
 import time
-from lume_model.models import TorchModule, TorchModel
+
+import mlflow
+import sympy as sp
+import yaml
+from lume_model.models import TorchModel, TorchModule
+from mlflow import MlflowClient
+from mlflow.models.model import get_model_info
 
 
 class MLflowModelGetter:
@@ -28,7 +28,7 @@ class MLflowModelGetter:
             version.run_id, f"{artifact_location}/pv_mapping.yaml", "."
         )
         return yaml.load(
-            open(f"{artifact_location}/pv_mapping.yaml", "r"), Loader=yaml.FullLoader
+            open(f"{artifact_location}/pv_mapping.yaml"), Loader=yaml.FullLoader
         )
 
     def get_tags(self):
