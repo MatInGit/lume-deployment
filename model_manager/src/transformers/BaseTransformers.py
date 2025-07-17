@@ -41,8 +41,8 @@ class SimpleTransformer:
     def __validate_formulas(self, formula: str):
         try:
             sp.sympify(formula.replace(":", "_"))
-        except:
-            raise Exception(f"Invalid formula: {formula}")
+        except Exception as e:
+            raise Exception(f"Invalid formula: {formula}: {e}")
 
     def handler(self, pv_name, value):
         # logger.debug(f"SimpleTransformer handler for {pv_name} with value {value}")
@@ -131,7 +131,7 @@ class CAImageTransfomer:
             if "unfold" in value.keys():
                 self.variables[key + "_unfolding"] = value["unfold"]
             else:
-                self.variables[key + "_unfolding"] = "row_major"  #
+                self.variables[key + "_unfolding"] = "row_major"
             self.input_list.append(value["img_ch"])
             self.input_list.append(value["img_x_ch"])
             self.input_list.append(value["img_y_ch"])
@@ -144,7 +144,6 @@ class CAImageTransfomer:
 
     def handler(self, variable_name: str, value: dict):
         logger.debug(f"CAImageTransfomer handler for {variable_name}")
-        # logger.debug(f"Value: {value}")
         try:
             self.latest_input[variable_name] = value["value"]
             if all([value is not None for value in self.latest_input.values()]):
@@ -216,10 +215,10 @@ class PassThroughTransformer:
         for key, value in self.pv_mapping.items():
             self.latest_transformed[key] = self.latest_input[value]
 
-            # compare types and shapes
-            if type(self.latest_input[value]) != type(self.latest_transformed[key]):
+            # not sure I should do it like this
+            if isinstance(self.latest_transformed[key], type(self.latest_input[value])):
                 logger.error(f"Type mismatch between input and output for {key}")
-            if type(self.latest_input[value]) == np.ndarray:
+            if isinstance(self.latest_input[value], np.ndarray):
                 if self.latest_input[value].shape != self.latest_transformed[key].shape:
                     logger.error(f"Shape mismatch between input and output for {key}")
         self.updated = True
