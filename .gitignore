@@ -1,7 +1,7 @@
 main_local.py
 env
 cred.json
-__pycache__
+__pycache__/
 *lcls-cu-inj-nn/*
 *lcls_cu_inj_nn/*
 kube
@@ -38,7 +38,7 @@ lebt_*/
 *-surrograte/
 waterfall*/
 _version.py
-dist/*
+dist/
 graphs/
 .coverage
 .vscode
