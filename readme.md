@@ -60,7 +60,7 @@ modules:
         type: "type.subtype"    # type of the module, used to identify the module class and subclass 
         pub: "topic1"           # topic the outputs will be published to, similar to MQTT, Kafka, ROS etc 
         sub:                    # topics the module will subscribe to, we listen for and transform data from these topics
-        - "get_all"             # get_all is a special topic that will trigger an interface module to run get_all method (get_many for all keys)
+        - "update"              # update is a special topic that will trigger an interface module to run get_all method (get_many for all keys)
         - "topic3"              
         module_args: None       # defines what arguments to pass to the module observer, if any this can inform unpacking etc
         config:                 # configuration specific to the module type
