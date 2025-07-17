@@ -17,15 +17,15 @@ logger = get_logger()
 
 class CompoundTransformer:
     def __init__(self, config):
-        logger.debug("Initializing CompoundTransformer")
+        logger.debug('Initializing CompoundTransformer')
         self.transformers = []
         self.latest_input = {}
         self.latest_transformed = {}
         self.input_list = []
-        for transformer in config["transformers"]:
+        for transformer in config['transformers']:
             # print(transformer, config["transformers"][transformer])
-            transformer_type = config["transformers"][transformer]["type"]
-            transformer_config = config["transformers"][transformer]["config"]
+            transformer_type = config['transformers'][transformer]['type']
+            transformer_config = config['transformers'][transformer]['config']
             self.transformers.append(
                 registered_transformers[transformer_type](transformer_config)
             )
@@ -50,7 +50,7 @@ class CompoundTransformer:
 
     def handler(self, name, data):
         time_start = time.time()
-        logger.debug(f"CompoundTransformer handler for {name}")
+        logger.debug(f'CompoundTransformer handler for {name}')
         for transformer in self.transformers:
             if name in transformer.input_list:
                 transformer.handler(name, data)

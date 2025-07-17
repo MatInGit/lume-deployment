@@ -27,8 +27,8 @@ class AbstractInterfaceLoader(ABC):
         """Utility function to dynamically import a module and class."""
         try:
             # Assuming 'src.interfaces' is the parent package for all your modules
-            module = importlib.import_module(module_name, package="model_manager.src")
+            module = importlib.import_module(module_name, package='model_manager.src')
             return getattr(module, class_name)
         except ImportError as e:
-            print(f"Error importing {module_name}: {e}")
+            print(f'Error importing {module_name}: {e}')
             raise e

@@ -8,7 +8,7 @@ from torch import nn
 # if the error is greater than the threshold, enable the adaptive learning on each step
 # the adaptive learning uses backpropagation to update the parameters of the PID controller
 
-logger = logging.getLogger("model_manager")
+logger = logging.getLogger('model_manager')
 
 
 class PID(nn.Module):
@@ -33,31 +33,35 @@ class PID(nn.Module):
         self.last_output = 0
 
     def forward(self, setpoint, system_output):
-        logger.info(f"Setpoint: {setpoint}, System Output: {system_output}")
+        logger.info(f'Setpoint: {setpoint}, System Output: {system_output}')
         if time.time() - self.last_update > 1:
             self.last_update = time.time()
             if self.adaptive:
                 self.adapt()
             logger.info(
-                f"Setpoint: {setpoint}, System Output: {system_output}, Error: {self.error}"
+                f'Setpoint: {setpoint}, System Output: {system_output}, Error: {self.error}'
             )
             self.error = setpoint - system_output
             self.integral += self.error * self.dt
             derivative = (self.error - self.prev_error) / self.dt
             self.prev_error = self.error
             output = self.P * self.error + self.I * self.integral + self.D * derivative
-            self.input_history = torch.cat(
-                (self.input_history, torch.tensor([system_output]))
-            )
-            self.set_point_history = torch.cat(
-                (self.set_point_history, torch.tensor([setpoint]))
-            )
-            self.output_history = torch.cat(
-                (self.output_history, torch.tensor([output]))
-            )
-            self.error_history = torch.cat(
-                (self.error_history, torch.tensor([self.error]))
-            )
+            self.input_history = torch.cat((
+                self.input_history,
+                torch.tensor([system_output]),
+            ))
+            self.set_point_history = torch.cat((
+                self.set_point_history,
+                torch.tensor([setpoint]),
+            ))
+            self.output_history = torch.cat((
+                self.output_history,
+                torch.tensor([output]),
+            ))
+            self.error_history = torch.cat((
+                self.error_history,
+                torch.tensor([self.error]),
+            ))
             self.last_output = output
         else:
             output = self.last_output
@@ -69,13 +73,13 @@ class PID(nn.Module):
                 and not self.adaptive
             ):
                 self.adaptive = True
-                logger.info("Adaptive learning enabled")
+                logger.info('Adaptive learning enabled')
             if (
                 all([abs(e) <= self.threshold for e in self.error_history[-5:]])
                 and self.adaptive
             ):
                 self.adaptive = False
-                logger.info("Adaptive learning disabled")
+                logger.info('Adaptive learning disabled')
 
         return output
 
@@ -83,12 +87,12 @@ class PID(nn.Module):
         self.zero_grad()
         loss = self.loss(self.output_history[-1], self.set_point_history[-1])
         loss.backward()
-        print(f"Loss: {loss}")
+        print(f'Loss: {loss}')
         with torch.no_grad():
             for param in self.parameters():
                 if param.grad is not None:  # Check if the gradient is not None
                     param -= self.lr * param.grad
-        logger.info(f"Adapted PID: P: {self.P}, I: {self.I}, D: {self.D}")
+        logger.info(f'Adapted PID: P: {self.P}, I: {self.I}, D: {self.D}')
         # self.input_history = torch.tensor([], requires_grad=True)
         # self.output_history = torch.tensor([], requires_grad=True)
         # self.error_history = torch.tensor([], requires_grad=True)
@@ -106,8 +110,8 @@ class PID(nn.Module):
 
     def evaluate(self, input_dict):
         return {
-            "new_input": self.forward(
-                input_dict["setpoint"], input_dict["system_output"]
+            'new_input': self.forward(
+                input_dict['setpoint'], input_dict['system_output']
             )
         }
 

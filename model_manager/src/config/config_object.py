@@ -21,11 +21,11 @@ class InputDataToModelConfig(pydantic.BaseModel):
     type: str
     config: Any
 
-    @pydantic.validator("type")
+    @pydantic.validator('type')
     def check_type(cls, v):
         if v not in allowed_transformers:
             raise ValueError(
-                f"Invalid transformer type: {v}, choose from {allowed_transformers}"
+                f'Invalid transformer type: {v}, choose from {allowed_transformers}'
             )
         return v
 
@@ -34,11 +34,11 @@ class ModelToOutputDataConfig(pydantic.BaseModel):
     type: str
     config: Any
 
-    @pydantic.validator("type")
+    @pydantic.validator('type')
     def check_type(cls, v):
         if v not in allowed_transformers:
             raise ValueError(
-                f"Invalid transformer type: {v}, choose from {allowed_transformers}"
+                f'Invalid transformer type: {v}, choose from {allowed_transformers}'
             )
         return v
 

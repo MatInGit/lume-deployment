@@ -6,6 +6,7 @@ from model_manager.src.transformers.BaseTransformer import BaseTransformer
 
 logger = get_logger()
 
+
 class SimpleTransformer(BaseTransformer):
     def __init__(self, config):
         """
@@ -19,16 +20,16 @@ class SimpleTransformer(BaseTransformer):
                 list of symbols to be used in the formula
         """
 
-        pv_mapping = config["variables"]
-        self.input_list = config["symbols"]
+        pv_mapping = config['variables']
+        self.input_list = config['symbols']
 
-        logger.debug("Initializing SimpleTransformer")
-        logger.debug(f"PV Mapping: {pv_mapping}")
-        logger.debug(f"Symbol List: {self.input_list}")
+        logger.debug('Initializing SimpleTransformer')
+        logger.debug(f'PV Mapping: {pv_mapping}')
+        logger.debug(f'Symbol List: {self.input_list}')
         self.pv_mapping = pv_mapping
 
         for key, value in self.pv_mapping.items():
-            self.__validate_formulas(value["formula"])
+            self.__validate_formulas(value['formula'])
         self.latest_input = {symbol: None for symbol in self.input_list}
         self.latest_transformed = {key: 0 for key in self.pv_mapping.keys()}
         self.updated = False
@@ -38,21 +39,21 @@ class SimpleTransformer(BaseTransformer):
 
     def __validate_formulas(self, formula: str):
         try:
-            sp.sympify(formula.replace(":", "_"))
+            sp.sympify(formula.replace(':', '_'))
         except Exception as e:
-            raise Exception(f"Invalid formula: {formula}: {e}")
+            raise Exception(f'Invalid formula: {formula}: {e}')
 
     def handler(self, pv_name, value):
         # logger.debug(f"SimpleTransformer handler for {pv_name} with value {value}")
 
         # assert valus is float
         try:
-            if isinstance(value["value"], (float, int)):
-                value = float(value["value"])
-            elif isinstance(value["value"], (np.ndarray, list)):
-                value = np.array(value["value"]).astype(float)
+            if isinstance(value['value'], (float, int)):
+                value = float(value['value'])
+            elif isinstance(value['value'], (np.ndarray, list)):
+                value = np.array(value['value']).astype(float)
         except Exception as e:
-            logger.error(f"Error converting value to float: {e}")
+            logger.error(f'Error converting value to float: {e}')
             raise e
 
         self.latest_input[pv_name] = value
@@ -62,14 +63,14 @@ class SimpleTransformer(BaseTransformer):
                 self.transform()
                 self.handler_time = time.time() - time_start
         except Exception as e:
-            logger.error(f"Error transforming: {e}")
+            logger.error(f'Error transforming: {e}')
             raise e
 
     def transform(self):
         # logger.debug("Transforming")
         transformed = {}
         pvs_renamed = {
-            key.replace(":", "_"): value for key, value in self.latest_input.items()
+            key.replace(':', '_'): value for key, value in self.latest_input.items()
         }
         pv_shapes = {}
 
@@ -82,11 +83,11 @@ class SimpleTransformer(BaseTransformer):
             elif isinstance(value, (float, int)):
                 pvs_renamed[key] = value
             else:
-                raise Exception(f"Invalid type for value: {value}")
+                raise Exception(f'Invalid type for value: {value}')
 
         for key, value in self.pv_mapping.items():
             try:
-                formula = value["formula"].replace(":", "_")
+                formula = value['formula'].replace(':', '_')
 
                 formula = sp.sympify(formula)
                 transformed[key] = formula.subs(pvs_renamed)
@@ -94,8 +95,8 @@ class SimpleTransformer(BaseTransformer):
                 # converted to float
                 if isinstance(transformed[key], sp.Matrix | sp.ImmutableDenseMatrix):
                     # bit hacky but casuse sympy is meant to be symbolic only and not numerical
-                    s = sp.symbols("s")
-                    numpy_value = sp.lambdify(s, transformed[key], modules="numpy")
+                    s = sp.symbols('s')
+                    numpy_value = sp.lambdify(s, transformed[key], modules='numpy')
                     numpy_value = numpy_value(0)
                     transformed[key] = numpy_value
                     # drop last dim if it is 1
@@ -105,7 +106,7 @@ class SimpleTransformer(BaseTransformer):
                     transformed[key] = float(transformed[key])
 
             except Exception as e:
-                logger.error(f"Error transforming: {e}")
+                logger.error(f'Error transforming: {e}')
                 raise e
 
         for key, value in transformed.items():
@@ -117,22 +118,22 @@ class CAImageTransfomer:
     """Input only image transformation"""
 
     def __init__(self, config) -> None:
-        self.img = config["variables"]
+        self.img = config['variables']
         self.img_list = list(self.img.keys())
 
         self.variables = {}
         self.input_list = []
         for key, value in self.img.items():
-            self.variables[key] = value["img_ch"]
-            self.variables[key + "_x"] = value["img_x_ch"]
-            self.variables[key + "_y"] = value["img_y_ch"]
-            if "unfold" in value.keys():
-                self.variables[key + "_unfolding"] = value["unfold"]
+            self.variables[key] = value['img_ch']
+            self.variables[key + '_x'] = value['img_x_ch']
+            self.variables[key + '_y'] = value['img_y_ch']
+            if 'unfold' in value.keys():
+                self.variables[key + '_unfolding'] = value['unfold']
             else:
-                self.variables[key + "_unfolding"] = "row_major"
-            self.input_list.append(value["img_ch"])
-            self.input_list.append(value["img_x_ch"])
-            self.input_list.append(value["img_y_ch"])
+                self.variables[key + '_unfolding'] = 'row_major'
+            self.input_list.append(value['img_ch'])
+            self.input_list.append(value['img_x_ch'])
+            self.input_list.append(value['img_y_ch'])
 
         self.latest_input = {symbol: None for symbol in self.input_list}
         self.latest_transformed = {key: 0 for key in self.variables.keys()}
@@ -141,21 +142,21 @@ class CAImageTransfomer:
         self.updated = False
 
     def handler(self, variable_name: str, value: dict):
-        logger.debug(f"CAImageTransfomer handler for {variable_name}")
+        logger.debug(f'CAImageTransfomer handler for {variable_name}')
         try:
-            self.latest_input[variable_name] = value["value"]
+            self.latest_input[variable_name] = value['value']
             if all([value is not None for value in self.latest_input.values()]):
                 time_start = time.time()
                 self.transform()
                 self.handler_time = time.time() - time_start
             else:
-                logger.debug("Not all values are present")
+                logger.debug('Not all values are present')
         except Exception as e:
-            logger.error(f"Error transforming: {e}")
+            logger.error(f'Error transforming: {e}')
             raise e
 
     def transform(self):
-        logger.debug("Transforming")
+        logger.debug('Transforming')
         transformed = {}
         for key in self.img_list:
             value = self.latest_input[self.variables[key]]
@@ -164,19 +165,19 @@ class CAImageTransfomer:
                 transformed[key] = np.array(value).reshape(
                     (
                         int(
-                            self.latest_input[self.variables[key + "_y"]]
+                            self.latest_input[self.variables[key + '_y']]
                         ),  # note the order, we are going from x,y to y,x (rows, columns) in numpy
-                        int(self.latest_input[self.variables[key + "_x"]]),
+                        int(self.latest_input[self.variables[key + '_x']]),
                     ),
-                    order="F"
-                    if self.variables[key + "_unfolding"] == "column_major"
-                    else "C",
+                    order='F'
+                    if self.variables[key + '_unfolding'] == 'column_major'
+                    else 'C',
                 )
 
-                if self.variables[key + "_unfolding"] == "column_major":
+                if self.variables[key + '_unfolding'] == 'column_major':
                     transformed[key] = transformed[key].T
             except Exception as e:
-                logger.error(f"Error transforming: {e}")
+                logger.error(f'Error transforming: {e}')
         for key, value in transformed.items():
             self.latest_transformed[key] = value
         self.updated = True
@@ -185,7 +186,7 @@ class CAImageTransfomer:
 class PassThroughTransformer:
     def __init__(self, config):
         # config is a dictionary of output:intput pairs
-        pv_mapping = config["variables"]
+        pv_mapping = config['variables']
         self.latest_input = {}
         self.latest_transformed = {}
         self.updated = False
@@ -200,8 +201,8 @@ class PassThroughTransformer:
 
     def handler(self, pv_name, value):
         time_start = time.time()
-        logger.debug(f"PassThroughTransformer handler for {pv_name}")
-        self.latest_input[pv_name] = value["value"]
+        logger.debug(f'PassThroughTransformer handler for {pv_name}')
+        self.latest_input[pv_name] = value['value']
         if all([value is not None for value in self.latest_input.values()]):
             self.transform()
         self.updated = True
@@ -209,13 +210,13 @@ class PassThroughTransformer:
         self.handler_time = time_end - time_start
 
     def transform(self):
-        logger.debug("Transforming")
+        logger.debug('Transforming')
         for key, value in self.pv_mapping.items():
             self.latest_transformed[key] = self.latest_input[value]
 
             if isinstance(self.latest_input[value], np.ndarray):
                 if self.latest_input[value].shape != self.latest_transformed[key].shape:
-                    logger.error(f"Shape mismatch between input and output for {key}")
+                    logger.error(f'Shape mismatch between input and output for {key}')
         self.updated = True
 
         # for key, value in self.latest_input.items():
