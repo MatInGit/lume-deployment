@@ -36,6 +36,7 @@ test:
       - hatch build
       - ls -l dist
       - pip install dist/*.whl
+      - cp $env_file ./tests/env.json
       - pytest
   allow_failure: true
 
