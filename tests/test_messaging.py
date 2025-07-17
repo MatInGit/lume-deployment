@@ -1,11 +1,11 @@
 import pytest
-from model_manager.src.utils.messaging import (
+from poly_lithic.src.utils.messaging import (
     Message,
     MessageBroker,
     Observer,
     TransformerObserver,
 )
-from model_manager.src.transformers.BaseTransformers import SimpleTransformer
+from poly_lithic.src.transformers.BaseTransformers import SimpleTransformer
 import logging
 
 

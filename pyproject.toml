@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 allow-direct-references = true
 
 [project]
-name = "Poly-Lithic"
+name = "Poly_Lithic"
 dynamic = ["version"]
 description = "A package for deploying AI models and more using lume inspired interfaces"
 authors = [
@@ -32,10 +32,10 @@ dependencies = [
 source = "vcs"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "model_manager/_version.py"
+version-file = "poly_lithic/_version.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["model_manager"]
+packages = ["poly_lithic"]
 only-packages = true
 
 [tool.ruff.format]
@@ -43,10 +43,11 @@ preview = true
 quote-style = "single"
 
 [project.scripts]
-model_manager = "model_manager.scripts.main:main"
+poly_lithic = "poly_lithic.scripts.main:main"
+pl = "poly_lithic.scripts.main:main"
 
 [tool.hatch.envs.default.env-vars]
-PYTHONPATH = "model_manager/src"
+PYTHONPATH = "poly_lithic/src"
 
 [tool.hatch.envs.default.scripts]
 test = "pytest"
@@ -55,7 +56,7 @@ test = "pytest"
 local_scheme = "no-local-version"
 
 [tool.hatch.scripts]
-pre_install = "model_manager/pre_install.py"
+pre_install = "poly_lithic/pre_install.py"
 
 [tool.hatch.envs.default.pipelines]
 pre_install = ["pre_install"]

@@ -1,5 +1,5 @@
-from model_manager.src.utils.builder import Builder
-from model_manager.src.utils.messaging import Message
+from poly_lithic.src.utils.builder import Builder
+from poly_lithic.src.utils.messaging import Message
 import pytest, os, json, logging
 import requests # to check if we can rech the mlflow server
 
