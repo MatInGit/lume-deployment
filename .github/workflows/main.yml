@@ -54,6 +54,7 @@ jobs:
       - name: Install package and run tests
         run: |
           pip install dist/*.whl
+          cp $env_file ./tests/env.json
           pytest
 
       - name: Archive artifacts
