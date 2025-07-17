@@ -114,7 +114,7 @@ class SimpleTransformer(BaseTransformer):
         self.updated = True
 
 
-class CAImageTransfomer:
+class CAImageTransfomer(BaseTransformer):
     """Input only image transformation"""
 
     def __init__(self, config) -> None:
@@ -183,7 +183,7 @@ class CAImageTransfomer:
         self.updated = True
 
 
-class PassThroughTransformer:
+class PassThroughTransformer(BaseTransformer):
     def __init__(self, config):
         # config is a dictionary of output:intput pairs
         pv_mapping = config['variables']
