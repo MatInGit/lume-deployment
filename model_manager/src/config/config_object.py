@@ -31,7 +31,7 @@ class ModuleConfig(pydantic.BaseModel):
 
 class DeploymentConfig(pydantic.BaseModel):
     type: str
-
+    rate: Optional[Union[float,int]] = None
 
 class ConfigObject(pydantic.BaseModel):
     deployment: DeploymentConfig

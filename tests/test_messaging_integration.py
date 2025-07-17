@@ -139,20 +139,20 @@ def test_interface_observer_put(
     logging.info(message_broker.queue)
     for message in message_broker.queue:
         assert message.topic == "in_interface"
-    message_broker.parese_queue()
+    message_broker.parse_queue()
     assert len(message_broker.queue) == 1
     logging.info(message_broker.queue)
     assert message_broker.queue[0].topic == "in_transformer"
-    message_broker.parese_queue()
+    message_broker.parse_queue()
     assert len(message_broker.queue) == 1
     logging.info(message_broker.queue)
     assert message_broker.queue[0].topic == "model_out"
-    message_broker.parese_queue()
+    message_broker.parse_queue()
     assert len(message_broker.queue) == 1
     logging.info(message_broker.queue)
     assert message_broker.queue[0].topic == "out_transformer"
     assert (
         message_broker.queue[0].value["out_scaled"]["value"] == 0.5
     )  # if you are looking at this and wondering why it returns a different shape looks for the unpack_output=True in the transformer_observer_out fixture
-    message_broker.parese_queue()
+    message_broker.parse_queue()
     assert len(message_broker.queue) == 0  # no messages left in the queue

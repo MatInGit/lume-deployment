@@ -22,12 +22,12 @@ class SimplePVAInterface(BaseInterface):
     def __init__(self, config):
         self.ctxt = Context('pva', nt=False)
         if 'EPICS_PVA_NAME_SERVERS' in os.environ:
-            logger.debug(
+            logger.warning(
                 f"EPICS_PVA_NAME_SERVERS: {os.environ['EPICS_PVA_NAME_SERVERS']}"
             )
         elif 'EPICS_PVA_NAME_SERVERS' in config:
             os.environ['EPICS_PVA_NAME_SERVERS'] = config['EPICS_PVA_NAME_SERVERS']
-            logger.debug(
+            logger.warning(
                 f"EPICS_PVA_NAME_SERVERS: {os.environ['EPICS_PVA_NAME_SERVERS']}"
             )
         else:

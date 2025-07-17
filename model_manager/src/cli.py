@@ -20,8 +20,9 @@ from model_manager.src.utils.messaging import (
     TransformerObserver,
     InterfaceObserver,
     ModelObserver,
-    GenericObserver,
 )
+
+from model_manager.src.utils.builder import Builder
 
 from model_manager._version import __version__
 
@@ -82,13 +83,13 @@ def setup():
     """Setup the model manager."""
     parser = argparse.ArgumentParser(description="Model Manager CLI")
 
-    parser.add_argument(
-        "-l",  # expects 3 arguments
-        "--local",
-        help="Local mode, run without mlflow",
-        required=False,
-        nargs=2,
-    )
+    # parser.add_argument(
+    #     "-l",  # expects 3 arguments
+    #     "--local",
+    #     help="Local mode, run without mlflow",
+    #     required=False,
+    #     nargs=2,
+    # )
 
     parser.add_argument(
         "-d",
@@ -109,17 +110,17 @@ def setup():
         choices=["mlflow", "local"],
         default="mlflow",
     )
-    parser.add_argument(
-        "-n",
-        "--model_name",
-        required=False,
-        help="Name of the model to be loaded from mlflow",
-    )
-    parser.add_argument(
-        "-v",
-        "--model_version",
-        help="Version of the model to be loaded from mlflow",
-    )
+    # parser.add_argument(
+    #     "-n",
+    #     "--model_name",
+    #     required=False,
+    #     help="Name of the model to be loaded from mlflow",
+    # )
+    # parser.add_argument(
+    #     "-v",
+    #     "--model_version",
+    #     help="Version of the model to be loaded from mlflow",
+    # )
     parser.add_argument(
         "-r",
         "--reqirements",
@@ -136,14 +137,14 @@ def setup():
         required=False,
     )
 
-    parser.add_argument(
-        "-o",
-        "--one_shot",
-        help="One shot mode, run once and exit, helpful for debugging",
-        required=False,
-        default=False,
-        action="store_true",
-    )
+    # parser.add_argument(
+    #     "-o",
+    #     "--one_shot",
+    #     help="One shot mode, run once and exit, helpful for debugging",
+    #     required=False,
+    #     default=False,
+    #     action="store_true",
+    # )
 
     # publish
     parser.add_argument(
@@ -197,125 +198,106 @@ def setup():
     if args.env:
         env_config(args.env)
 
-    if args.local is not None:
-        # model getter
-        model_getter = get_model_getter(
-            "local",
-            {
-                "model_path": args.local[0],
-                "model_factory_class": args.local[1],
-            },
-        )
-    else:
-        # model getter
-        model_getter = get_model_getter(
-            "mlflow",
-            {
-                "model_name": args.model_name,
-                "model_version": args.model_version,
-            },
-        )
+    # if args.local is not None:
+    #     # model getter
+    #     model_getter = get_model_getter(
+    #         "local",
+    #         {
+    #             "model_path": args.local[0],
+    #             "model_factory_class": args.local[1],
+    #         },
+    #     )
+    # else:
+    #     # model getter
+    #     model_getter = get_model_getter(
+    #         "mlflow",
+    #         {
+    #             "model_name": args.model_name,
+    #             "model_version": args.model_version,
+    #         },
+        # )
 
     # requirements install and quit
-    if args.reqirements:
-        deps = model_getter.get_requirements()
-        for line in open(deps).readlines():
-            logger.debug(f"Installing {line}")
-            os.system(f"pip install {line}")
-        logger.info("Requirements installed, exiting")
-        sys.exit(0)
+    # if args.reqirements:
+    #     deps = model_getter.get_requirements()
+    #     for line in open(deps).readlines():
+    #         logger.debug(f"Installing {line}")
+    #         os.system(f"pip install {line}")
+    #     logger.info("Requirements installed, exiting")
+    #     sys.exit(0)
 
     # get model and config
 
-    model = model_getter.get_model()
+    # model = model_getter.get_model()
 
     if not args.config:
         logger.info(
             "No configuration file provided, getting config from model artifacts"
         )
-        config = model_getter.get_config()
-        config = initailize_config(config)
-        logger.info(f"Configuration file obtained from model: {config}")
-        logger.debug(f"Configuration: {config}")
+        # check if os.environ["MODEL_CONFIG_FILE"] exists
+        if os.environ["MODEL_CONFIG_FILE"]:
+            builder = Builder(args.config)
+        else:
+            raise Exception("No configuration file provided, this should be done via command -c line or environment variable MODEL_CONFIG_FILE")
     else:
         logger.info(f"Configuration file provided: {args.config}")
-        config = initailize_config(args.config)
+        builder = Builder(args.config)
+    
+    
+    broker = builder.build()
 
-    # configure input and output interface transformers
-    logger.debug("Configuring input and output interface transformers")
-    logger.debug(f"Input transformer: {config.input_data_to_model.type}")
-    logger.debug(f"Output transformer: {config.output_model_to_data.type}")
+    # in_interface = registered_interfaces[config.input_data.get_method](
+    #     config.input_data.config
+    # )
+    # out_interface = registered_interfaces[config.output_data_to.put_method](
+    #     config.output_data_to.config
+    # )
+    # in_transformer = registered_transformers[config.input_data_to_model.type](
+    #     config.input_data_to_model.config
+    # )
+    # out_transformer = registered_transformers[config.output_model_to_data.type](
+    #     config.output_model_to_data.config
+    # )
 
-    # configure interfaces
-    logger.debug("Configuring interfaces")
-    logger.debug(f"In_interfaces: {config.input_data.get_method}")
-    logger.debug(f"Out_interfaces: {config.output_data_to.put_method}")
+    # # wrap in observer
+    # in_interface_wrapped = InterfaceObserver(in_interface)
+    # out_interface_wrapped = InterfaceObserver(out_interface)
+    # in_transformer_wrapped = TransformerObserver(in_transformer)
+    # out_transformer_wrapped = TransformerObserver(out_transformer)
+    # model_wrapped = ModelObserver(model)
 
-    in_interface = registered_interfaces[config.input_data.get_method](
-        config.input_data.config
-    )
-    out_interface = registered_interfaces[config.output_data_to.put_method](
-        config.output_data_to.config
-    )
-    in_transformer = registered_transformers[config.input_data_to_model.type](
-        config.input_data_to_model.config
-    )
-    out_transformer = registered_transformers[config.output_model_to_data.type](
-        config.output_model_to_data.config
-    )
-
-    # wrap in observer
-    in_interface_wrapped = InterfaceObserver(in_interface)
-    out_interface_wrapped = InterfaceObserver(out_interface)
-    in_transformer_wrapped = TransformerObserver(in_transformer)
-    out_transformer_wrapped = TransformerObserver(out_transformer)
-    model_wrapped = ModelObserver(model)
-
-    # add observers to message broker
-    broker = MessageBroker()
-    # default sequence
-    # in_interface -> in_transformer -> model -> out_transformer -> out_interface
-    # this will be specified in the config file or default to the above, not implemented as of yet
-    broker.attach(in_interface_wrapped, "update_trigger") # update_trigger is a topic that is used to trigger the update of the model
-    broker.attach(in_transformer_wrapped, "in_interface")
-    broker.attach(model_wrapped, "in_transformer")
-    broker.attach(out_transformer_wrapped, "model")
-    broker.attach(out_interface_wrapped, "out_transformer")
+    # # add observers to message broker
+    # broker = MessageBroker()
+    # # default sequence
+    # # in_interface -> in_transformer -> model -> out_transformer -> out_interface
+    # # this will be specified in the config file or default to the above, not implemented as of yet
+    # broker.attach(in_interface_wrapped, "update_trigger") # update_trigger is a topic that is used to trigger the update of the model
+    # broker.attach(in_transformer_wrapped, "in_interface")
+    # broker.attach(model_wrapped, "in_transformer")
+    # broker.attach(out_transformer_wrapped, "model")
+    # broker.attach(out_interface_wrapped, "out_transformer")
     
 
-    logger.debug("Model manager setup complete")
-    logger.debug(f"Broker: {broker}")
-    logger.debug(f"Observers attached: {broker._observers}")
+    # logger.debug("Model manager setup complete")
+    # logger.debug(f"Broker: {broker}")
+    # logger.debug(f"Observers attached: {broker._observers}")
 
-    logger.info(f"Model: {args.model_name} version: {args.model_version} loaded")
-    logger.info(f"Model type: {model_getter.model_type}")
+    # logger.info(f"Model: {args.model_name} version: {args.model_version} loaded")
+    # logger.info(f"Model type: {model_getter.model_type}")
 
-    logger.info(f"Model loaded in {time.time() - init_time} seconds")
+    # logger.info(f"Model loaded in {time.time() - init_time} seconds")
 
     return (
-        in_interface,
-        out_interface,
-        in_transformer,
-        out_transformer,
-        model,
-        model_getter,
         args,
-        config.deployment.type,
+        builder.config,
         broker,
-        
     )
 
 
 async def model_main(
-    in_interface,
-    out_interface,
-    in_transformer,
-    out_transformer,
-    model,
-    model_getter,
-    broker,
     args,
-):
+    config,
+    broker):
     """Main."""
     # monitor and send to transformer handle
     # reintialise logger to get the correct logger and clear any previous handlers
@@ -329,152 +311,26 @@ async def model_main(
     stats_output_transform = []
     stats_put = []
     last_stat_report = time.time()
-
+    os.environ["PUBLISH"] = str(args.publish)
     try:
-        # in_interface.monitor(in_transformer.handler)
-        logger.info("Monitoring input interface")
-
-        # initialise variables using get
-        for key in in_interface.variable_list:
-            _, value = in_interface.get(key)
-
-            in_transformer.handler(key, value)
-        last_input_update = time.time()
-        while True:
-            if time.time() - last_stat_report > 1:
-                stat_string = ""
-                last_stat_report = time.time()
-                if len(stats_inference) > 0:
-                    stat = sum(stats_inference) / len(stats_inference)
-                    stat = stat * 1000
-                    # display 2 decimal places
-                    stat_temp = f" | Inference time: {stat:.2f} ms |"
-                    spaces = 20 - len(stat_temp)
-                    stat_string += stat_temp + " " * spaces
-
-                if len(stats_input_transform) > 0:
-                    stat = sum(stats_input_transform) / len(stats_input_transform)
-                    stat = stat * 1000
-                    stat_temp = f" Input transform time: {stat:.2f} ms |"
-                    spaces = 20 - len(stat_temp)
-                    stat_string += stat_temp + " " * spaces
-                if len(stats_output_transform) > 0:
-                    stat = sum(stats_output_transform) / len(stats_output_transform)
-                    stat = stat * 1000
-                    stat_temp = f" Output transform time: {stat:.2f} ms |"
-                    spaces = 20 - len(stat_temp)
-                    stat_string += stat_temp + " " * spaces
-
-                if len(stats_put) > 0:
-                    stat = sum(stats_put) / len(stats_put)
-                    stat = stat * 1000
-                    stat_temp = f" Put time: {stat:.2f} ms |"
-                    spaces = 20 - len(stat_temp)
-                    stat_string += stat_temp + " " * spaces
-
-                if stat_string == "":
-                    # print("No stats available")
-                    pass
-                else:
-                    logger.info(stat_string)
-                    # last_stat_report = time.time()
-                    stats_inference = []
-                    stats_input_transform = []
-                    stats_output_transform = []
-                    stats_put = []
-
-            # # do update at 10 Hz
-            if True:
-                for key in in_interface.variable_list:
-                    _, value = in_interface.get(key)
-                    if type(value["value"]) == float:
-                        if value["value"] == in_transformer.latest_input[key]:
-                            pass
-                        else:
-                            in_transformer.handler(key, value)
-                    elif type(value["value"]) == np.ndarray:
-                        if np.array_equal(
-                            value["value"], in_transformer.latest_input[key]
-                        ):
-                            pass
-                        else:
-                            in_transformer.handler(key, value)
-
-            if in_transformer.updated:
-                try:
-                    stats_input_transform.append(in_transformer.handler_time)
-                except:
-                    logger.warning("No handler time available for stats")
-                    stats_input_transform.append(0)
-                # logger.debug("Input transformer updated")
-                # logger.debug(
-                #     f"Input transformer latest transformed: {in_transformer.latest_transformed}"
-                # )
-
-                # logger.debug("Evaluating model")
-
-                # this part can maybe be handled by lume-model
-                if model_getter.model_type == "torch":
-                    latest_transformed = in_transformer.latest_transformed
-                    for key in latest_transformed:
-                        # convert to tensor
-                        latest_transformed[key] = torch.tensor(
-                            latest_transformed[key], dtype=torch.float32
-                        )
-
-                else:
-                    latest_transformed = in_transformer.latest_transformed
-
-                inference_start = time.time()
-                output = model.evaluate(in_transformer.latest_transformed)
-                inference_time = time.time() - inference_start
-                stats_inference.append(inference_time)
-                # logger.debug(f"Output from model.evaluate: {output}")
-                # print("=" * 20)
-                # print("Output from model.evaluate: ")
-                # print(output)
-                # print("=" * 20)
-                for key in output:
-                    # logger.debug(f"Output: {key}: {output[key]}")
-                    out_transformer.handler(key, {"value": output[key]}) # need to removr the "value" adding logic from here
-
-                if out_transformer.updated:
-                    try:
-                        stats_output_transform.append(out_transformer.handler_time)
-                    except:
-                        logger.warning("No handler time available for stats")
-                        stats_output_transform.append(0)
+        if config.deployment.type == "continuous":
+            time_start = time.time()
+            while True:
+                if time.time() - time_start > config.deployment.rate:
                     time_start = time.time()
-
-                    if os.environ["PUBLISH"] == "True":
-                        logger.debug("Publishing data")
-                        out_interface.put_many(out_transformer.latest_transformed)
-                    else:
-                        logger.debug(
-                            "Not publishing data, to publish use -p or --publish"
-                        )
-                    out_transformer.updated = False
-
-                    time_end = time.time()
-                    stats_put.append(time_end - time_start)
-
-                in_transformer.updated = False
-                # print("in_transformer.updated = False")
-
-                if args.one_shot:
-                    logger.info("One shot mode, exiting")
-                    break
-
-            await asyncio.sleep(
-                0.0001
-            )  # makes the loop less cpu intensive 100% - > 15% cpu usage , more refactoring needed to make it more efficient
-
+                    broker.get_all()
+                
+                if len(broker.queue) > 0:
+                    broker.parse_queue()
+                
+                await asyncio.sleep(0.01)
+    
+        else:
+            raise Exception("Deployment type not supported")
+ 
     except Exception as e:
         logger.error(f"Error monitoring: {traceback.format_exc()}")
         raise e
     finally:
-        out_interface.close()
-        in_interface.close()
-
         logger.info("Exiting")
         sys.exit(0)

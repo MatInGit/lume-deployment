@@ -63,7 +63,7 @@ def test_parse_queue(message_broker, test_observer):
     message_broker.attach(test_observer, "test_topic")
     message = Message(topic="test_topic", source="source", value={"key": {"value": 1}})
     message_broker.queue.append(message)
-    message_broker.parese_queue()
+    message_broker.parse_queue()
     assert len(test_observer.messages) == 1
     assert test_observer.messages[0] == message
 
