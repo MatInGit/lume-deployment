@@ -86,8 +86,8 @@ def test_ca_image_transformer():
     # 3x3 image
 
     img_2 = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-    img_2_x = 4 # columns
-    img_2_y = 3 # rows
+    img_2_x = 4  # columns
+    img_2_y = 3  # rows
     # numpy array 3x4 image
 
     # both should return the np.array with shape (3, 3) and (3, 4) respectively
@@ -151,7 +151,7 @@ def test_compound_transformer():
 
     assert ct.latest_transformed["img_1"].shape == (3, 3)
     assert ct.latest_transformed["img_2"].shape == (3, 4)
-    
+
     # check positions of al 4 corners in each image
     assert ct.latest_transformed["img_1"][0, 0] == 1
     assert ct.latest_transformed["img_1"][0, 2] == 3

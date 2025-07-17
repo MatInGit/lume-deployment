@@ -1,9 +1,11 @@
 from p4p.client.thread import Context
+
 # server
 from p4p.server import Server
 from p4p.nt import NTScalar, NTNDArray
 from p4p.server.thread import SharedPV
 import numpy as np
+
 ctxt = Context("pva")
 from matplotlib import pyplot as plt
 
@@ -17,7 +19,6 @@ state0 = []
 state1 = []
 
 # [{'lume:test:mimo:test:state_0': SharedPV(value=0.0)}, {'lume:test:mimo:test:state_1': SharedPV(value=0.0)}, {'lume:test:mimo:test:input_0': SharedPV(value=0.0)}, {'lume:test:mimo:test:output_0': SharedPV(value=0.0)}]
-
 
 
 while True:
@@ -37,4 +38,3 @@ while True:
     ax.plot(state1, label="State 1")
     ax.legend()
     plt.pause(0.1)
-    

@@ -2,12 +2,14 @@ from lume_model.base import LUMEBaseModel
 from lume_model.variables import ScalarInputVariable, ScalarOutputVariable
 import numpy as np
 
+
 # This is the model definition as in other examples
 class ExampleModel(LUMEBaseModel):
     def evaluate(self, input_dict):
         output_dict = {}
         output_dict["y"] = np.max([input_dict["x1"], input_dict["x2"]])
         return output_dict
+
 
 # We use this to create a model instance, we need this to yield a fully functional model instance
 class ModelFactory:

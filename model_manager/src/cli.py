@@ -26,12 +26,13 @@ if os.path.exists("build-info.json"):
         data = json.load(stream)
     for key, value in data.items():
         os.environ[key] = value
-        
+
 print("=" * 120)
 print(f"Commit head: {os.environ['vcs-ref']}")
 print(f"Build time: {os.environ['build-date']}")
 print("=" * 120 + "\n")
-    
+
+
 def initailize_config(config_path):
     """Initialize the configuration."""
     try:
@@ -240,7 +241,7 @@ def setup():
 
     logger.info(f"Model: {args.model_name} version: {args.model_version} loaded")
     logger.info(f"Model type: {model_getter.model_type}")
-    
+
     logger.info(f"Model loaded in {time.time() - init_time} seconds")
 
     return (

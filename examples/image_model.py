@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 #     axes = figure.add_subplot(111)
 #     axes.set_title("Example Image Model")
 
+
 class ExampleImageModel:
     def evaluate(self, input_dict):
         output_dict = {}
@@ -18,8 +19,6 @@ class ExampleImageModel:
         output_dict["y_mean"] = np.mean(input_dict["image"])
         output_dict["y_std"] = np.std(input_dict["image"])
         output_dict["y_img"] = input_dict["image"]
-        
-        
 
         # square
         output_dict["y_img"] = output_dict["y_img"] ** 2
@@ -30,7 +29,7 @@ class ExampleImageModel:
         threshhold = (max_val - min_val) * 0.5
         # anythin below threshhold is set to min_val
         output_dict["y_img"][output_dict["y_img"] < threshhold] = min_val
-        
+
         # if visualize:
         #     figure.clear()
         #     axes = figure.add_subplot(111)
@@ -39,12 +38,11 @@ class ExampleImageModel:
         #     # print(input_dict["image"].shape)
         #     plt.draw()
         #     plt.pause(0.0001)
-        
 
         return output_dict
 
 
-class ModelFactory: # used to create model instances when in local mode
+class ModelFactory:  # used to create model instances when in local mode
     @staticmethod
     def get_model():
         return ExampleImageModel()

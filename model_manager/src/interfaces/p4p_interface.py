@@ -19,6 +19,7 @@ logger = get_logger()
 
 # os.environ["EPICS_PVA_NAME_SERVERS"] = "localhost:5075"
 
+
 class SimplePVAInterface(BaseInterface):
     def __init__(self, config):
         self.ctxt = Context("pva", nt=False)
@@ -73,7 +74,7 @@ class SimplePVAInterface(BaseInterface):
 
     def get(self, name, **kwargs):
         value = self.ctxt.get(name)
-        if type(value["value"]) == np.ndarray:
+        if isinstance(value["value"], np.ndarray):
             # if value has dimension
             if "dimension" in value:
                 y_size = value["dimension"][0]["size"]
@@ -88,7 +89,7 @@ class SimplePVAInterface(BaseInterface):
         return name, value
 
     def put(self, name, value, **kwargs):
-        if type(value) == np.ndarray:
+        if isinstance(value, np.ndarray):
             value = NTNDArray().wrap(value)
         else:
             value = value
@@ -121,80 +122,83 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
             port = config["port"]
         else:
             port = (
-                5075  # thos will fail if we have two servers running on the same port
+                5075  # this will fail if we have two servers running on the same port
             )
 
-        if "init" in config:
-            # print(f"config['init']: {config['init']}")
-            if config["init"] == False:
-                self.init_pvs = False
-            else:
-                self.init_pvs = True
-        else:
-            self.init_pvs = True
+        # if "init" in config:
+        #     if not config["init"]:
+        #         self.init_pvs = False
+        #     else:
+        #         self.init_pvs = True
+        # else:
+        #     self.init_pvs = True
 
         # print(f"self.init_pvs: {self.init_pvs}")
 
         for pv in self.pv_list:
+            
             if "type" in config["variables"][pv]:
                 pv_type = config["variables"][pv]["type"]
-                # print(f"pv_type: {pv_type}")
-                # print(pv_type == "image")
-                # print(pv_type == "waveform")
-                # print(pv_type == "array")
-                # print(pv_type == "scalar")
                 if pv_type == "image":
                     # note the y and x are flipped when reshaping (rows, columns) -> (y, x)
                     y_size = config["variables"][pv]["image_size"]["y"]
                     x_size = config["variables"][pv]["image_size"]["x"]
-                    # intialize with ones
                     intial_value = np.zeros((y_size, x_size))
                     pv_type_nt = NTNDArray()
                     pv_type_init = intial_value
                     self.value_build_fn = None
+                    if "default" in config["variables"][pv]:
+                        raise NotImplementedError(
+                            "Default values for images not implemented"
+                        )
 
                 # waveform or array
                 elif pv_type == "waveform" or pv_type == "array":
+                    print(f"pv: {pv}")
                     if "length" in config["variables"][pv]:
                         length = config["variables"][pv]["length"]
                     else:
                         length = 10
-                    intial_value = np.zeros(length, dtype=np.float64)
+                    if "default" in config["variables"][pv]:
+                        intial_value = np.array(config["variables"][pv]["default"])
+                    else:
+                        intial_value = np.zeros(length, dtype=np.float64)
+
                     pv_type_nt = NTScalar("ad")
                     pv_type_nt_bd = NTScalar.buildType("ad")
                     self.value_build_fn = Value(pv_type_nt_bd, {"value": intial_value})
                     pv_type_init = intial_value
-                    # print(f"pv_type_init: {pv_type_init}")
+
                 elif pv_type == "scalar":
                     pv_type_nt = NTScalar("d")
-                    pv_type_init = 0
+                    if "default" in config["variables"][pv]:
+                        pv_type_init = float(config["variables"][pv]["default"])
+                    else:
+                        pv_type_init = 0.0
+
                 else:
                     raise TypeError(f"Unknown PV type for {pv}: {pv_type}")
-
             else:
-                # warnings.warn(f"No type specified for {pv}")
                 pv_type_nt = NTScalar("d")
-                pv_type_init = 0
+                if "default" in config["variables"][pv]:
+                    pv_type_init = float(config["variables"][pv]["default"])
+                else:
+                    pv_type_init = 0.0
                 self.value_build_fn = None
 
             pv_item = {pv: SharedPV(initial=pv_type_init, nt=pv_type_nt)}
+            print(f"pv_item: {pv_item}")
+            print(f"pv_type_init: {pv_type_init}")
+            print(f"pv_type_nt: {pv_type_nt}")
 
             @pv_item[pv].put
             def put(pv: SharedPV, op: ServOpWrap):
-                # logger.debug(f"Put {pv} {op}")
-                # logger.debug(f"type(pv): {type(op.value())}")
-                
-                # scalar value
                 pv.post(op.value(), timestamp=time.time())
                 op.done()
-
+            
             self.shared_pvs[pv] = pv_item[pv]
-            # this feels ugly
 
-        # self.server = Server(
-        #     providers=[{name: pv} for name, pv in self.shared_pvs.items()]
-        # )
-        # self.providers = [{name: pv} for name, pv in self.shared_pvs.items()]
+
         self.provider = StaticProvider("pva")
         for name, pv in self.shared_pvs.items():
             self.provider.add(name, pv)
@@ -202,6 +206,9 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         self.server = Server(
             providers=[self.provider], conf={"EPICS_PVA_SERVER_PORT": str(port)}
         )
+        
+        # for pv in self.pv_list:
+        #     self.server.start()
         logger.info(
             f"SimplePVAInterfaceServer initialized with config: {self.server.conf()}"
         )
@@ -212,21 +219,16 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         super().close()
 
     def put(self, name, value, **kwargs):
-        
-        # get a current value
-        # current_value = self.shared_pvs[name].current().raw.value
-        # print(f"current_value: {current_value}")
-
-        self.shared_pvs[name].post(value, timestamp = time.time()) # , 
+        # if not open then open
+        if not self.shared_pvs[name].isOpen():
+            self.shared_pvs[name].open(value)
+        else:
+            self.shared_pvs[name].post(value, timestamp=time.time())
 
     def get(self, name, **kwargs):
-        # print(f"Getting {name}")
         value_raw = self.shared_pvs[name].current().raw
-        if type(value_raw.value) == np.ndarray:
-            # print(f"value_raw_type: {type(value_raw.value)}")
-            # print(f"value_raw: {value_raw.value}")
-            # print(f"value_raw_shape: {value_raw.value.shape}")
-            # ndtndarray has property dimension
+        if isinstance(value_raw.value, np.ndarray):
+            # if value has dimension
             if "dimension" in value_raw:
                 y_size = value_raw.dimension[0]["size"]
                 x_size = value_raw.dimension[1]["size"]
