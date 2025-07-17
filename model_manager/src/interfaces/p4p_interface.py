@@ -123,7 +123,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         if "port" in config:
             port = config["port"]
         else:
-            port = 5075
+            port = 5075 # thos will fail if we have two servers running on the same port
         
         if "init" in config:
             # print(f"config['init']: {config['init']}")
