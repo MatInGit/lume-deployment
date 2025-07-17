@@ -1,6 +1,6 @@
 Poly-Lithic
 =========================
-Under Construction :warning:
+Under Construction 🚧
 
 Welcome to the Poly-Lithic documentation!
 
