@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class BaseTransformer:
     @abstractmethod
     def __init__(self, config: dict):
