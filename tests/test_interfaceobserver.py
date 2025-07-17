@@ -106,6 +106,7 @@ def test_interface_observer_get_all(interface_observer):
     
     assert result.topic == "next_step"
     assert result.source == "interface"
+    assert len(result.value) == 2
     assert result.key in interface_observer.interface.variable_list
     assert result.value is not None
 
