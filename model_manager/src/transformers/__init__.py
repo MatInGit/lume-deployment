@@ -1,13 +1,23 @@
-registered_transformers = {}
+from src.utils.lazyInterfaceLoader import AbstractInterfaceLoader
 
-from .BaseTransformers import (
-    CAImageTransfomer,
-    PassThroughTransformer,
-    SimpleTransformer,
-)
-from .CompoundTransformer import CompoundTransformer
-
-registered_transformers["SimpleTransformer"] = SimpleTransformer
-registered_transformers["CAImageTransfomer"] = CAImageTransfomer
-registered_transformers["CompoundTransformer"] = CompoundTransformer
-registered_transformers["PassThroughTransformer"] = PassThroughTransformer
+class TransformerLoader(AbstractInterfaceLoader):
+    def __init__(self):
+        
+        super().__init__()
+    
+    def keys(self):
+        return ["SimpleTransformer", "CAImageTransfomer", "CompoundTransformer", "PassThroughTransformer"]
+    
+    def _load_interface(self, key):
+        if key == "SimpleTransformer":
+            return self.import_module(".transformers.BaseTransformers", "SimpleTransformer")
+        elif key == "CAImageTransfomer":
+            return self.import_module(".transformers.BaseTransformers", "CAImageTransfomer")
+        elif key == "CompoundTransformer":
+            return self.import_module(".transformers.CompoundTransformer", "CompoundTransformer")
+        elif key == "PassThroughTransformer":
+            return self.import_module(".transformers.BaseTransformers", "PassThroughTransformer")
+        else:
+            raise KeyError(f"Interface '{key}' not registered.")
+        
+registered_transformers = TransformerLoader()

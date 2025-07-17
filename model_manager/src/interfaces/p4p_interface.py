@@ -164,7 +164,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
                     print(f"pv_type_init: {pv_type_init}")
 
             else:
-                warnings.warn(f"No type specified for {pv}")
+                # warnings.warn(f"No type specified for {pv}")
                 pv_type_nt = NTScalar("d")
                 pv_type_init = 0
                 self.value_build_fn = None
