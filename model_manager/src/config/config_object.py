@@ -144,9 +144,9 @@ class ConfigObject(pydantic.BaseModel):
         edges = []
         # to collect edges we need to go through each item , look at what its publishing and find matching subsribers, this will form an edge
         for key, value in self.modules.items():
-            if isinstance(value.pub, str):
+            if value.pub is not None or value.pub.lower() is not "none":
+                if isinstance(value.pub, str):
                     value.pub = [value.pub]
-            if value.pub is not None and value.pub != []:
                 for key2, value2 in self.modules.items():
                     if value2.sub is not None:
                         # normalise them all to lists
@@ -163,23 +163,24 @@ class ConfigObject(pydantic.BaseModel):
                                 
             nodes.append(value.name)
             
-        # logging.debug(f"Nodes: {nodes}")
-        # logging.debug(f"Edges: {edges}")
+        logging.debug(f"Nodes: {nodes}")
+        logging.debug(f"Edges: {edges}")
         nodes = list(set(nodes))
         nodes = [x for x in nodes if x is not None]
         edges = [tuple(x) for x in edges]
         
         G.add_nodes_from(nodes)
         G.add_edges_from(edges)
-        isolated_nodes = list(nx.isolates(G))
-        logging.debug(f"Isolated nodes: {isolated_nodes}")
+        return G
+    
+    @pydantic.field_validator('graph')
+    def check_routing(cls, v):
+        isolated_nodes = list(nx.isolates(v))
         if isolated_nodes:
             raise ValueError(
                 f'Isolated nodes found in routing graph: {isolated_nodes}, this means that a modules is niether a publisher or subscriber to any other module'
             )
-        return G
-    
-
+        return v    
     
     def draw_routing_graph(self):
         G = self.graph
