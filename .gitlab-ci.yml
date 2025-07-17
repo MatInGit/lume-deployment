@@ -12,6 +12,7 @@ stages:
     - pip install hatch
     - pip install pytest
     - pip install -r requirements.txt
+    - pip install ruff
 
 format:
   <<: *before_script_template
