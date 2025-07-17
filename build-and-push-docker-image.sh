@@ -15,8 +15,8 @@
 # echo "  \"vcs-ref\": \"$VCS_REF\"" >> build-info.json
 # echo "}" >> build-info.json
 
-docker build --pull --rm -f "Dockerfile" -t harbor.stfc.ac.uk/isis-accelerator-controls/lume-deploy:dev10 "." &&
-docker push harbor.stfc.ac.uk/isis-accelerator-controls/lume-deploy:dev10
+docker build --pull --rm -f "Dockerfile" -t harbor.stfc.ac.uk/isis-accelerator-controls/lume-deploy:dev "." &&
+docker push harbor.stfc.ac.uk/isis-accelerator-controls/lume-deploy:dev
 
-docker build --pull --rm -f "Dockerfile.interactive" -t harbor.stfc.ac.uk/isis-accelerator-controls/lume-deploy:interactive10 "." &&
-docker push harbor.stfc.ac.uk/isis-accelerator-controls/lume-deploy:interactive10
+docker build --pull --rm -f "Dockerfile.interactive" -t harbor.stfc.ac.uk/isis-accelerator-controls/lume-deploy:interactive "." &&
+docker push harbor.stfc.ac.uk/isis-accelerator-controls/lume-deploy:interactive

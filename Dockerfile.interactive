@@ -4,7 +4,7 @@ RUN python -m pip install botorch tensorflow pydantic --no-cache-dir
 
 COPY requirements.txt /app/requirements.txt
 RUN python -m pip install -r /app/requirements.txt --no-cache-dir
-RUN pip install -i https://test.pypi.org/simple/ lume-deploy==0.1.3.dev13 --extra-index-url https://pypi.org/simple/ --no-cache-dir
+RUN pip install -i https://test.pypi.org/simple/ lume-deploy==0.1.3 --extra-index-url https://pypi.org/simple/ --no-cache-dir
 
 COPY . /opt/deployment/
 # WORKDIR /opt/deployment/model_manager   
