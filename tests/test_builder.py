@@ -29,9 +29,10 @@ def env_config(env_config):
             data = json.load(stream)
         for key, value in data.items():
             os.environ[key] = value
+        os.environ['MLFLOW_MODE'] = True
     except Exception as e:
         logging.error(f'Error setting environment variables: {e}')
-        raise e
+        os.environ['MLFLOW_MODE'] = False
 
 
 def test_build(caplog, make_builder):
@@ -43,6 +44,11 @@ def test_build(caplog, make_builder):
     message_broker.notify(message)
 
 
+# only run this test if the MLflow server is reachable
+@pytest.mark.skipif(
+    os.environ.get('MLFLOW_TRACKING_URI') is None,
+    reason='MLFLOW_TRACKING_URI is not set',
+)
 def test_mlflow_legacy(caplog, make_builder):
     # caplog.set_level(logging.DEBUG)
     try:
@@ -85,7 +91,10 @@ def test_mlflow_legacy(caplog, make_builder):
     message_broker.parse_queue()
     assert len(message_broker.queue) == 0  # no messages left in the queue
 
-
+@pytest.mark.skipif(
+    os.environ.get('MLFLOW_TRACKING_URI') is None,
+    reason='MLFLOW_TRACKING_URI is not set',
+)
 def test_mlflow(caplog, make_builder):
     # caplog.set_level(logging.DEBUG)
     try:
