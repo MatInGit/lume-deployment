@@ -113,13 +113,12 @@ def test_interface_observer_get_all(interface_observer):
     # Test get_all method
     result = interface_observer.get_all()
 
-    assert len(result) == 2
+    assert len(result) == 1
     assert result[0].topic == "next_step"
-    assert result[0].value == {"test_scalar": {"value": 9.0}}
+    assert result[0].value["test_scalar"] == {"value": 9.0}
 
-    assert result[1].topic == "next_step"
     np.testing.assert_array_equal(
-        result[1].value["test_array"]["value"], np.array([7.0, 8.0, 9.0])
+        result[0].value["test_array"]["value"], np.array([7.0, 8.0, 9.0])
     )
 
 

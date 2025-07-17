@@ -319,6 +319,9 @@ async def model_main(
                 if time.time() - time_start > config.deployment.rate:
                     time_start = time.time()
                     broker.get_all()
+                else:
+                    if len(broker.queue) > 0:
+                        broker.parse_queue()
                 
                 if len(broker.queue) > 0:
                     broker.parse_queue()
@@ -326,11 +329,10 @@ async def model_main(
                         logger.info("One shot mode, exiting")
                         break
                 
-                await asyncio.sleep(0.001)
+                await asyncio.sleep(0.001) # sleep for 100ms
     
         else:
             raise Exception("Deployment type not supported")
- 
     except Exception as e:
         logger.error(f"Error monitoring: {traceback.format_exc()}")
         raise e

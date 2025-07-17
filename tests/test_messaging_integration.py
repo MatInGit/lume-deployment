@@ -22,7 +22,7 @@ class MockModel:
         self.predictions.append(value)
         # the next layer expects a dictionary with {"name": {"value": value}, ...} so we have to retrun it as follows
         return {
-            "pred0": value["x1"]["value"]+ value["x2"]["value"] }
+            "pred0": value["x1"]+ value["x2"] }
 
 
 @pytest.fixture
@@ -131,7 +131,7 @@ def test_interface_observer_put(
 
     # this should trigger the interface to get all variables
     message_broker.notify(message)
-    assert len(message_broker.queue) == 2
+    assert len(message_broker.queue) == 1
     logging.info(message_broker.queue)
     for message in message_broker.queue:
         assert message.topic == "in_interface"

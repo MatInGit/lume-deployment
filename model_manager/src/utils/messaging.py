@@ -14,8 +14,24 @@ from model_manager.src.transformers import BaseTransformer
 from model_manager.src.interfaces import BaseInterface
 from model_manager.src.model_utils import registered_model_getters
 import os
-
+from deepdiff import DeepDiff
+from concurrent.futures import ThreadPoolExecutor, as_completed
 logger = get_logger()
+
+import cProfile
+
+def profileit(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        datafn = func.__name__ + ".profile" # Name the data file sensibly
+        prof = cProfile.Profile()
+        retval = prof.runcall(func, *args, **kwargs)
+        end = time.time()
+        if end - start_time > 0.3:
+            prof.dump_stats(datafn)
+        return retval
+
+    return wrapper
 
 
 class Message(BaseModel):
@@ -126,14 +142,42 @@ class MessageBroker:
                     self._observers[t].remove(observer)
         else:
             self._observers[topic].remove(observer)
-
+    @profileit
     def notify(self, message: Message) -> None:
         """notify all observers of a message"""
+        # if message.topic in self._observers:
+        #     start = time.time()
+        #     logger.debug(f"notifying observers of {message}")
+        #     with ThreadPoolExecutor() as executor:
+        #         futures = []
+        #         for observer in self._observers[message.topic]:
+        #             logger.debug(f"notifying {observer} of {message}")
+        #             futures.append(executor.submit(observer.update, message))
+                
+        #         for future in as_completed(futures):
+        #             result = future.result()
+
+                    
+        #             if result is not None:
+        #                 # if list of messages
+        #                 if isinstance(result, list):
+        #                     for r in result:
+        #                         self.queue.append(r)
+        #                 else:
+        #                     self.queue.append(result)
+        #     end = time.time()
+        #     print(f"messsage update time: {(end-start)*1000:.2f}ms for {message.topic}")
+        # else:
+        #     logger.error(f"no observers for {message.topic}")
+        """notify all observers of a message"""
         if message.topic in self._observers:
-            logger.debug(f"notifying observers of {message}")
+            start = time.time()
+            # logger.debug(f"notifying observers of {message}")
+            
             for observer in self._observers[message.topic]:
-                logger.debug(f"notifying {observer} of {message}")
+                logger.debug(f"notifying {observer}")
                 result = observer.update(message)
+                
                 if result is not None:
                     # if list of messages
                     if isinstance(result, list):
@@ -141,6 +185,9 @@ class MessageBroker:
                             self.queue.append(r)
                     else:
                         self.queue.append(result)
+            
+            end = time.time()
+            print(f"message update time: {(end-start)*1000:.2f}ms for {message.topic}")
         else:
             logger.error(f"no observers for {message.topic}")
 
@@ -160,7 +207,7 @@ class MessageBroker:
             self.notify(message)
             self.queue.remove(message)
             logger.debug(f"queue length: {len(self.queue)}")
-            logger.debug(f"queue: {self.queue}")
+            # logger.debug(f"queue: {self.queue}")
 
 
 class TransformerObserver(Observer):
@@ -196,13 +243,14 @@ class InterfaceObserver(Observer):
         self.interface: BaseInterface = interface
         self.topic: str = topic
         self.sanitise = sanitise
+        self.last_get_all = None
 
     def update(self, message: Message) -> Message | list[Message]:
         if message.topic == "get_all":
             messages = self.get_all()
             return messages
         else:
-            logger.debug(f"updating {self} with {message}")
+            logger.debug(f"updating {self}")
             if os.environ["PUBLISH"] == "True":
                 self.interface.put_many(message.value)
             else:
@@ -221,13 +269,36 @@ class InterfaceObserver(Observer):
     def get_all(self) -> list[Message]:
         """get all variables from the interface based on internal variable list"""
         messages = []
+        output_dict = {}
+        
+        values = self.interface.get_many(self.interface.variable_list)
+        # print(f"values: {values}")
         for key in self.interface.variable_list:
             key, value = self.interface.get(key)
             if value is not None:
-                messages.append(
-                    Message(topic=self.topic, source=str(self), value={key: value})
-                )
-        return messages
+                output_dict[key] = value
+        
+        messages.append(
+            Message(topic=self.topic, source=str(self), value=output_dict)
+        )
+        return messages        
+        
+        # if self.last_get_all is not None:
+        #     diff = DeepDiff(self.last_get_all, output_dict)
+        #     self.last_get_all = output_dict
+        #     if diff:
+        #         messages.append(
+        #             Message(topic=self.topic, source=str(self), value=output_dict)
+        #         )
+        #     else:
+        #         logger.debug("no diff")
+        # else:
+        #     self.last_get_all = output_dict
+        #     messages.append(
+        #         Message(topic=self.topic, source=str(self), value=output_dict)
+        #     )
+        # return messages
+    
 
     def get_many(self, message: Message) -> list[Message]:
         """get many variables from the interface"""
@@ -298,22 +369,23 @@ class ModelObserver(Observer):
         
     def update(self, message: Message) -> list[Message]:
         messages = []
-        logger.debug(f"updating {self} with {message.value}")
+        logger.debug(f"updating {self}")
         
         if self.unpack_input:
-            logger.debug(f"unpacking input: {message.value}")
+            # logger.debug(f"unpacking input: {message.value}")
             value = {v: message.value[v]["value"] for v in message.value}
         else:
-            logger.debug(f"not unpacking input passign raw: {message.value}")
+            # logger.debug(f"not unpacking input passign raw: {message.value}")
             value = message.value
         pred = self.model.evaluate(value)
-        output = {}    
+        output = {}
+            
         if self.pack_output:
-            logger.debug(f"packing output: {pred}")
+            # logger.debug(f"packing output: {pred}")
             for key, value in pred.items():
                 output[key] = {"value": value}
         else:
-            logger.debug(f"not packing output passign raw: {pred}")
+            # logger.debug(f"not packing output passign raw: {pred}")
             output = pred
             
         messages.append(Message(topic=self.topic, source=str(self), value=output))
