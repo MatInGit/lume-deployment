@@ -5,6 +5,10 @@ from p4p.server.thread import SharedPV
 from p4p.nt import NTScalar, NTNDArray
 import numpy as np
 from p4p.wrapper import Value, Type
+import os 
+
+# set env 
+os.environ["EPICS_PVA_SERVER_PORT"] = "5577"
 
 # get all upper case alphabet
 import string
@@ -21,6 +25,10 @@ pv_list_image = [name_proto_image + letter + letter for letter in ALPHABET]
 pv_list_waveform = [name_proto_waveform + letter + letter for letter in ALPHABET]
 
 shared_pvs = []
+
+## set port 
+
+
 
 for pv in pv_list:
     # self.shared_pvs.append(pv)

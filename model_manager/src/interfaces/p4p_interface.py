@@ -140,6 +140,11 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         for pv in self.pv_list:
             if "type" in config["variables"][pv]:
                 pv_type = config["variables"][pv]["type"]
+                print(f"pv_type: {pv_type}")
+                print(pv_type == "image")
+                print(pv_type == "waveform")
+                print(pv_type == "array")
+                print(pv_type == "scalar")
                 if pv_type == "image":
                     # note the y and x are flipped when reshaping (rows, columns) -> (y, x)
                     y_size = config["variables"][pv]["image_size"]["y"]
@@ -151,7 +156,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
                     self.value_build_fn = None
 
                 # waveform or array
-                if pv_type == "waveform" or pv_type == "array":
+                elif pv_type == "waveform" or pv_type == "array":
                     if "length" in config["variables"][pv]:
                         length = config["variables"][pv]["length"]
                     else:
@@ -161,7 +166,12 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
                     pv_type_nt_bd = NTScalar.buildType("ad")
                     self.value_build_fn = Value(pv_type_nt_bd, {"value": intial_value})
                     pv_type_init = intial_value
-                    print(f"pv_type_init: {pv_type_init}")
+                    # print(f"pv_type_init: {pv_type_init}")
+                elif pv_type == "scalar":
+                    pv_type_nt = NTScalar("d")
+                    pv_type_init = 0
+                else:
+                    raise TypeError(f"Unknown PV type for {pv}: {pv_type}")
 
             else:
                 # warnings.warn(f"No type specified for {pv}")
@@ -175,6 +185,8 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
             def put(pv: SharedPV, op: ServOpWrap):
                 # logger.debug(f"Put {pv} {op}")
                 # logger.debug(f"type(pv): {type(op.value())}")
+                
+                # scalar value
                 pv.post(op.value(), timestamp=time.time())
                 op.done()
 
@@ -213,9 +225,9 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         # print(f"Getting {name}")
         value_raw = self.shared_pvs[name].current().raw
         if type(value_raw.value) == np.ndarray:
-            print(f"value_raw_type: {type(value_raw.value)}")
-            print(f"value_raw: {value_raw.value}")
-            print(f"value_raw_shape: {value_raw.value.shape}")
+            # print(f"value_raw_type: {type(value_raw.value)}")
+            # print(f"value_raw: {value_raw.value}")
+            # print(f"value_raw_shape: {value_raw.value.shape}")
             # ndtndarray has property dimension
             if "dimension" in value_raw:
                 y_size = value_raw.dimension[0]["size"]
