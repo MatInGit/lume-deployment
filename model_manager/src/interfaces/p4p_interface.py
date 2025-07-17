@@ -2,7 +2,6 @@ import os
 import time
 
 # anyScalar
-import warnings
 
 import numpy as np
 from p4p.client.thread import Context
@@ -19,7 +18,6 @@ from .BaseInterface import BaseInterface
 logger = get_logger()
 
 # os.environ["EPICS_PVA_NAME_SERVERS"] = "localhost:5075"
-
 
 class SimplePVAInterface(BaseInterface):
     def __init__(self, config):
@@ -140,11 +138,11 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         for pv in self.pv_list:
             if "type" in config["variables"][pv]:
                 pv_type = config["variables"][pv]["type"]
-                print(f"pv_type: {pv_type}")
-                print(pv_type == "image")
-                print(pv_type == "waveform")
-                print(pv_type == "array")
-                print(pv_type == "scalar")
+                # print(f"pv_type: {pv_type}")
+                # print(pv_type == "image")
+                # print(pv_type == "waveform")
+                # print(pv_type == "array")
+                # print(pv_type == "scalar")
                 if pv_type == "image":
                     # note the y and x are flipped when reshaping (rows, columns) -> (y, x)
                     y_size = config["variables"][pv]["image_size"]["y"]
