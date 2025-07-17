@@ -105,7 +105,7 @@ Note that the data is a dictionary of dictionaries.
 ## Modules
 
 ### Interface
-Interface modules are used to interact with external data, usually an accelerators control systems but can be anything. They follow the following structure (see [base interface class](./model_manager/src/interfaces/BaseInterface.py)):
+Interface modules are used to interact with external data, usually an accelerators control systems but can be anything. They follow the following structure (see [base interface class](./poly-lithic/src/interfaces/BaseInterface.py)):
 
 ```python
 class BaseInterface(ABC):
@@ -198,11 +198,52 @@ modules:
 ```
 Yes, it is identical to p4p, the only difference is that the p4p server will host the PVs for the specified variables.
 
-##### `k2eg` sample configuration
- 
-TODO - See old [docs](./readme_old.md) for now.
+#### `k2eg` Sample configuration
+
+> [!CAUTION]
+> need some more testing as it was last tested in Q1 2024. 
+
+```yaml
+input_data:
+  get_method: "k2eg"
+  config:
+    variables:
+      MY_VAR:TEST_A:
+        proto: ca # supports ca or pva
+        name: MY_VAR:TEST_A
+      MY_VAR:TEST_B:
+        proto: pva
+        name: MY_VAR:TEST_B
+```
 
 ### Transformer
+
+Transformers are used to transform data from one format to another, they can be used to convert data from one interface to another or to perform some data processing, aggregation or any other transformation action. They follow the structure (see [base transformer class](./poly-lithic/src/transformers/BaseTransformer.py)):
+
+```python
+class BaseTransformer:
+    @abstractmethod
+    def __init__(self, config: dict):
+        """
+        config: dict passed from the pv_mappings.yaml files.
+        """
+        pass
+
+    @abstractmethod
+    def transform(self):
+        """
+        Call transform function to transform the input data, see SimpleTransformer in model_manager/src/transformers/BaseTransformers.py for an example.
+        """
+        pass
+
+    @abstractmethod
+    def handler(self, pv_name: str, value: dict | float | int):
+        """
+        Handler function to handle the input data, in most cases it initiates the transform function when all the input data is available.
+        Handler is the only function exposed to the main loop of the program aside from initial configuration.
+        """
+        pass
+```
 
 ### Model 
 
