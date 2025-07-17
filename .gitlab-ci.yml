@@ -9,7 +9,7 @@ stages:
 .before_script_template: &before_script_template
   before_script: 
     - python -m pip install --upgrade pip
-    - pip install pytest pytest-asyncio hatch pytorch pytest-cov
+    - pip install pytest pytest-asyncio hatch torch pytest-cov
     - pip install -r requirements.txt
     - pip install ruff
 
