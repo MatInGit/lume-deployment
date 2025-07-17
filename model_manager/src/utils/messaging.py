@@ -178,47 +178,16 @@ class TransformerObserver(Observer):
             self.transformer.handler(key, value)
 
         if self.transformer.updated:
-            value = self.transformer.latest_transformed
-            if self.unpack_output:
-                for key, value in value.items():
-                    if isinstance(value, dict) and "value" in value:
-                        self.transformer.updated = False
-                        return Message(
-                            topic=self.topic, source=str(self), value={key: value}
-                        )
-                    elif isinstance(value, dict) and "value" not in value:
-                        self.transformer.updated = False
-                        return Message(
-                            topic=self.topic,
-                            source=str(self),
-                            value={key: {"value": value}},
-                        )
-                    else:
-                        self.transformer.updated = False
-                        return Message(
-                            topic=self.topic,
-                            source=str(self),
-                            value={key: {"value": value}},
-                        )
-
-            else:
-                if not isinstance(value, dict):
-                    raise ValueError(f"value must be a dictionary, got {value}")
-
-                if isinstance(value, dict) and "value" in value:
-                    self.transformer.updated = False
-                    return Message(
-                        topic=self.topic, source=str(self), value={"transformed": value}
-                    )
-                elif isinstance(value, dict) and "value" not in value:
-                    self.transformer.updated = False
-                    return Message(
-                        topic=self.topic,
-                        source=str(self),
-                        value={"transformed": {"value": value}},
-                    )
-                else:
-                    raise ValueError(f"value must be a dictionary, got {value}")
+            values = self.transformer.latest_transformed
+            message_dict = {}
+            for key, value in values.items():
+                message_dict[key] = {"value":value}                
+            
+            self.transformer.updated = False
+            return Message(
+                topic=self.topic, source=str(self), value=message_dict
+            )
+            
 
 
 class InterfaceObserver(Observer):

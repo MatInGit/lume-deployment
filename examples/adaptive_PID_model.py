@@ -4,6 +4,8 @@ import time
 import torch
 from torch import nn
 
+from matplotlib import pyplot as plt
+
 # simple PID controller implemented using pytorch, it has calculates the error and tracks the history
 # if the error is greater than the threshold, enable the adaptive learning on each step
 # the adaptive learning uses backpropagation to update the parameters of the PID controller
@@ -120,3 +122,53 @@ class ModelFactory:  # used to create model instances when in local mode
     @staticmethod
     def get_model():
         return PID()
+
+
+class TestPlant: 
+    # 3 state state space model SISO system
+    def __init__(self):
+        self.A = torch.tensor([[0.9, -0.1, 0.0], [0.0, 0.9, 0.0], [0.0, 0.0, 0.9]], dtype=torch.float)
+        self.B = torch.tensor([[0.1], [0.1], [0.1]], dtype=torch.float)
+        self.C = torch.tensor([[1, 0, 0]], dtype=torch.float)
+        self.x = torch.tensor([[0.0], [0.0], [0.0]], dtype=torch.float)
+        self.u = torch.tensor([[1.0]], dtype=torch.float)
+        self.y = torch.tensor([[1.0]], dtype=torch.float)
+        
+    def step(self, u):
+        u = u.view(1, 1)  # Ensure u is [1, 1]
+        # print(f'1 A: {self.A.shape}, x: {self.x.shape}, B: {self.B.shape}, u: {u.shape}, C: {self.C.shape}, y: {self.y.shape}')
+        self.x = self.A @ self.x + self.B @ u
+        # print(f'2 A: {self.A.shape}, x: {self.x.shape}, B: {self.B.shape}, u: {u.shape}, C: {self.C.shape}, y: {self.y.shape}')
+        self.y = self.C @ self.x
+
+        # print(f'3 A: {self.A.shape}, x: {self.x.shape}, B: {self.B.shape}, u: {u.shape}, C: {self.C.shape}, y: {self.y.shape}')
+        return self.y.item()  # Returns a scalar
+    
+    def reset(self):
+        self.x = torch.tensor([[0.0], [0.0], [0.0]], dtype=torch.float)
+        self.u = torch.tensor([[0.0]], dtype=torch.float)
+        self.y = torch.tensor([[0.0]], dtype=torch.float)
+        return self.y
+    
+
+def main():
+    # test plant 
+    plant = TestPlant()
+    
+    x = []
+    y = []
+    for i in range(1000):
+        setpoint = torch.tensor([torch.sin(torch.tensor([i/10]))])
+        system_output = plant.step(setpoint)
+        print(f'Setpoint: {setpoint}, System Output: {system_output}')
+        x.append(setpoint.item())
+        y.append(system_output)
+        # time.sleep(0.1)
+    
+    plt.plot(x)
+    plt.plot(y)
+    plt.savefig('plant_output.png')
+    
+
+if __name__ == '__main__':
+    main()

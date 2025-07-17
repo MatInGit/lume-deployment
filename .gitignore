@@ -40,3 +40,6 @@ waterfall*/
 _version.py
 dist/*
 graphs/
+.coverage
+.vscode
+tmp*
