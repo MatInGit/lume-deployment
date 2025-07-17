@@ -480,23 +480,21 @@ Then to run the model:
 ```bash
 pl --publish -c examples/base/local/deployment_config.yaml
 ```
-See the [local example notebook](./examples/base/simple_model_local.ipynb) for more details.
+See the [local example notebook](./examples/base/local/simple_model_local.ipynb) for more details.
 
 #### Example Model - MLFLow Model
->TODO
-
-#### Working with Lume-Model
->TODO
+See the [MLFlow example notebook](./examples/base/mlflow_model/simple_model_mlflow.ipynb) for more details.
 
 
 ## Roadmap
 
-| Feature / Task                                | Timeline     | Priority |
-|-----------------------------------------------|--------------|----------|
-| 🧠 🔧 **Lume-Model Integration**               | 1–3 Months   | 🥇       |
-| 📦 🤖 **MLflow 3.x Support**                   | 1–3 Months   | 🥇       |
-| 🌐 🚀 **Move to `gh-pages`**                   | 1–3 Months   | 🥈       |
-| 🔗 🧪 **p4p4isis Interface**                   | 6–12 Months  | 🥉       |
-| 📊 🧭 **Time Series Aggregation**              | 3–6 Months   | 🥉       |
-| 📈 🔍 **Model Evaluator Module**               | 3–6 Months   | 🥉       |
-| 🔁 🔧 **Model Retrainer Module**               | 6–12 Months  | 🥈       |
+| Feature / Task                                | Timeline     | Priority | Status        |
+|-----------------------------------------------|--------------|----------|---------------|
+| 🖌️ 🎨 **Make logo**                            | 1–3 Months   | 🥇       | 🚧 In Progress  |
+| 🧠 🔧 **Lume-Model Integration**               | 1–3 Months   | 🥇       | 🚧 In Progress |
+| 📦 🤖 **MLflow 3.x Support**                   | 1–3 Months   | 🥇       | ⏳ Planned     |
+| 🌐 🚀 **Move to `gh-pages`**                   | 1–3 Months   | 🥈       | ⏳ Planned     |
+| 🔗 🧪 **p4p4isis Interface**                   | 6–12 Months  | 🥉       | ⏳ Planned     |
+| 📊 🧭 **Time Series Aggregation**              | 3–6 Months   | 🥉       | ⏳ Planned     |
+| 📈 🔍 **Model Evaluator Module**               | 3–6 Months   | 🥉       | ⏳ Planned     |
+| 🔁 🔧 **Model Retrainer Module**               | 6–12 Months  | 🥈       | ⏳ Planned     |
