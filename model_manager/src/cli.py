@@ -265,19 +265,23 @@ def setup():
     )
 
     # wrap in observer
-    in_interface = InterfaceObserver(in_interface)
-    out_interface = InterfaceObserver(out_interface)
-    in_transformer = TransformerObserver(in_transformer)
-    out_transformer = TransformerObserver(out_transformer)
-    model = ModelObserver(model)
+    in_interface_wrapped = InterfaceObserver(in_interface)
+    out_interface_wrapped = InterfaceObserver(out_interface)
+    in_transformer_wrapped = TransformerObserver(in_transformer)
+    out_transformer_wrapped = TransformerObserver(out_transformer)
+    model_wrapped = ModelObserver(model)
 
     # add observers to message broker
     broker = MessageBroker()
-    broker.attach("in_interface", in_interface)
-    broker.attach("out_interface", out_interface)
-    broker.attach("in_transformer", in_transformer)
-    broker.attach("out_transformer", out_transformer)
-    broker.attach("model", model)
+    # default sequence
+    # in_interface -> in_transformer -> model -> out_transformer -> out_interface
+    # this will be specified in the config file or default to the above, not implemented as of yet
+    broker.attach(in_interface_wrapped, "update_trigger") # update_trigger is a topic that is used to trigger the update of the model
+    broker.attach(in_transformer_wrapped, "in_interface")
+    broker.attach(model_wrapped, "in_transformer")
+    broker.attach(out_transformer_wrapped, "model")
+    broker.attach(out_interface_wrapped, "out_transformer")
+    
 
     logger.debug("Model manager setup complete")
     logger.debug(f"Broker: {broker}")
@@ -297,6 +301,8 @@ def setup():
         model_getter,
         args,
         config.deployment.type,
+        broker,
+        
     )
 
 
@@ -307,6 +313,7 @@ async def model_main(
     out_transformer,
     model,
     model_getter,
+    broker,
     args,
 ):
     """Main."""
@@ -330,7 +337,6 @@ async def model_main(
         # initialise variables using get
         for key in in_interface.variable_list:
             _, value = in_interface.get(key)
-            # measure size of value in bytes
 
             in_transformer.handler(key, value)
         last_input_update = time.time()

@@ -18,6 +18,7 @@ def main():
         getter,
         args,
         dep_type,
+        broker,
     ) = setup()
     logger.info(f'Model deployed with type: {dep_type}')
     print('resetting logging...')
@@ -37,6 +38,7 @@ def main():
                 out_transformer,
                 model,
                 getter,
+                broker,
                 args,
             )
         )
