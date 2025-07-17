@@ -29,7 +29,8 @@ exclude_patterns = []
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 # Optional theme
-html_theme = 'furo'  # or 'alabaster', 'sphinx_rtd_theme', etc.
+html_permalinks_icon = '<span>🔗</span>'
+html_theme = 'sphinxawesome_theme'  # or 'alabaster', 'sphinx_rtd_theme', etc.
 html_static_path = ['_static']
 
 autodoc_member_order = 'bysource'  # show functions in source order
