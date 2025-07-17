@@ -12,6 +12,7 @@ description = "A package for deploying AI models and more using lume inspired in
 authors = [
     {"name" = "Mateusz Leputa"},
     {"name" = "Kathryn Baker"},
+    {"name" = "Mihnea Romanovschi"},
     {"name" = "Jesse Bellister"},
 ]
 dependencies = [
@@ -45,6 +46,8 @@ quote-style = "single"
 [project.scripts]
 poly_lithic = "poly_lithic.scripts.main:main"
 pl = "poly_lithic.scripts.main:main"
+model_manager = "poly_lithic.scripts.main:main"
+
 
 [tool.hatch.envs.default.env-vars]
 PYTHONPATH = "poly_lithic/src"
