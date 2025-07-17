@@ -67,7 +67,7 @@ class allowedRoutingTypes(Enum):
     
 class RoutingObject(pydantic.BaseModel):
     type: allowedRoutingTypes
-    topic: Optional[str] = None
+    pub: Optional[str] = None
     sub: Optional[str] = None
     args: Optional[dict[str, Union[str, dict, bool]]] | str = None
 
@@ -82,13 +82,13 @@ class RoutingConfig(pydantic.BaseModel):
     @property
     def graph(self):
         G = nx.DiGraph()
-        # topics are nodes and subs are edges
+        # pubs are nodes and subs are edges
         nodes = []
         edges = []
         for key, value in self.config.items():
-            nodes.append(value.topic)
+            nodes.append(value.pub)
             nodes.append(value.sub)
-            edges.append((value.sub, value.topic))
+            edges.append((value.sub, value.pub))
 
         # keep only unique nodes
         nodes = list(set(nodes))
@@ -110,53 +110,28 @@ class RoutingConfig(pydantic.BaseModel):
             )
         return v
 
-def makeDefaultRoutingConfig():
-    config = {
-        "input_data": {
-            "type": "in_interface",
-            "topic": "in_interface",
-            "sub": "update",
-            "args": None
-        },
-        "input_data_to_model": {
-            "type": "in_transformer",
-            "topic": "in_transformer",
-            "sub": "in_interface",
-            "args": None
-        },
-        "model": {
-            "type": "model",
-            "topic": "model",
-            "sub": "in_transformer",
-            "args": None
-        },
-        "output_model_to_data": {
-            "type": "out_transformer",
-            "topic": "out_transformer",
-            "sub": "model",
-            "args": {
-                "unpack_data": True
-            }
-        },
-        "output_data_to": {
-            "type": "out_interface",
-            "topic": None,
-            "sub": "out_transformer",
-            "args": None
-        }
-    }
-    return RoutingConfig(config=config)
+class ValidModuleConfig(Enum):
+    input_data: InputDataConfig = InputDataConfig
+    input_data_to_model: InputDataToModelConfig = InputDataToModelConfig
+    output_model_to_data: ModelToOutputDataConfig = ModelToOutputDataConfig
+    output_data_to: OutputDataToConfig = OutputDataToConfig
+    outputs_model: OutputModelConfig = OutputModelConfig
             
 
 class ConfigObject(pydantic.BaseModel):
-    
     routing: Optional[RoutingConfig] = None
     deployment: DeploymentConfig
-    input_data: InputDataConfig
-    input_data_to_model: InputDataToModelConfig
-    output_model_to_data: ModelToOutputDataConfig
-    output_data_to: OutputDataToConfig
-    outputs_model: OutputModelConfig
+    # old 
+    # input_data: Optional[dict[str, InputDataConfig]] = None
+    # input_data_to_model: Optional[dict[str, InputDataToModelConfig]] = None
+    # output_model_to_data: Optional[dict[str, ModelToOutputDataConfig]] = None
+    # output_data_to: Optional[dict[str, OutputDataToConfig]] = None
+    # outputs_model: Optional[dict[str, OutputModelConfig]] = None
+    
+    # new all of these ara a module config
+    modules: dict[str, ValidModuleConfig]
+
+    
     
 
     @model_validator(mode='before')
@@ -168,6 +143,7 @@ class ConfigObject(pydantic.BaseModel):
     
     def draw_routing_graph(self):
         G = self.routing.graph
+        plt.figure(figsize=(10, 10))
         nx.draw(G, with_labels=True)
         if not os.path.exists("./graphs"):
             os.makedirs("./graphs")
