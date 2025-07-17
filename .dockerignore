@@ -21,5 +21,10 @@ local_test/
 lebt_torch_model/
 cookiecutter-*
 *.json
+* 
 test-env
+!poly_lithic/
+!requirements.txt
+!pyproject.toml
+!tests
 
