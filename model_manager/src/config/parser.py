@@ -1,7 +1,6 @@
 import yaml
-
 from .config_object import ConfigObject
-
+import logging
 
 class ConfigParser:
     def __init__(self, config_path):
@@ -11,6 +10,7 @@ class ConfigParser:
         with open(self.config_path) as stream:
             try:
                 data = yaml.safe_load(stream)
+                logging.debug(data)  
                 return ConfigObject(**data)
             except yaml.YAMLError as exc:
                 print(exc)
