@@ -60,7 +60,14 @@ class MLflowModelGetterLegacy(ModelGetterBase):
                 self.model_name, self.model_version
             )
             version = self.client.get_model_version(self.model_name, version_no.version)
-
+        else :
+            raise ValueError(
+                f'Invalid model version: {self.model_version}. Must be a non-negative integer or "champion".'
+            )
+        if not version:
+            raise ValueError(
+                f'Model version {self.model_version} not found for model {self.model_name}.'
+            )
         deps = mlflow.artifacts.download_artifacts(f'{version.source}/requirements.txt')
         return deps
 
@@ -149,8 +156,8 @@ class MLflowModelGetter(MLflowModelGetterLegacy):
 
             # access the wrapped Python Pyfunc model
             model = mlflow_model.unwrap_python_model()
-            # res = model.evaluate({"x": 0, "y": 0})  # test if the model has an evaluate method
-            # print(f'Model evaluation result: {res}') cant test becuse of mlflow wierdness
+            res = model.evaluate({"x": 0, "y": 0})  # test if the model has an evaluate method
+            print(f'Model evaluation result: {res}') # cant test becuse of mlflow wierdness
         else:
             raise TypeError(
                 f'Expected a pyfunc model, but got {loader_module}.'
