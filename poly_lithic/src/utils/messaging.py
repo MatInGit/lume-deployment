@@ -407,6 +407,13 @@ class ModelObserver(Observer):
                 raise ValueError('model is None')
             return model
 
+        elif self.config['type'] == 'LocalModelGetter':
+            model_getter = registered_model_getters['local'](
+                self.config['args']
+            )
+            model = model_getter.get_model()
+            return model
+
         else:
             raise ValueError(f'model type not recognised: {self.config["type"]}')
 
