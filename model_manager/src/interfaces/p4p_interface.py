@@ -2,13 +2,15 @@ from p4p.client.thread import Context
 from p4p.server import Server
 from p4p.server.raw import ServOpWrap
 from p4p.server.thread import SharedPV
-from p4p.nt import NTScalar, NTNDArray
-from p4p.wrapper import Value,Type
+from p4p.nt import NTScalar, NTNDArray, NTMultiChannel
+from p4p.wrapper import Value, Type
 
 from .BaseInterface import BaseInterface
 from src.logging_utils import get_logger
 import os, time
 import numpy as np
+
+import warnings
 
 logger = get_logger()
 
@@ -23,9 +25,7 @@ class SimplePVAInterface(BaseInterface):
                 f"EPICS_PVA_NAME_SERVERS: {os.environ['EPICS_PVA_NAME_SERVERS']}"
             )
         elif "EPICS_PVA_NAME_SERVERS" in config:
-            os.environ["EPICS_PVA_NAME_SERVERS"] = config[
-                "EPICS_PVA_NAME_SERVERS"
-            ]
+            os.environ["EPICS_PVA_NAME_SERVERS"] = config["EPICS_PVA_NAME_SERVERS"]
             logger.debug(
                 f"EPICS_PVA_NAME_SERVERS: {os.environ['EPICS_PVA_NAME_SERVERS']}"
             )
@@ -68,18 +68,21 @@ class SimplePVAInterface(BaseInterface):
                 )
                 logger.error(f"pv: {pv}")
                 raise e
-        # pass # bugged out
 
     def get(self, name, **kwargs):
-        value = self.ctxt.get(name)        
+        value = self.ctxt.get(name)
         if type(value["value"]) == np.ndarray:
-            y_size = value["dimension"][0]["size"]
-            x_size = value["dimension"][1]["size"]
-            value = value["value"].reshape((y_size, x_size))
+            # if value has dimension
+            if "dimension" in value:
+                y_size = value["dimension"][0]["size"]
+                x_size = value["dimension"][1]["size"]
+                value = value["value"].reshape((y_size, x_size))
+            else:
+                value = value["value"]
         else:
             value = value["value"]
-            
-        value  = {"value": value}
+
+        value = {"value": value}
         return name, value
 
     def put(self, name, value, **kwargs):
@@ -122,22 +125,33 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         # print(f"self.init_pvs: {self.init_pvs}")
 
         for pv in self.pv_list:
-            # self.shared_pvs.append(pv)
-            # need to check if key exists config["variables"]["pv"]["type"]
-            # print(f"config['variables'][pv]: {config['variables'][pv]}")
+
             if "type" in config["variables"][pv]:
-                # print(f"config['variables'][pv]['type']: {config['variables'][pv]['type']}")
+                warnings.warn(f"Type specified for {pv}")
+
                 pv_type = config["variables"][pv]["type"]
                 if pv_type == "image":
                     # note the y and x are flipped when reshaping (rows, columns) -> (y, x)
                     y_size = config["variables"][pv]["image_size"]["y"]
                     x_size = config["variables"][pv]["image_size"]["x"]
                     # intialize with ones
-                    intial_value = np.ones((y_size,x_size))
+                    intial_value = np.ones((y_size, x_size))
                     pv_type_nt = NTNDArray()
                     pv_type_init = intial_value
 
+                # waveform
+                if pv_type == "waveform":
+                    if "length" in config["variables"][pv]:
+                        length = config["variables"][pv]["length"]
+                    else:
+                        length = 10
+                    intial_value = np.ones(length)
+                    pv_type_nt = NTScalar("ad")
+                    pv_type_nt_bd = NTScalar.buildType("ad")
+                    pv_type_init = Value(pv_type_nt_bd, {"value": intial_value})
+
             else:
+                warnings.warn(f"No type specified for {pv}")
                 pv_type_nt = NTScalar("d")
                 pv_type_init = 0
 
@@ -153,7 +167,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
             def put(pv: SharedPV, op: ServOpWrap):
                 # logger.debug(f"Put {pv} {op}")
                 # logger.debug(f"type(pv): {type(op.value())}")
-                pv.post(op.value(), timestamp=time.time())
+                pv.post(op.value())
                 op.done()
 
             self.shared_pvs[pv] = pv_item[pv]
@@ -172,7 +186,7 @@ class SimlePVAInterfaceServer(SimplePVAInterface):
         # logger.debug(f"Putting {name} with value {value}")
         # if type(value) == np.ndarray:
         #     value = value.T # quick fix for the fact that the image is flipped
-        
+        print(f"Putting {name} with value {value}")
         self.shared_pvs[name].post(value, timestamp=time.time())
 
     def get(self, name, **kwargs):

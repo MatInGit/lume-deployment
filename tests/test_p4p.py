@@ -72,3 +72,26 @@ def test_SimplePVAInterface_put_and_get_image():
     assert image_get["value"][0][0] == arry[0][0]
 
     p4p.close()
+    
+def test_SimplePVAInterface_put_and_get_array():
+    config = {
+        "variables": {
+            "test:array:AA": {
+                "name": "test:array:AA",
+                "proto": "pva",
+                "type": "array",
+            }
+        }
+    }
+    p4p = SimplePVAInterface(config)
+
+    name, array_get = p4p.get("test:array:AA")
+    print(array_get["value"])    
+    assert type(array_get["value"]) == np.ndarray
+    arry = np.random.rand(10)
+    p4p.put("test:array:AA", arry.tolist())
+    name, array_get = p4p.get("test:array:AA")
+    print(array_get)
+    np.testing.assert_array_equal(array_get["value"], arry)
+
+    p4p.close()

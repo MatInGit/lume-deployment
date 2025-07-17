@@ -7,6 +7,7 @@ from src.interfaces import registered_interfaces
 from src.transformers import registered_transformers
 import torch
 import time, logging, asyncio
+import numpy as np
 
 logger = get_logger()
 
@@ -313,10 +314,17 @@ async def model_main(
             if True:
                 for key in in_interface.variable_list:
                     _, value = in_interface.get(key)
-                    if value["value"] == in_transformer.latest_input[key]:
-                        pass
-                    else:
-                        in_transformer.handler(key, value)
+                    if type(value["value"]) == float:
+                        if value["value"] == in_transformer.latest_input[key]:
+                            pass
+                        else:
+                            in_transformer.handler(key, value)
+                    elif type(value["value"]) == np.ndarray:
+                        if np.array_equal(value["value"], in_transformer.latest_input[key]):
+                            pass
+                        else:
+                            in_transformer.handler(key, value)
+
 
             if in_transformer.updated:
                 try:
