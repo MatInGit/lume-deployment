@@ -3,10 +3,15 @@ name: CI Pipeline
 # only on tagged commits or manual trigger or on change to main.yml
 on:
   push:
+    # tags:
+    #   - '*'
+    # paths:
+    #   - .github/workflows/**.yml
+    branches:
+      - dev
     tags:
       - '*'
-    paths:
-      - .github/workflows/**
+    # on push to dev or main branch if tags are pushed
 
 jobs:
   Build:
