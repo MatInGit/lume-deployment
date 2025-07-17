@@ -4,6 +4,8 @@ import time
 from model_manager.src.logging_utils.make_logger import get_logger
 from model_manager.src.transformers import registered_transformers
 
+from model_manager.src.transformers.BaseTransformer import BaseTransformer
+
 logger = get_logger()
 
 
@@ -15,7 +17,7 @@ logger = get_logger()
 # }
 
 
-class CompoundTransformer:
+class CompoundTransformer(BaseTransformer):
     def __init__(self, config):
         logger.debug('Initializing CompoundTransformer')
         self.transformers = []

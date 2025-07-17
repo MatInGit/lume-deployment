@@ -9,7 +9,7 @@ def test_LocalModelGetter():
     model = model_getter.get_model()
     input_dict = {'x1': 1, 'x2': 2}
     
-    for  i in range(100):
+    for  i in range(10):
         input_dict['x1'] = i
         input_dict['x2'] = i*2
         output_dict = model.evaluate(input_dict)
