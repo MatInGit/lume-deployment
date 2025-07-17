@@ -48,3 +48,4 @@ notify.profile
 test.yaml
 test_files/
 old_examples/
+*code-workspace
