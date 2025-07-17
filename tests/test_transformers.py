@@ -78,7 +78,6 @@ def test_simple_transformer_complex_array_in():
     st.handler("C1", {"value": 7})
     
     assert st.updated
-    print(st.latest_transformed)
     expected_result = np.outer(np.array([1, 2, 3]), np.array([4, 5, 6]))
     np.testing.assert_array_equal(st.latest_transformed["x2"], expected_result)
     np.testing.assert_array_equal(st.latest_transformed["x1"], np.array([1, 2, 3]))
