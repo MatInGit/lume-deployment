@@ -10,8 +10,10 @@ class ConfigParser:
         with open(self.config_path) as stream:
             try:
                 data = yaml.safe_load(stream)
-                logging.debug(data)  
-                return ConfigObject(**data)
+                # logging.debug(data)  
+                config_object = ConfigObject(**data)
+                _ = config_object.graph  # Access the graph property to trigger validation
+                return config_object
             except yaml.YAMLError as exc:
                 print(exc)
                 return None
