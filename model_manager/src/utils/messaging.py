@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any
-from pydantic import BaseModel, Field
+from typing import Dict, Any, Optional
+from pydantic import BaseModel, Field, ValidationError, ValidationInfo, field_validator, computed_field
 import time
 from model_manager.src.logging_utils import get_logger
 from model_manager.src.transformers import BaseTransformer
@@ -13,15 +13,51 @@ logger = get_logger()
 class Message(BaseModel):
     topic: str
     source: str
-    key: str
-    value: Any
+    ## key: str made a mess of this by including a key, no need to include a key
+    value: dict = Field(default_factory=dict)
     timestamp: float = Field(default_factory=time.time)
+    # optional 
+    allow_unsafe: Optional[bool] = False 
+    
+    @field_validator('value')
+    @classmethod
+    def check_value(cls, value):
+        if not isinstance(value, dict):
+            if cls.allow_unsafe:
+                logger.warning(f"allowing unsafe value {value}")
+                return {"value": value}
+            else:
+                raise ValueError("value must be a dictionary")
+        # structs must be
+        # {name : {"value": value, "timestamp": timestamp, "metadata": metadata}} value is mandatory, timestamp is optional, metadata is optional
+        # can have multiple structs in a dictionary {name1: struct1, name2: struct2}
+        for key, struct in value.items():
+            if not isinstance(struct, dict):
+                raise ValueError("struct must be a dictionary")
+            if "value" not in struct:
+                raise ValueError("struct must contain a value")
+            if "timestamp" in struct:
+                if not isinstance(struct["timestamp"], (int, float)):
+                    raise ValueError("timestamp must be an int or float")
+            if "metadata" in struct:
+                if not isinstance(struct["metadata"], dict):
+                    raise ValueError("metadata must be a dictionary")
+        return value
+    
+    @computed_field
+    def keys(self) -> list[str]:
+        return list(self.value.keys())
+
+    @computed_field
+    def values(self) -> list[Any]:
+        return list(self.value.values())
+    
 
     def __str__(self):
-        return f"Message(topic={self.topic}, source={self.source}, key={self.key}, value={self.value}, timestamp={self.timestamp})"
+        return f"Message(topic={self.topic}, source={self.source}, value={self.value}, timestamp={self.timestamp})"
 
     def __repr__(self):
-        return f"Message(topic={self.topic}, source={self.source}, key={self.key}, value={self.value}, timestamp={self.timestamp})"
+        return f"Message(topic={self.topic}, source={self.source}, value={self.value}, timestamp={self.timestamp})"
 
 
 class Observer(ABC):
@@ -64,12 +100,10 @@ class MessageBroker:
 
     def notify(self, message: Message) -> None:
         """notify all observers of a message"""
-        logger.debug(f"notifying observers of {message}")
-        # print (f"notifying observers of {message}")
         if message.topic in self._observers:
             # print (f"observers for {message.topic}")
             for observer in self._observers[message.topic]:
-                # print (f"observer {observer}")
+                logger.debug(f"notifying {observer} of {message}")
                 result = observer.update(message)
                 if result is not None:
                     # if list of messages
@@ -93,23 +127,62 @@ class MessageBroker:
 
 
 class TransformerObserver(Observer):
-    def __init__(self, transformer: BaseTransformer, topic: str):
+    def __init__(self, transformer: BaseTransformer, topic: str, unpack_output: bool = False):
         """wraps around the transformer.handler method"""
         self.transformer = transformer
         self.topic = topic
+        self.unpack_output = unpack_output
 
-    def update(self, message: Message) -> Message:
-        self.transformer.handler(message.key, message.value)
-        # print (self.transformer.latest_input)
-        # print (self.transformer.latest_transformed)
+    def update(self, message: Message) -> Message | list[Message]:
+        
+        for key, value in message.value.items():
+            self.transformer.handler(key, value)
+            
         if self.transformer.updated:
-            return Message(
-                topic=self.topic,
-                source=message.topic,
-                key=message.key,
-                value=self.transformer.latest_transformed,
-            )
-
+            value=self.transformer.latest_transformed
+            
+            if self.unpack_output:
+                for key, value in value.items():
+                    if isinstance(value, dict) and "value" in value:
+                        return Message(
+                            topic=self.topic,
+                            source=str(self),
+                            value={key: value}
+                        )
+                    elif isinstance(value, dict) and "value" not in value:
+                        return Message(
+                            topic=self.topic,
+                            source=str(self),
+                            value={key: {"value": value}}
+                        )
+                    else:
+                        return Message(
+                            topic=self.topic,
+                            source=str(self),
+                            value={key: {"value": value}}
+                        )
+                
+            
+            else:
+                if not isinstance(value, dict):
+                    raise ValueError(f"value must be a dictionary, got {value}")
+                
+                if isinstance(value, dict) and  "value" in value:
+                    return Message(
+                        topic=self.topic,
+                        source=str(self),
+                        value={"transformed": value}
+                    )
+                elif isinstance(value, dict) and  "value" not in value:
+                    return Message(
+                        topic=self.topic,
+                        source=str(self),
+                        value={"transformed": {"value": value}}
+                    )
+                else:
+                    raise ValueError(f"value must be a dictionary, got {value}")
+            
+            
 
 class InterfaceObserver(Observer):
     def __init__(self, interface: BaseInterface, topic: str, sanitise: bool = True):
@@ -119,62 +192,66 @@ class InterfaceObserver(Observer):
         self.sanitise = sanitise
 
     def update(self, message: Message) -> Message | list[Message]:
-        
         if message.topic == 'get_all':
             messages = self.get_all()
             return messages
         else:
+            logger.debug(f"updating {self} with {message}")
             if os.environ['PUBLISH'] == 'True':
-                self.interface.put_many({message.key: message.value})
+                self.interface.put_many(message.value)
             
-    def get(self, message: Message) -> None:
+    def get(self, message: Message) -> list[Message]:
         """get a single variable from the interface"""
-        _, value = self.interface.get(message.key)
-        
-        if value is not None:
-            return Message(
+        messages = []
+        for key in message.keys:
+            key, value = self.interface.get(key)
+            messages.append(Message(
                 topic=self.topic,
-                source='interface',
-                key=message.key,
-                value=value
-            )
+                source=str(self),
+                value={key: value}
+            ))
+        return messages
+
     
     def get_all(self) -> list[Message]:
         """get all variables from the interface based on internal variable list"""
         messages = []
         for key in self.interface.variable_list:
-            _, value = self.interface.get(key)  
+            key, value = self.interface.get(key)  
             if value is not None:
                 messages.append(Message(
                     topic=self.topic,
-                    source='interface',
-                    key=key,
-                    value=value
+                    source=str(self),
+                    value={key: value}
                 ))
         return messages   
                 
     def get_many(self, message: Message) -> list[Message]:
         """get many variables from the interface"""
-        _, values = self.interface.get_many(message.value)
+        keys, values = self.interface.get_many(message.value)
         
         messages = []
-        if values is not None:
+        for key, value in values.items():
             messages.append(Message(
                 topic=self.topic,
-                source='interface',
-                key=message.key,
-                value=values
+                source=str(self),
+                value= {key: value}
             ))
         return messages    
 
     def put(self, message: Message) -> None:
         """put a single variable into the interface"""
-        self.interface.put(message.key, message.value)
-
+        if not isinstance(message.value, dict):
+            raise ValueError("message value must be a dictionary")
+        
+        for key, value in zip(message.keys, message.values):
+            self.interface.put(key, value)
+        
     def put_many(self, message: Message) -> None:
         """put many variables into the interface"""
-        for key, value in message.value.items():
-            self.interface.put(key, value)
+        if not isinstance(message.value, dict):
+            raise ValueError("message value must be a dictionary")
+        self.interface.put_many(message.value)
         
 
     
@@ -199,14 +276,16 @@ class ModelObserver(Observer):
         self.model = model
         self.topic = topic
 
-    def update(self, message: Message) -> None:
+    def update(self, message: Message) -> list[Message]:
         pred = self.model.predict(message.value)
-        return Message(
-            topic=self.topic,
-            source=message.topic,
-            key=message.key,
-            value=pred,
-        )
+        messages = []
+        for key, value in pred.items():
+            messages.append(Message(
+                topic=self.topic,
+                source=str(self),
+                value={key: value}
+            ))
+        return messages
 
 # class GenericObserver(Observer):
 #     def __init__(self, callback):

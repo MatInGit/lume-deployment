@@ -6,7 +6,7 @@ from model_manager.src.utils.messaging import (
     TransformerObserver,
 )
 from model_manager.src.transformers.BaseTransformers import SimpleTransformer
-
+import logging
 
 class TestObserver(Observer):
     def __init__(self):
@@ -42,7 +42,7 @@ def test_detach_observer(message_broker, test_observer):
 def test_notify_observers(message_broker, test_observer):
     message_broker.attach(test_observer, "test_topic")
     message = Message(
-        topic="test_topic", source="source", key="key", value="value"
+        topic="test_topic", source="source", value={"key": {"value": 1}}
     )
     message_broker.notify(message)
     assert len(test_observer.messages) == 1
@@ -50,16 +50,18 @@ def test_notify_observers(message_broker, test_observer):
 
 
 def test_notify_no_observers(message_broker, caplog):
-    message = Message(topic="no_topic", source="source", key="key", value="value")
+    caplog.set_level(logging.DEBUG)
+    message = Message(topic="test_topic", source="source", value={"key": {"value": 1}})
     message_broker.notify(message)
-    # assert "no observers for no_topic" in caplog.text
+    print(caplog.text)
+    # assert "no observers for test_topic" in caplog.text # fails when running all tests but passes when running only this test
 
 
 def test_parse_queue(message_broker, test_observer):
     test_observer.messages = []
     message_broker.attach(test_observer, "test_topic")
     message = Message(
-        topic="test_topic", source="test_topic", key="key0", value="value1"
+        topic="test_topic", source="source", value={"key": {"value": 1}}
     )
     message_broker.queue.append(message)
     message_broker.parese_queue()
@@ -76,10 +78,10 @@ def test_TransformerObserver(message_broker, test_observer):
     stObserver = TransformerObserver(st, "test_topic")
 
     message1 = Message(
-        topic="test_topic", source="source", key="A1", value={"value": 2}
+        topic="test_topic", source="source", value={"A1": {"value": 2}}
     )
     message2 = Message(
-        topic="test_topic", source="source", key="B1", value={"value": 2}
+        topic="test_topic", source="source", value={"B1": {"value": 2}}
     )
 
     message_broker.attach(stObserver, "test_topic")
