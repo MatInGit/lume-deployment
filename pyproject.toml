@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling", "hatch-vcs", "wheel", "numpy<2.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.metadata]
