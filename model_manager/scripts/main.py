@@ -3,8 +3,8 @@ def main():
     import logging
     import os
 
-    from src.cli import model_main, setup
-    from src.logging_utils import make_logger, reset_logging
+    from model_manager.src.cli import model_main, setup
+    from model_manager.src.logging_utils import make_logger, reset_logging
 
     logger = make_logger("model_manager")
     logger.info("Starting model manager")

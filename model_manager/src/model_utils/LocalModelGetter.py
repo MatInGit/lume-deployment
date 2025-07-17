@@ -1,8 +1,8 @@
 # not implemented yet warning
 import importlib.util
 
-from src.logging_utils import get_logger
-from src.model_utils import ModelGetterBase
+from model_manager.src.logging_utils import get_logger
+from model_manager.src.model_utils import ModelGetterBase
 
 logger = get_logger()
 

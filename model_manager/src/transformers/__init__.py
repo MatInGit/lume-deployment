@@ -1,4 +1,4 @@
-from src.utils.lazyInterfaceLoader import AbstractInterfaceLoader
+from model_manager.src.utils.lazyInterfaceLoader import AbstractInterfaceLoader
 
 
 class TransformerLoader(AbstractInterfaceLoader):

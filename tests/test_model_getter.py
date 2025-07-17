@@ -1,4 +1,4 @@
-from src.model_utils.LocalModelGetter import LocalModelGetter
+from model_manager.src.model_utils.LocalModelGetter import LocalModelGetter
 
 
 def test_LocalModelGetter():

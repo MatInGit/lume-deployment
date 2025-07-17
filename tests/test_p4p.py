@@ -1,10 +1,10 @@
-# from src.interfaces import SimplePVAInterface
+# from model_manager.src.interfaces import SimplePVAInterface
 import subprocess
 
 import numpy as np
 import pytest
-from src.interfaces import registered_interfaces
-from src.logging_utils.make_logger import make_logger
+from model_manager.src.interfaces import registered_interfaces
+from model_manager.src.logging_utils.make_logger import make_logger
 
 SimplePVAInterface = registered_interfaces["p4p"]
 # start mailbox.py as a subprocess

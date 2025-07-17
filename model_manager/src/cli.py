@@ -9,11 +9,11 @@ import traceback
 
 import numpy as np
 import torch
-from src.config import ConfigParser
-from src.interfaces import registered_interfaces
-from src.logging_utils import get_logger, make_logger
-from src.model_utils import registered_model_getters
-from src.transformers import registered_transformers
+from model_manager.src.config import ConfigParser
+from model_manager.src.interfaces import registered_interfaces
+from model_manager.src.logging_utils import get_logger, make_logger
+from model_manager.src.model_utils import registered_model_getters
+from model_manager.src.transformers import registered_transformers
 
 from model_manager.src._version import __version__
 

@@ -1,13 +1,13 @@
 import math
 
 import numpy as np
-from src.logging_utils.make_logger import get_logger
-from src.transformers.BaseTransformers import (
+from model_manager.src.logging_utils.make_logger import get_logger
+from model_manager.src.transformers.BaseTransformers import (
     CAImageTransfomer,
     PassThroughTransformer,
     SimpleTransformer,
 )
-from src.transformers.CompoundTransformer import CompoundTransformer
+from model_manager.src.transformers.CompoundTransformer import CompoundTransformer
 
 logger = get_logger()
 

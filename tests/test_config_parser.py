@@ -1,4 +1,4 @@
-from src.config.parser import ConfigParser
+from model_manager.src.config.parser import ConfigParser
 
 
 def test_parse():

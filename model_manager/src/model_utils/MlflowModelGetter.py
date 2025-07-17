@@ -2,8 +2,8 @@ import mlflow
 from lume_model.models import TorchModel, TorchModule
 from mlflow import MlflowClient
 from mlflow.models.model import get_model_info
-from src.logging_utils import get_logger
-from src.model_utils import ModelGetterBase
+from model_manager.src.logging_utils import get_logger
+from model_manager.src.model_utils import ModelGetterBase
 
 logger = get_logger()
 
