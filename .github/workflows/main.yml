@@ -63,7 +63,7 @@ jobs:
           name: dist
           path: |
             dist
-  TestPyPI:
+  PyPI:
     needs: Build
     runs-on: ubuntu-latest
     permissions:
@@ -71,8 +71,8 @@ jobs:
     if: github.ref == 'refs/heads/dev' || startsWith(github.ref, 'refs/tags/') 
 
     environment:
-      name: testpypi
-      url: https://test.pypi.org/p/<package-name>
+      name: pypi
+      url: https://test.pypi.org/p/poly-lithic
 
     steps:
       - name: Download artifacts
