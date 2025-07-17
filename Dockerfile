@@ -11,5 +11,5 @@ COPY . /opt/deployment
 WORKDIR /opt/deployment
 RUN python -m pip install . --no-cache-dir
 WORKDIR /opt/deployment
-CMD model_manager -n $MODEL_NAME -v $MODEL_VERSION -r -e env.json && model_manager -n $MODEL_NAME -v $MODEL_VERSION -p -e env.json
+CMD pl -n $MODEL_NAME -v $MODEL_VERSION -r -e env.json && pl -n $MODEL_NAME -v $MODEL_VERSION -p -e env.json
 # CMD tail -f /dev/null
