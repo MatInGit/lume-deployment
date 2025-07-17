@@ -38,3 +38,4 @@ lebt_*/
 *-surrograte/
 waterfall*/
 _version.py
+dist/*
