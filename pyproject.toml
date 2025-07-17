@@ -26,8 +26,8 @@ dependencies = [
     "k2eg==0.2.7",
     "psutil>=6.0.0",
     "colorlog>=6.8.2",
-    "p4p",
-    "pyepics",
+    "p4p==4.1.12",
+    "pyepics==3.5.7",
 ]
 
 [tool.hatch.version]
