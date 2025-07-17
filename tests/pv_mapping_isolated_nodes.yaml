@@ -69,7 +69,7 @@ modules:
     name: "output_data_x"
     type: "interface.p4p_server"
     pub: None
-    sub: "out_transformer"
+    sub: None
     module_args: None
     config:
       variables:
@@ -81,7 +81,7 @@ modules:
     name: "output_data_y"
     type: "interface.p4p_server"
     pub: None
-    sub: None
+    sub: out_transformer
     module_args: None
     config:
       variables:
