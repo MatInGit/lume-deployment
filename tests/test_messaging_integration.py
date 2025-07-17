@@ -22,11 +22,7 @@ class MockModel:
         self.predictions.append(value)
         # the next layer expects a dictionary with {"name": {"value": value}, ...} so we have to retrun it as follows
         return {
-            "pred0": {
-                "value": value["x1"]["value"]
-                + value["x2"]["value"]
-            }
-        }
+            "pred0": value["x1"]["value"]+ value["x2"]["value"] }
 
 
 @pytest.fixture

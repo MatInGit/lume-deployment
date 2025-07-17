@@ -264,11 +264,13 @@ class MockModel:
         return {"not_initialized": {"value": -99999999999}}
 
 class ModelObserver(Observer):
-    def __init__(self, model=None, config = None, topic: str = "model"):
+    def __init__(self, model=None, config = None, topic: str = "model", unpack_input: bool = True, pack_output: bool = True):
         """wraps around the model.predict method"""
         self.model = model
         self.topic = topic
         self.config = config
+        self.unpack_input = unpack_input
+        self.pack_output = pack_output
         
         if self.model is None and self.config is not None:
             self.model = self.__get_model()
@@ -295,13 +297,27 @@ class ModelObserver(Observer):
             raise ValueError(f"model type not recognised: {self.config['type']}")
         
     def update(self, message: Message) -> list[Message]:
-        logger.debug(f"updating {self} with {message.value}")
-        pred = self.model.evaluate(message.value)
         messages = []
-        for key, value in pred.items():
-            messages.append(
-                Message(topic=self.topic, source=str(self), value={key: value})
-            )
+        logger.debug(f"updating {self} with {message.value}")
+        
+        if self.unpack_input:
+            logger.debug(f"unpacking input: {message.value}")
+            value = {v: message.value[v]["value"] for v in message.value}
+        else:
+            logger.debug(f"not unpacking input passign raw: {message.value}")
+            value = message.value
+        pred = self.model.evaluate(value)
+        output = {}    
+        if self.pack_output:
+            logger.debug(f"packing output: {pred}")
+            for key, value in pred.items():
+                output[key] = {"value": value}
+        else:
+            logger.debug(f"not packing output passign raw: {pred}")
+            output = pred
+            
+        messages.append(Message(topic=self.topic, source=str(self), value=output))
+    
         return messages
 
 
