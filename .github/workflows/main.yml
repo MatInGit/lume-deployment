@@ -4,7 +4,7 @@ name: CI Pipeline
 on:
   push:
     tags:
-      - 'v*'
+      - '*'
 
 jobs:
   Build and test:
