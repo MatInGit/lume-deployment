@@ -116,7 +116,9 @@ class MessageBroker:
         """initialize the message broker"""
         self._observers: Dict[str, list[Observer]] = {}
         self._stats = {}
+        self._stats_cnt = {}
         self.queue = []
+        self.last_update = time.time()
 
     def attach(self, observer: Observer, topic: str | list[str]) -> None:
         """add observer to topic"""
@@ -187,7 +189,24 @@ class MessageBroker:
                         self.queue.append(result)
             
             end = time.time()
-            print(f"message update time: {(end-start)*1000:.2f}ms for {message.topic}")
+            # print(f"message update time: {(end-start)*1000:.2f}ms for {message.topic}")
+            if message.topic in self._stats:
+                self._stats[message.topic] += (end-start)*1000
+                self._stats_cnt[message.topic] += 1
+            else:
+                self._stats[message.topic] = (end-start)*1000
+                self._stats_cnt[message.topic] = 1
+            
+            if time.time() - self.last_update > 1:
+                self.last_update = time.time()
+                fmt_stats = {k: v/self._stats_cnt[k] for k, v in self._stats.items()}
+                fmt_pretty_str = "\n\t\n"+"\t\n".join([f"{k}: {v:.2f}ms" for k, v in fmt_stats.items()])
+                # sum all _stats
+                sum_time = sum([v for v in self._stats.values()])
+                logger.info(f"real time factor: {sum_time/1000:.2f} must be less than 1")
+                logger.info(f"average time per topic: {fmt_pretty_str}")
+                self._stats = {}
+            
         else:
             logger.error(f"no observers for {message.topic}")
 
