@@ -29,11 +29,10 @@ def env_config(env_config):
             data = json.load(stream)
         for key, value in data.items():
             os.environ[key] = value
-        os.environ['MLFLOW_MODE'] = True
     except Exception as e:
         logging.error(f'Error setting environment variables: {e}')
-        os.environ['MLFLOW_MODE'] = False
 
+ENV_LOADED = env_config('./tests/env.json')
 
 def test_build(caplog, make_builder):
     # caplog.set_level(logging.DEBUG)
