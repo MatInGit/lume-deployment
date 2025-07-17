@@ -49,6 +49,21 @@ def test_interface_observer_put(interface_observer):
     name, value_dict = interface_observer.interface.get('test_scalar')
     assert value_dict['value'] == 5.0
     assert name == 'test_scalar'
+    
+    
+    message = Message(
+        topic="interface",
+        source="model",
+        key="test_scalar",
+        value=6.0
+    )
+    
+    interface_observer.put(message)
+    
+    # Verify value was set
+    name, value_dict = interface_observer.interface.get('test_scalar')
+    assert value_dict['value'] == 6.0
+    assert name == 'test_scalar'
 
 def test_interface_observer_put_many(interface_observer):
     # Test putting multiple values
@@ -65,6 +80,7 @@ def test_interface_observer_put_many(interface_observer):
     )
     
     os.environ['PUBLISH'] = 'True'
+    
     interface_observer.put_many(message)
     
     # Verify values were set
@@ -77,7 +93,7 @@ def test_interface_observer_put_many(interface_observer):
 def test_interface_observer_get(interface_observer):
     # Set a value first
     interface_observer.interface.put('test_scalar', 3.0)
-    
+    os.environ['PUBLISH'] = 'True'
     # Test get method
     message = Message(
         topic="interface",
@@ -99,16 +115,22 @@ def test_interface_observer_get_all(interface_observer):
         'test_scalar': 9.0,
         'test_array': [7.0, 8.0, 9.0]
     }
+    os.environ['PUBLISH'] = 'True'
     interface_observer.interface.put_many(values)
     
     # Test get_all method
     result = interface_observer.get_all()
     
-    assert result.topic == "next_step"
-    assert result.source == "interface"
-    assert len(result.value) == 2
-    assert result.key in interface_observer.interface.variable_list
-    assert result.value is not None
+    assert len(result) == 2
+    assert result[0].topic == "next_step"
+    assert result[0].source == "interface"
+    assert result[0].key == "test_scalar"
+    assert result[0].value['value'] == 9.0
+    
+    assert result[1].topic == "next_step"
+    assert result[1].source == "interface"
+    assert result[1].key == "test_array"
+    np.testing.assert_array_equal(result[1].value['value'], np.array([7.0, 8.0, 9.0]))
 
 def test_interface_observer_update_no_publish(interface_observer):
     # Test update method when PUBLISH is False

@@ -64,9 +64,21 @@ class MessageBroker:
 
     def notify(self, message: Message) -> None:
         """notify all observers of a message"""
+        logger.debug(f"notifying observers of {message}")
+        # print (f"notifying observers of {message}")
         if message.topic in self._observers:
+            # print (f"observers for {message.topic}")
             for observer in self._observers[message.topic]:
-                self.queue.append(observer.update(message))
+                # print (f"observer {observer}")
+                result = observer.update(message)
+                if result is not None:
+                    # if list of messages
+                    if isinstance(result, list):
+                        for r in result:
+                            self.queue.append(r)
+                    else:
+                        self.queue.append(result)
+                
         else:
             logger.error(f"no observers for {message.topic}")
 
@@ -78,7 +90,6 @@ class MessageBroker:
         for message in queue_snapshot:
             self.notify(message)
             self.queue.remove(message)
-            print(self.queue)
 
 
 class TransformerObserver(Observer):
@@ -89,12 +100,14 @@ class TransformerObserver(Observer):
 
     def update(self, message: Message) -> Message:
         self.transformer.handler(message.key, message.value)
+        # print (self.transformer.latest_input)
+        # print (self.transformer.latest_transformed)
         if self.transformer.updated:
             return Message(
                 topic=self.topic,
                 source=message.topic,
                 key=message.key,
-                value=self.transformer.latest_input,
+                value=self.transformer.latest_transformed,
             )
 
 
@@ -105,9 +118,14 @@ class InterfaceObserver(Observer):
         self.topic: str = topic
         self.sanitise = sanitise
 
-    def update(self, message: Message) -> None:
-        if os.environ['PUBLISH'] == 'True':
-            self.interface.put_many({message.key: message.value})
+    def update(self, message: Message) -> Message | list[Message]:
+        
+        if message.topic == 'get_all':
+            messages = self.get_all()
+            return messages
+        else:
+            if os.environ['PUBLISH'] == 'True':
+                self.interface.put_many({message.key: message.value})
             
     def get(self, message: Message) -> None:
         """get a single variable from the interface"""
@@ -121,29 +139,33 @@ class InterfaceObserver(Observer):
                 value=value
             )
     
-    def get_all(self) -> None:
+    def get_all(self) -> list[Message]:
         """get all variables from the interface based on internal variable list"""
+        messages = []
         for key in self.interface.variable_list:
-            _, value = self.interface.get(key)
+            _, value = self.interface.get(key)  
             if value is not None:
-                return Message(
+                messages.append(Message(
                     topic=self.topic,
                     source='interface',
                     key=key,
                     value=value
-                )
+                ))
+        return messages   
                 
-    def get_many(self, message: Message) -> None:
+    def get_many(self, message: Message) -> list[Message]:
         """get many variables from the interface"""
         _, values = self.interface.get_many(message.value)
         
+        messages = []
         if values is not None:
-            return Message(
+            messages.append(Message(
                 topic=self.topic,
                 source='interface',
                 key=message.key,
                 value=values
-            )        
+            ))
+        return messages    
 
     def put(self, message: Message) -> None:
         """put a single variable into the interface"""
@@ -151,7 +173,9 @@ class InterfaceObserver(Observer):
 
     def put_many(self, message: Message) -> None:
         """put many variables into the interface"""
-        self.interface.put_many(message.value)
+        for key, value in message.value.items():
+            self.interface.put(key, value)
+        
 
     
     # unused due to the issues in p4p with the monitor method
@@ -169,13 +193,20 @@ class InterfaceObserver(Observer):
     #     """monitor a variable in the interface"""
         
 
-# class ModelObserver(Observer):
-#     def __init__(self, model):
-#         """wraps around the model.predict method"""
-#         self.model = model
+class ModelObserver(Observer):
+    def __init__(self, model, topic: str):
+        """wraps around the model.predict method"""
+        self.model = model
+        self.topic = topic
 
-#     def update(self, message: Message) -> None:
-#         self.model.predict(message.value)
+    def update(self, message: Message) -> None:
+        pred = self.model.predict(message.value)
+        return Message(
+            topic=self.topic,
+            source=message.topic,
+            key=message.key,
+            value=pred,
+        )
 
 # class GenericObserver(Observer):
 #     def __init__(self, callback):
