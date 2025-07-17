@@ -42,9 +42,9 @@ jobs:
 
       - name: Run tests
         run: |
-          hatch run test
+          pytest
       
-      - name: Hatch build and test
+      - name: Hatch build
         run: |
           hatch build
 
