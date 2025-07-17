@@ -15,7 +15,7 @@ from model_manager.src.logging_utils import get_logger, make_logger
 from model_manager.src.model_utils import registered_model_getters
 from model_manager.src.transformers import registered_transformers
 
-from model_manager.src._version import __version__
+from model_manager._version import __version__
 
 logger = get_logger()
 

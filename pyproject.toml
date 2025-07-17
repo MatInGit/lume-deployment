@@ -36,7 +36,7 @@ dependencies = [
 source = "vcs"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "_version.py"
+version-file = "model_manager/_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["model_manager"]
