@@ -22,7 +22,7 @@ test.ipynb
 image_model
 test.h5
 .vscode
-build
+/build
 env.json
 creds.json
 test.py
@@ -48,4 +48,3 @@ notify.profile
 test.yaml
 test_files/
 old_examples/
-!docs
