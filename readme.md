@@ -1,3 +1,7 @@
+> [!WARNING]  
+> This repository has moved [here](https://github.com/ISISNeutronMuon/poly-lithic) 
+
+
 ## Purpose and Idea
 The purpose of the model manager is to allow for easy deployment of models from MLflow, local model defintion or other sources. 
 The package is in an early stage and right now is tightly coupled with MLflow. The goal is to make it more general and allow for easy deployment of models from other sources as well.
