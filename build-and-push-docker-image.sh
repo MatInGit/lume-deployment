@@ -23,9 +23,9 @@ docker build --pull --rm --target tensorflow -f "Dockerfile" -t harbor.stfc.ac.u
 # docker build --pull --rm -f "Dockerfile.interactive" -t harbor.stfc.ac.uk/isis-accelerator-controls/lume-deploy:interactive13 "." &&
 # docker push harbor.stfc.ac.uk/isis-accelerator-controls/lume-deploy:interactive13
 
-docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:base-$VERSION
-docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:torch-$VERSION
-docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:tensorflow-$VERSION
+# docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:base-$VERSION
+# docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:torch-$VERSION
+# docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:tensorflow-$VERSION
 
 # docker hub retag and push matindocker/poly-lithic
 docker tag harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:base-$VERSION matindocker/poly-lithic:base-$VERSION

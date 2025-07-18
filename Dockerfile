@@ -29,10 +29,12 @@ RUN python -m pip install -r /app/requirements.txt --no-cache-dir
 FROM base AS torch
 # Install additional ML libraries
 RUN python -m pip install botorch pydantic torch==2.6.0 --no-cache-dir
-
-COPY . /opt/deployment
+# need to copy poly_lithic, pyptoject.toml and tests
+COPY poly_lithic /opt/poly_lithic
+COPY pyproject.toml /opt/deployment/pyproject.toml
+COPY tests /opt/deployment/tests
 WORKDIR /opt/deployment
-RUN python -m pip install . --no-cache-dir
+RUN python -m pip install poly-lithic --no-cache-dir
 
 CMD pl -c config.yaml -r -e env.json && pl --publish -c config.yaml -e env.json
 
@@ -40,17 +42,21 @@ FROM base AS tensorflow
 # Install additional ML libraries
 RUN python -m pip install pydantic tensorflow --no-cache-dir
 
-COPY . /opt/deployment
+COPY poly_lithic /opt/poly_lithic
+COPY pyproject.toml /opt/deployment/pyproject.toml
+COPY tests /opt/deployment/tests
 WORKDIR /opt/deployment
-RUN python -m pip install . --no-cache-dir
+RUN python -m pip install poly-lithic --no-cache-dir
 
 CMD pl -c config.yaml -r -e env.json && pl --publish -c config.yaml -e env.json
 
 
 FROM base AS vanilla
 
-COPY . /opt/deployment
+COPY poly_lithic /opt/poly_lithic
+COPY pyproject.toml /opt/deployment/pyproject.toml
+COPY tests /opt/deployment/tests
 WORKDIR /opt/deployment
-RUN python -m pip install . --no-cache-dir
+RUN python -m pip install poly-lithic --no-cache-dir
 
 CMD pl -c config.yaml -r -e env.json && pl --publish -c config.yaml -e env.json
