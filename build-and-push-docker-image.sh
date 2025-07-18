@@ -36,7 +36,7 @@ docker push isisacceleratorcontrols/poly-lithic:base-$VERSION
 docker push isisacceleratorcontrols/poly-lithic:torch-$VERSION
 docker push isisacceleratorcontrols/poly-lithic:tensorflow-$VERSION
 
-# if version does not containe a 'dev' tag, then push to latest
+# if version does not containe a 'dev'or tag, then push to latest
 if [[ $VERSION != *"dev"* ]]; then
 
     # tag latest versions

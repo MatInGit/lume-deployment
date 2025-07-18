@@ -8,7 +8,6 @@ on:
     # paths:
     #   - .github/workflows/**.yml
     branches:
-      - 18-improved-model-getting-and-examples
       - dev
     tags:
       - '*'
