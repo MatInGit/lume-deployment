@@ -1,7 +1,7 @@
 # set build time variables
 export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 export VCS_REF=$(git rev-parse --short HEAD)
-export VERSION=0.1.6.dev6 #   $(hatch version)
+export VERSION=$(hatch version)
 
 # # if build-info file exists, remove it
 # if [ -f build-info ]; then
@@ -27,11 +27,28 @@ docker build --pull --rm --target tensorflow -f "Dockerfile" -t harbor.stfc.ac.u
 # docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:torch-$VERSION
 # docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:tensorflow-$VERSION
 
-# docker hub retag and push matindocker/poly-lithic
-docker tag harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:base-$VERSION matindocker/poly-lithic:base-$VERSION
-docker tag harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:torch-$VERSION matindocker/poly-lithic:torch-$VERSION
-docker tag harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:tensorflow-$VERSION matindocker/poly-lithic:tensorflow-$VERSION
+# docker hub retag and push isisacceleratorcontrols/poly-lithic
+docker tag harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:base-$VERSION isisacceleratorcontrols/poly-lithic:base-$VERSION
+docker tag harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:torch-$VERSION isisacceleratorcontrols/poly-lithic:torch-$VERSION
+docker tag harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:tensorflow-$VERSION isisacceleratorcontrols/poly-lithic:tensorflow-$VERSION
 
-docker push matindocker/poly-lithic:base-$VERSION
-docker push matindocker/poly-lithic:torch-$VERSION
-docker push matindocker/poly-lithic:tensorflow-$VERSION
+docker push isisacceleratorcontrols/poly-lithic:base-$VERSION
+docker push isisacceleratorcontrols/poly-lithic:torch-$VERSION
+docker push isisacceleratorcontrols/poly-lithic:tensorflow-$VERSION
+
+# if version does not containe a 'dev' tag, then push to latest
+if [[ $VERSION != *"dev"* ]]; then
+
+    # tag latest versions
+    docker tag harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:base-$VERSION harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:base-latest
+    docker tag harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:torch-$VERSION harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:torch-latest
+    docker tag harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:tensorflow-$VERSION harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:tensorflow-latest
+    
+    # push latest tags
+    docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:base-latest
+    docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:torch-latest
+    docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:tensorflow-latest
+
+    # also tag and push latest base as latest
+    docker tag harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:base-latest harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:latest
+    docker push harbor.stfc.ac.uk/isis-accelerator-controls/poly-lithic:latest

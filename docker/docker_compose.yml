@@ -1,6 +1,6 @@
 services:
   pl1:
-    image: matindocker/poly-lithic:torch-0.1.6.dev6
+    image: matindocker/poly-lithic:base-latest
     # volumes: # mount your files here
     #   - ./mymodel.yaml:/opt/deployment/config.yaml
     #   - ./env.json:/opt/deployment/env.json

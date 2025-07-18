@@ -35,8 +35,7 @@ Each deployment is defined by a model, typically hosted and retrieved from [MLFl
 Python `3.11.x` recommended.
 
 ```bash
-pip install -r reqirements.txt
-pip install .
+pip install poly-lithic
 ```
 for development:
 
@@ -44,6 +43,11 @@ for development:
 pip install -r reqirements.txt
 pip install -e .
 ```
+
+with docker:
+
+```bash
+docker compose 
 
 ## Usage
 
