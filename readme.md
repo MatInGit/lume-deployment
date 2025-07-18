@@ -47,7 +47,8 @@ pip install -e .
 with docker:
 
 ```bash
-docker compose 
+docker compose -f ./docker/docker_compose.yml up
+``` 
 
 ## Usage
 
